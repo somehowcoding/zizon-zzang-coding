@@ -3,92 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지존짱짱 - 모두의 작품</title>
+    <title>지존짱짱 - Made by 어쩌다코딩</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fbff; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fbff; margin: 0; }
         .hidden { display: none !important; }
-        .nav-item { font-weight: 700; color: #475569; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
-        .nav-item:hover { color: #4f46e5; }
-        .active-tab { background-color: #4f46e5; color: white !important; padding: 8px 20px; border-radius: 12px; }
-        .project-card { background: white; border: 2px solid #ffeb3b; border-radius: 24px; padding: 24px; transition: 0.3s; width: 260px; }
-        .project-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
-        .btn-create { background: #2563eb; color: white; padding: 12px 24px; border-radius: 16px; font-weight: 800; transition: 0.2s; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4); }
-        .btn-create:hover { background: #1d4ed8; transform: scale(1.05); }
+        .login-card { background: white; padding: 45px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); width: 400px; border: 1px solid #f1f5f9; }
+        .input-box { width: 100%; background: #f8fafc; border: 2px solid #f1f5f9; padding: 16px; border-radius: 20px; outline: none; transition: 0.2s; font-weight: 600; margin-bottom: 12px; }
+        .input-box:focus { border-color: #3b82f6; background: white; }
+        .nav-btn { font-weight: 700; color: #475569; padding: 8px 16px; border-radius: 14px; transition: 0.2s; cursor: pointer; }
+        .nav-btn:hover { background: #f1f5f9; color: #2563eb; }
+        .active-pill { background-color: #4f46e5; color: white !important; }
+        .card { background: white; border-radius: 24px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col">
 
-<nav class="bg-white border-b px-12 py-4 flex justify-between items-center sticky top-0 z-50">
-    <div class="flex items-center gap-2">
-        <span class="text-2xl font-black text-blue-600 italic">지존짱짱 🚀</span>
-    </div>
-    <div class="flex items-center gap-10">
-        <div class="flex gap-8 items-center">
-            <button class="nav-item">🏠 홈</button>
-            <button class="nav-item">📦 마이페이지</button>
-            <button class="nav-item active-tab">💬 이야기</button>
+<nav id="topNav" class="bg-white border-b px-12 py-5 flex justify-between items-center hidden sticky top-0 z-50">
+    <div class="flex items-center gap-2"><span class="text-2xl font-black text-blue-600 italic cursor-pointer" onclick="showSection('main')">지존짱짱 🚀</span></div>
+    <div class="flex items-center gap-6 font-bold">
+        <div class="flex gap-2 items-center">
+            <button class="nav-btn" onclick="showSection('main')">🏠 홈</button>
+            <button class="nav-btn" id="storyMenuBtn" onclick="showSection('story')">💬 이야기</button>
+            <button class="nav-btn" onclick="alert('마이페이지 기능은 준비 중입니다!')">📦 마이페이지</button>
         </div>
         <div class="h-6 w-[1px] bg-slate-200"></div>
         <div class="flex items-center gap-3">
-            <span class="text-[10px] bg-yellow-400 px-2 py-0.5 rounded font-black shadow-sm">👑 관리자</span>
-            <span class="text-sm font-bold text-slate-700">어쩌다코딩님</span>
-            <button onclick="handleLogout()" class="text-xs text-red-500 font-bold hover:underline">로그아웃</button>
+            <span id="adminTag" class="hidden text-[10px] bg-yellow-400 px-2 py-0.5 rounded font-black shadow-sm">👑 관리자</span>
+            <span class="text-sm text-slate-700 font-bold"><span id="userNick" class="text-blue-600"></span>님</span>
+            <button id="logoutBtn" class="text-xs text-red-500 underline font-bold cursor-pointer">로그아웃</button>
         </div>
     </div>
 </nav>
 
-<main class="max-w-6xl mx-auto mt-16 px-6">
-    <div class="flex justify-between items-end mb-12">
-        <div>
-            <h1 class="text-4xl font-black text-slate-800 mb-3">모두의 작품 🌍</h1>
-            <p class="text-slate-500 font-bold text-lg text-blue-500">전 세계 친구들의 코드를 구경해보세요.</p>
-        </div>
-        <button onclick="addProject()" class="btn-create text-lg">+ 새 작품 만들기</button>
-    </div>
-
-    <div id="projectList" class="flex flex-wrap gap-8">
-        <div class="project-card text-center">
-            <div class="text-5xl mb-4">🤖</div>
-            <h3 class="text-xl font-black text-slate-800 mb-1">테스트</h3>
-            <span class="inline-block bg-yellow-300 text-[10px] font-black px-2 py-0.5 rounded mb-3">⚙️ 스션</span>
-            <p class="text-xs text-slate-400 font-bold mb-6">By 어쩌다코딩</p>
-            <button class="w-full bg-slate-800 text-white py-2 rounded-xl text-xs font-bold hover:bg-slate-700">스션 해제 ✨</button>
-        </div>
-    </div>
-</main>
-
-<script>
-// Firebase 설정 (기존 정보 그대로 사용)
-const firebaseConfig = {
-    apiKey: "AIzaSyDdFsRGy_2mZowYinOf9LeQhot08xyaqc4",
-    authDomain: "zizon-coding.firebaseapp.com",
-    projectId: "zizon-coding",
-    storageBucket: "zizon-coding.firebasestorage.app",
-    messagingSenderId: "146850583672",
-    appId: "1:146850583672:web:243e71867880c00ffdc98d",
-    databaseURL: "https://zizon-coding-default-rtdb.firebaseio.com"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-// 작품 만들기 버튼 기능
-function addProject() {
-    const title = prompt("작품 제목을 입력해주세요!");
-    if(title) {
-        alert("'" + title + "' 작품이 성공적으로 생성되었습니다! (서버 저장 로직 연결 중)");
-    }
-}
-
-function handleLogout() {
-    alert("로그아웃 되었습니다.");
-    location.reload();
-}
-</script>
-</body>
-</html>
+<div id="authBox" class="flex-grow flex items-center justify-center">
+    <div class="login-card text-center">
+        <h2 class="text-3xl font-black mb-1 text-slate-800">지존짱짱 👋</h2>
+        <p class="text-[10px] text-blue-400 font-black mb-8 tracking-widest uppercase">Made by 어쩌다코딩</p>
+        
+        <div id="loginView">
+            <input id="loginId" type="text" placeholder="아이디" class="input-box">
+            <input id="loginPw" type="password" placeholder="비밀번호" class="input-box">
+            <button id="doLoginBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black mb-4 shadow-lg shadow-blue-100">로그인</button>
+            <button id="goSignupBtn" class="text-slate-400
