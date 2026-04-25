@@ -1,43 +1,243 @@
-<div id="authBox" class="flex-grow flex items-center justify-center">
-    <div class="login-card text-center">
-        <h2 class="text-3xl font-black mb-1 text-slate-800">지존짱짱 👋</h2>
-        <p class="text-[10px] text-blue-400 font-black mb-8 tracking-widest uppercase">Made by 어쩌다코딩</p>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지존짱짱 - Made by 어쩌다코딩</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fbff; margin: 0; }
+        .hidden { display: none !important; }
+        .login-card { background: white; padding: 40px; border-radius: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); width: 100%; max-width: 400px; border: 1px solid #f1f5f9; }
+        .input-box { width: 100%; background: #f8fafc; border: 2px solid #f1f5f9; padding: 14px; border-radius: 16px; outline: none; transition: 0.2s; font-weight: 600; margin-bottom: 12px; display: block; }
+        .input-box:focus { border-color: #3b82f6; background: white; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50">
+
+<nav id="topNav" class="bg-white border-b px-6 py-4 flex justify-between items-center hidden sticky top-0 z-50">
+    <div class="text-xl font-black text-blue-600 italic cursor-pointer" onclick="showSection('main')">지존짱짱 🚀</div>
+    <div class="flex items-center gap-4">
+        <button class="font-bold text-slate-600 hover:text-blue-600" onclick="showSection('main')">홈</button>
+        <button class="font-bold text-slate-600 hover:text-blue-600" onclick="showSection('story')">이야기</button>
+        <div class="flex items-center gap-2 ml-4">
+            <span id="userNick" class="text-sm font-bold text-slate-700 border-r pr-3"></span>
+            <button id="logoutBtn" class="text-xs text-red-500 font-bold underline">로그아웃</button>
+        </div>
+    </div>
+</nav>
+
+<div id="authBox" class="flex-grow flex items-center justify-center p-6">
+    <div class="login-card">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-black text-slate-800">지존짱짱 👋</h2>
+            <p class="text-xs text-blue-500 font-bold mt-1 uppercase tracking-widest">Made by 어쩌다코딩</p>
+        </div>
         
         <div id="loginView">
             <input id="loginId" type="text" placeholder="아이디" class="input-box">
             <input id="loginPw" type="password" placeholder="비밀번호" class="input-box">
-            <button id="doLoginBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black mb-4 shadow-lg shadow-blue-100">로그인</button>
-            <button id="goSignupBtn" type="button" class="text-slate-400 text-sm font-bold underline cursor-pointer hover:text-blue-500">회원가입 하기</button>
+            <button id="doLoginBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black mb-4 hover:bg-blue-700 transition-all">로그인</button>
+            <button id="goSignupBtn" class="w-full text-slate-400 text-sm font-bold underline">회원가입 하기</button>
         </div>
 
         <div id="signupView" class="hidden">
             <input id="regId" type="text" placeholder="아이디 정하기" class="input-box">
             <input id="regNick" type="text" placeholder="닉네임 정하기" class="input-box">
             <input id="regPw" type="password" placeholder="비밀번호 (6자 이상)" class="input-box">
-            <button id="doSignupBtn" class="w-full bg-green-500 text-white py-4 rounded-2xl font-black mb-4 shadow-lg shadow-green-100">가입 완료</button>
-            <button id="goLoginBtn" type="button" class="text-slate-400 text-sm font-bold underline cursor-pointer hover:text-blue-500">이미 계정이 있어요</button>
+            <button id="doSignupBtn" class="w-full bg-green-500 text-white py-4 rounded-2xl font-black mb-4 hover:bg-green-600 transition-all">가입 완료</button>
+            <button id="goLoginBtn" class="w-full text-slate-400 text-sm font-bold underline">이미 계정이 있어요</button>
         </div>
     </div>
 </div>
 
+<main id="mainView" class="hidden p-8 max-w-5xl mx-auto w-full">
+    <div class="flex justify-between items-center mb-10">
+        <h1 class="text-3xl font-black text-slate-800">모두의 작품 🌍</h1>
+        <button onclick="showSection('create')" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-black shadow-lg hover:scale-105 transition-all">+ 작품 올리기</button>
+    </div>
+    <div id="workList" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+</main>
+
+<section id="storyView" class="hidden p-8 max-w-3xl mx-auto w-full">
+    <h1 class="text-3xl font-black text-slate-800 mb-8">이야기 게시판 💬</h1>
+    <div class="bg-white p-6 rounded-3xl shadow-sm mb-8 border border-slate-100">
+        <textarea id="storyInput" placeholder="무슨 소식이 있나요?" class="input-box h-24 resize-none mb-4"></textarea>
+        <button id="postStoryBtn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black">글쓰기</button>
+    </div>
+    <div id="storyList" class="space-y-4"></div>
+</section>
+
+<section id="createView" class="hidden p-8 max-w-xl mx-auto w-full">
+    <div class="bg-white p-8 rounded-3xl shadow-lg border border-slate-100">
+        <h2 class="text-2xl font-black mb-6 text-slate-800">새 작품 등록 🎨</h2>
+        <input id="workTitle" type="text" placeholder="작품 이름" class="input-box">
+        <textarea id="workDesc" placeholder="설명이나 링크를 적어주세요." class="input-box h-32 resize-none"></textarea>
+        <div class="flex gap-3">
+            <button onclick="showSection('main')" class="flex-1 bg-slate-100 text-slate-500 py-4 rounded-2xl font-black">취소</button>
+            <button id="saveWorkBtn" class="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-black">올리기</button>
+        </div>
+    </div>
+</section>
+
 <script>
-// (자바스크립트 부분에서 이 연결 코드가 잘 있는지 꼭 봐줘!)
-document.addEventListener("DOMContentLoaded", function() {
-    const loginView = document.getElementById("loginView");
-    const signupView = document.getElementById("signupView");
+const firebaseConfig = {
+    apiKey: "AIzaSyDdFsRGy_2mZowYinOf9LeQhot08xyaqc4",
+    authDomain: "zizon-coding.firebaseapp.com",
+    projectId: "zizon-coding",
+    databaseURL: "https://zizon-coding-default-rtdb.firebaseio.com"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
 
-    // 회원가입 화면으로 가기
+let currentUser = null;
+const SECTIONS = ['main', 'story', 'create'];
+
+function showSection(name) {
+    SECTIONS.forEach(s => {
+        const el = document.getElementById(s + 'View');
+        if (el) el.classList.add('hidden');
+    });
+    const target = document.getElementById(name + 'View');
+    if (target) target.classList.remove('hidden');
+
+    if (name === 'main') loadWorks();
+    if (name === 'story') loadStories();
+}
+
+// ✅ 수정: 리스너 중복 방지를 위해 .off() 후 .on() 사용 (실시간 유지)
+function loadStories() {
+    const list = document.getElementById('storyList');
+    db.ref('stories').off(); 
+    db.ref('stories').orderByChild('time').on('value', snap => {
+        list.innerHTML = '';
+        if (!snap.val()) return;
+        Object.values(snap.val()).reverse().forEach(s => {
+            const div = document.createElement('div');
+            div.className = 'bg-white p-5 rounded-2xl border border-slate-100 shadow-sm';
+            
+            const nick = document.createElement('p');
+            nick.className = 'text-xs font-black text-blue-600 mb-1';
+            nick.textContent = s.nickname; // XSS 방지
+            
+            const text = document.createElement('p');
+            text.className = 'text-slate-700';
+            text.textContent = s.text; // XSS 방지
+            
+            div.append(nick, text);
+            list.appendChild(div);
+        });
+    });
+}
+
+function loadWorks() {
+    const list = document.getElementById('workList');
+    db.ref('works').off();
+    db.ref('works').on('value', snap => {
+        list.innerHTML = '';
+        if (!snap.val()) return;
+        Object.values(snap.val()).reverse().forEach(w => {
+            const div = document.createElement('div');
+            div.className = 'bg-white p-6 rounded-3xl border border-slate-100 shadow-sm';
+            
+            const h3 = document.createElement('h3');
+            h3.className = 'font-black text-xl mb-2';
+            h3.textContent = w.title;
+            
+            const p = document.createElement('p');
+            p.className = 'text-slate-500 text-sm mb-4';
+            p.textContent = w.desc;
+            
+            const small = document.createElement('p');
+            small.className = 'text-xs font-bold text-blue-500';
+            small.textContent = 'By ' + w.nickname;
+            
+            div.append(h3, p, small);
+            list.appendChild(div);
+        });
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    // UI 토글 버튼
     document.getElementById("goSignupBtn").onclick = () => {
-        loginView.classList.add("hidden");
-        signupView.classList.remove("hidden");
+        document.getElementById("loginView").classList.add("hidden");
+        document.getElementById("signupView").classList.remove("hidden");
+    };
+    document.getElementById("goLoginBtn").onclick = () => {
+        document.getElementById("signupView").classList.add("hidden");
+        document.getElementById("loginView").classList.remove("hidden");
     };
 
-    // 다시 로그인 화면으로 오기
-    document.getElementById("goLoginBtn").onclick = () => {
-        signupView.classList.add("hidden");
-        loginView.classList.remove("hidden");
+    // 회원가입
+    document.getElementById("doSignupBtn").onclick = async () => {
+        const id = document.getElementById('regId').value.trim();
+        const nick = document.getElementById('regNick').value.trim();
+        const pw = document.getElementById('regPw').value.trim();
+        if (!id || !nick || pw.length < 6) return alert("아이디/닉네임 입력 및 비번 6자 이상 확인!");
+        try {
+            const res = await auth.createUserWithEmailAndPassword(id + "@zizon.com", pw);
+            await db.ref('users/' + res.user.uid).set({ id, nickname: nick });
+            location.reload();
+        } catch (e) { alert(e.message); }
     };
-    
-    // ... 나머지 로그인/가입 로직은 그대로!
+
+    // 로그인
+    document.getElementById("doLoginBtn").onclick = () => {
+        const id = document.getElementById('loginId').value.trim();
+        const pw = document.getElementById('loginPw').value.trim();
+        if(!id || !pw) return alert("정보를 입력해줘!");
+        auth.signInWithEmailAndPassword(id + "@zizon.com", pw).catch(() => alert("아이디 또는 비밀번호가 틀렸어!"));
+    };
+
+    // 로그아웃
+    document.getElementById("logoutBtn").onclick = () => auth.signOut().then(() => location.reload());
+
+    // 게시글 등록
+    document.getElementById("postStoryBtn").onclick = async () => {
+        if (!currentUser) return alert("로그인 대기 중...");
+        const text = document.getElementById('storyInput').value.trim();
+        if (!text) return;
+        await db.ref('stories').push({ text, nickname: currentUser.nickname, time: Date.now() });
+        document.getElementById('storyInput').value = '';
+        // .on() 리스너가 있어서 자동 갱신됨
+    };
+
+    // 작품 등록
+    document.getElementById("saveWorkBtn").onclick = async () => {
+        if (!currentUser) return alert("로그인 대기 중...");
+        const title = document.getElementById('workTitle').value.trim();
+        const desc = document.getElementById('workDesc').value.trim();
+        if (!title || !desc) return alert("내용을 다 채워줘!");
+        await db.ref('works').push({ title, desc, nickname: currentUser.nickname });
+        document.getElementById('workTitle').value = '';
+        document.getElementById('workDesc').value = '';
+        showSection('main');
+    };
+});
+
+// 로그인 상태 감시 (최상위 실행)
+auth.onAuthStateChanged(async user => {
+    if (user) {
+        const snap = await db.ref('users/' + user.uid).once('value');
+        currentUser = snap.val();
+        if (currentUser) {
+            document.getElementById('authBox').classList.add('hidden');
+            document.getElementById('topNav').classList.remove('hidden');
+            document.getElementById('userNick').innerText = currentUser.nickname;
+            showSection('main');
+        }
+    } else {
+        document.getElementById('authBox').classList.remove('hidden');
+        document.getElementById('topNav').classList.add('hidden');
+        document.getElementById('mainView').classList.add('hidden');
+    }
 });
 </script>
+</body>
+</html>
