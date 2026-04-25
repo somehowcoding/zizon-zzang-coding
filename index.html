@@ -85,6 +85,7 @@
 </section>
 
 <script>
+// Firebase 설정 유지
 const firebaseConfig = {
     apiKey: "AIzaSyDdFsRGy_2mZowYinOf9LeQhot08xyaqc4",
     authDomain: "zizon-coding.firebaseapp.com",
@@ -110,26 +111,17 @@ function showSection(name) {
     if (name === 'story') loadStories();
 }
 
-// ✅ 수정: 리스너 중복 방지를 위해 .off() 후 .on() 사용 (실시간 유지)
 function loadStories() {
     const list = document.getElementById('storyList');
     db.ref('stories').off(); 
     db.ref('stories').orderByChild('time').on('value', snap => {
         list.innerHTML = '';
-        if (!snap.val()) return;
-        Object.values(snap.val()).reverse().forEach(s => {
+        const data = snap.val();
+        if (!data) return;
+        Object.values(data).reverse().forEach(s => {
             const div = document.createElement('div');
             div.className = 'bg-white p-5 rounded-2xl border border-slate-100 shadow-sm';
-            
-            const nick = document.createElement('p');
-            nick.className = 'text-xs font-black text-blue-600 mb-1';
-            nick.textContent = s.nickname; // XSS 방지
-            
-            const text = document.createElement('p');
-            text.className = 'text-slate-700';
-            text.textContent = s.text; // XSS 방지
-            
-            div.append(nick, text);
+            div.innerHTML = `<p class="text-xs font-black text-blue-600 mb-1">${s.nickname}</p><p class="text-slate-700">${s.text}</p>`;
             list.appendChild(div);
         });
     });
@@ -140,31 +132,18 @@ function loadWorks() {
     db.ref('works').off();
     db.ref('works').on('value', snap => {
         list.innerHTML = '';
-        if (!snap.val()) return;
-        Object.values(snap.val()).reverse().forEach(w => {
+        const data = snap.val();
+        if (!data) return;
+        Object.values(data).reverse().forEach(w => {
             const div = document.createElement('div');
             div.className = 'bg-white p-6 rounded-3xl border border-slate-100 shadow-sm';
-            
-            const h3 = document.createElement('h3');
-            h3.className = 'font-black text-xl mb-2';
-            h3.textContent = w.title;
-            
-            const p = document.createElement('p');
-            p.className = 'text-slate-500 text-sm mb-4';
-            p.textContent = w.desc;
-            
-            const small = document.createElement('p');
-            small.className = 'text-xs font-bold text-blue-500';
-            small.textContent = 'By ' + w.nickname;
-            
-            div.append(h3, p, small);
+            div.innerHTML = `<h3 class="font-black text-xl mb-2">${w.title}</h3><p class="text-slate-500 text-sm mb-4">${w.desc}</p><p class="text-xs font-bold text-blue-500">By ${w.nickname}</p>`;
             list.appendChild(div);
         });
     });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    // UI 토글 버튼
     document.getElementById("goSignupBtn").onclick = () => {
         document.getElementById("loginView").classList.add("hidden");
         document.getElementById("signupView").classList.remove("hidden");
@@ -174,12 +153,11 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("loginView").classList.remove("hidden");
     };
 
-    // 회원가입
     document.getElementById("doSignupBtn").onclick = async () => {
         const id = document.getElementById('regId').value.trim();
         const nick = document.getElementById('regNick').value.trim();
         const pw = document.getElementById('regPw').value.trim();
-        if (!id || !nick || pw.length < 6) return alert("아이디/닉네임 입력 및 비번 6자 이상 확인!");
+        if (!id || !nick || pw.length < 6) return alert("다시 확인해봐!");
         try {
             const res = await auth.createUserWithEmailAndPassword(id + "@zizon.com", pw);
             await db.ref('users/' + res.user.uid).set({ id, nickname: nick });
@@ -187,41 +165,30 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (e) { alert(e.message); }
     };
 
-    // 로그인
     document.getElementById("doLoginBtn").onclick = () => {
         const id = document.getElementById('loginId').value.trim();
         const pw = document.getElementById('loginPw').value.trim();
-        if(!id || !pw) return alert("정보를 입력해줘!");
-        auth.signInWithEmailAndPassword(id + "@zizon.com", pw).catch(() => alert("아이디 또는 비밀번호가 틀렸어!"));
+        auth.signInWithEmailAndPassword(id + "@zizon.com", pw).catch(() => alert("실패!"));
     };
 
-    // 로그아웃
     document.getElementById("logoutBtn").onclick = () => auth.signOut().then(() => location.reload());
 
-    // 게시글 등록
     document.getElementById("postStoryBtn").onclick = async () => {
-        if (!currentUser) return alert("로그인 대기 중...");
         const text = document.getElementById('storyInput').value.trim();
-        if (!text) return;
+        if (!text || !currentUser) return;
         await db.ref('stories').push({ text, nickname: currentUser.nickname, time: Date.now() });
         document.getElementById('storyInput').value = '';
-        // .on() 리스너가 있어서 자동 갱신됨
     };
 
-    // 작품 등록
     document.getElementById("saveWorkBtn").onclick = async () => {
-        if (!currentUser) return alert("로그인 대기 중...");
         const title = document.getElementById('workTitle').value.trim();
         const desc = document.getElementById('workDesc').value.trim();
-        if (!title || !desc) return alert("내용을 다 채워줘!");
+        if (!title || !desc || !currentUser) return;
         await db.ref('works').push({ title, desc, nickname: currentUser.nickname });
-        document.getElementById('workTitle').value = '';
-        document.getElementById('workDesc').value = '';
         showSection('main');
     };
 });
 
-// 로그인 상태 감시 (최상위 실행)
 auth.onAuthStateChanged(async user => {
     if (user) {
         const snap = await db.ref('users/' + user.uid).once('value');
@@ -235,7 +202,6 @@ auth.onAuthStateChanged(async user => {
     } else {
         document.getElementById('authBox').classList.remove('hidden');
         document.getElementById('topNav').classList.add('hidden');
-        document.getElementById('mainView').classList.add('hidden');
     }
 });
 </script>
