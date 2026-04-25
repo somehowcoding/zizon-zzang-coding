@@ -14,7 +14,6 @@
         .hidden { display: none !important; }
         .login-card { background: white; padding: 40px; border-radius: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); width: 100%; max-width: 400px; border: 1px solid #f1f5f9; }
         .input-box { width: 100%; background: #f8fafc; border: 2px solid #f1f5f9; padding: 14px; border-radius: 16px; outline: none; transition: 0.2s; font-weight: 600; margin-bottom: 12px; display: block; }
-        .input-box:focus { border-color: #3b82f6; background: white; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50">
@@ -35,21 +34,19 @@
     <div class="login-card">
         <div class="text-center mb-8">
             <h2 class="text-3xl font-black text-slate-800">지존짱짱 👋</h2>
-            <p class="text-xs text-blue-500 font-bold mt-1 uppercase tracking-widest">Made by 어쩌다코딩</p>
+            <p id="makerTag" class="text-xs text-blue-500 font-bold mt-1 uppercase tracking-widest">Made by 어쩌다코딩</p>
         </div>
-        
         <div id="loginView">
             <input id="loginId" type="text" placeholder="아이디" class="input-box">
             <input id="loginPw" type="password" placeholder="비밀번호" class="input-box">
-            <button id="doLoginBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black mb-4 hover:bg-blue-700 transition-all">로그인</button>
+            <button id="doLoginBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black mb-4">로그인</button>
             <button id="goSignupBtn" class="w-full text-slate-400 text-sm font-bold underline">회원가입 하기</button>
         </div>
-
         <div id="signupView" class="hidden">
             <input id="regId" type="text" placeholder="아이디 정하기" class="input-box">
             <input id="regNick" type="text" placeholder="닉네임 정하기" class="input-box">
             <input id="regPw" type="password" placeholder="비밀번호 (6자 이상)" class="input-box">
-            <button id="doSignupBtn" class="w-full bg-green-500 text-white py-4 rounded-2xl font-black mb-4 hover:bg-green-600 transition-all">가입 완료</button>
+            <button id="doSignupBtn" class="w-full bg-green-500 text-white py-4 rounded-2xl font-black mb-4">가입 완료</button>
             <button id="goLoginBtn" class="w-full text-slate-400 text-sm font-bold underline">이미 계정이 있어요</button>
         </div>
     </div>
@@ -58,7 +55,7 @@
 <main id="mainView" class="hidden p-8 max-w-5xl mx-auto w-full">
     <div class="flex justify-between items-center mb-10">
         <h1 class="text-3xl font-black text-slate-800">모두의 작품 🌍</h1>
-        <button onclick="showSection('create')" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-black shadow-lg hover:scale-105 transition-all">+ 작품 올리기</button>
+        <button onclick="goToCodingSite()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-black shadow-lg hover:scale-105 transition-all">🛠️ 코딩하러 가기</button>
     </div>
     <div id="workList" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
 </main>
@@ -72,20 +69,7 @@
     <div id="storyList" class="space-y-4"></div>
 </section>
 
-<section id="createView" class="hidden p-8 max-w-xl mx-auto w-full">
-    <div class="bg-white p-8 rounded-3xl shadow-lg border border-slate-100">
-        <h2 class="text-2xl font-black mb-6 text-slate-800">새 작품 등록 🎨</h2>
-        <input id="workTitle" type="text" placeholder="작품 이름" class="input-box">
-        <textarea id="workDesc" placeholder="설명이나 링크를 적어주세요." class="input-box h-32 resize-none"></textarea>
-        <div class="flex gap-3">
-            <button onclick="showSection('main')" class="flex-1 bg-slate-100 text-slate-500 py-4 rounded-2xl font-black">취소</button>
-            <button id="saveWorkBtn" class="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-black">올리기</button>
-        </div>
-    </div>
-</section>
-
 <script>
-// Firebase 설정 유지
 const firebaseConfig = {
     apiKey: "AIzaSyDdFsRGy_2mZowYinOf9LeQhot08xyaqc4",
     authDomain: "zizon-coding.firebaseapp.com",
@@ -95,50 +79,55 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
-
 let currentUser = null;
-const SECTIONS = ['main', 'story', 'create'];
+
+// ✅ 코딩 사이트로 이동하는 함수 (여기에 네 코딩 사이트 주소 넣기)
+function goToCodingSite() {
+    if(confirm("코딩 작품을 만들러 갈까요?")) {
+        window.open('https://your-coding-site-url.com', '_blank'); // 네 사이트 주소로 변경
+    }
+}
 
 function showSection(name) {
-    SECTIONS.forEach(s => {
-        const el = document.getElementById(s + 'View');
-        if (el) el.classList.add('hidden');
-    });
-    const target = document.getElementById(name + 'View');
-    if (target) target.classList.remove('hidden');
-
-    if (name === 'main') loadWorks();
-    if (name === 'story') loadStories();
+    ['mainView', 'storyView'].forEach(id => document.getElementById(id).classList.add('hidden'));
+    document.getElementById(name + 'View').classList.remove('hidden');
+    if(name === 'main') loadWorks();
+    if(name === 'story') loadStories();
 }
 
 function loadStories() {
-    const list = document.getElementById('storyList');
-    db.ref('stories').off(); 
-    db.ref('stories').orderByChild('time').on('value', snap => {
+    db.ref('stories').off();
+    db.ref('stories').on('value', snap => {
+        const list = document.getElementById('storyList');
         list.innerHTML = '';
-        const data = snap.val();
-        if (!data) return;
-        Object.values(data).reverse().forEach(s => {
-            const div = document.createElement('div');
-            div.className = 'bg-white p-5 rounded-2xl border border-slate-100 shadow-sm';
-            div.innerHTML = `<p class="text-xs font-black text-blue-600 mb-1">${s.nickname}</p><p class="text-slate-700">${s.text}</p>`;
-            list.appendChild(div);
+        if(!snap.val()) return;
+        Object.entries(snap.val()).reverse().forEach(([key, s]) => {
+            const isManager = currentUser && currentUser.nickname === '어쩌다코딩';
+            const delBtn = isManager ? `<button onclick="deleteData('stories/${key}')" class="text-red-400 text-xs ml-2">[삭제]</button>` : '';
+            list.innerHTML += `<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                <p class="text-xs font-black text-blue-600 mb-1">${s.nickname}${delBtn}</p>
+                <p class="text-slate-700">${s.text}</p>
+            </div>`;
         });
     });
 }
 
+function deleteData(path) {
+    if(confirm("정말 삭제할까요?")) db.ref(path).remove();
+}
+
 function loadWorks() {
-    const list = document.getElementById('workList');
     db.ref('works').off();
     db.ref('works').on('value', snap => {
+        const list = document.getElementById('workList');
         list.innerHTML = '';
-        const data = snap.val();
-        if (!data) return;
-        Object.values(data).reverse().forEach(w => {
-            const div = document.createElement('div');
-            div.className = 'bg-white p-6 rounded-3xl border border-slate-100 shadow-sm';
-            div.innerHTML = `<h3 class="font-black text-xl mb-2">${w.title}</h3><p class="text-slate-500 text-sm mb-4">${w.desc}</p><p class="text-xs font-bold text-blue-500">By ${w.nickname}</p>`;
-            list.appendChild(div);
+        if(!snap.val()) return;
+        Object.values(snap.val()).reverse().forEach(w => {
+            list.innerHTML += `<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                <h3 class="font-black text-xl mb-2">${w.title}</h3>
+                <p class="text-slate-500 text-sm mb-4">${w.desc}</p>
+                <p class="text-xs font-bold text-blue-500">By ${w.nickname}</p>
+            </div>`;
         });
     });
 }
@@ -152,51 +141,44 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("signupView").classList.add("hidden");
         document.getElementById("loginView").classList.remove("hidden");
     };
-
     document.getElementById("doSignupBtn").onclick = async () => {
         const id = document.getElementById('regId').value.trim();
         const nick = document.getElementById('regNick').value.trim();
         const pw = document.getElementById('regPw').value.trim();
-        if (!id || !nick || pw.length < 6) return alert("다시 확인해봐!");
+        if(!id || !nick || pw.length < 6) return alert("똑바로 입력해!");
         try {
             const res = await auth.createUserWithEmailAndPassword(id + "@zizon.com", pw);
             await db.ref('users/' + res.user.uid).set({ id, nickname: nick });
             location.reload();
-        } catch (e) { alert(e.message); }
+        } catch(e) { alert("이미 있는 아이디거나 오류야!"); }
     };
-
     document.getElementById("doLoginBtn").onclick = () => {
         const id = document.getElementById('loginId').value.trim();
         const pw = document.getElementById('loginPw').value.trim();
-        auth.signInWithEmailAndPassword(id + "@zizon.com", pw).catch(() => alert("실패!"));
+        auth.signInWithEmailAndPassword(id + "@zizon.com", pw).catch(() => alert("아이디 비번 확인!"));
     };
-
     document.getElementById("logoutBtn").onclick = () => auth.signOut().then(() => location.reload());
-
     document.getElementById("postStoryBtn").onclick = async () => {
         const text = document.getElementById('storyInput').value.trim();
-        if (!text || !currentUser) return;
+        if(!text || !currentUser) return;
         await db.ref('stories').push({ text, nickname: currentUser.nickname, time: Date.now() });
         document.getElementById('storyInput').value = '';
-    };
-
-    document.getElementById("saveWorkBtn").onclick = async () => {
-        const title = document.getElementById('workTitle').value.trim();
-        const desc = document.getElementById('workDesc').value.trim();
-        if (!title || !desc || !currentUser) return;
-        await db.ref('works').push({ title, desc, nickname: currentUser.nickname });
-        showSection('main');
     };
 });
 
 auth.onAuthStateChanged(async user => {
-    if (user) {
+    if(user) {
         const snap = await db.ref('users/' + user.uid).once('value');
         currentUser = snap.val();
-        if (currentUser) {
+        if(currentUser) {
             document.getElementById('authBox').classList.add('hidden');
             document.getElementById('topNav').classList.remove('hidden');
             document.getElementById('userNick').innerText = currentUser.nickname;
+            // ✅ 관리자(어쩌다코딩)이면 강조 표시
+            if(currentUser.nickname === '어쩌다코딩') {
+                document.getElementById('userNick').classList.add('text-red-600');
+                document.getElementById('userNick').innerText += " (관리자)";
+            }
             showSection('main');
         }
     } else {
