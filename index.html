@@ -46,18 +46,18 @@
 
     <div id="authBox" class="flex-grow flex items-center justify-center bg-slate-50">
         <div class="bg-white p-10 rounded-[30px] shadow-xl w-full max-w-[360px] text-center">
-            <h2 class="text-3xl font-black text-slate-800 mb-6">ZIZON CODING</h2>
+            <h2 class="text-3xl font-black text-slate-800 mb-6 italic">어쩌다코딩</h2>
             <div class="space-y-3">
                 <input id="loginId" type="text" placeholder="아이디" class="w-full bg-slate-50 p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 font-bold">
                 <input id="loginPw" type="password" placeholder="비밀번호" class="w-full bg-slate-50 p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 font-bold">
-                <button id="doLoginBtn" class="w-full entry-blue text-white py-4 rounded-xl font-black text-lg">로그인</button>
+                <button id="doLoginBtn" class="w-full entry-blue text-white py-4 rounded-xl font-black text-lg shadow-md">코딩 시작</button>
                 <button id="doSignupBtn" class="mt-4 text-slate-400 text-xs font-bold underline">회원가입</button>
             </div>
         </div>
     </div>
 
     <section id="mainView" class="hidden flex-grow p-8 overflow-y-auto bg-slate-50">
-        <h1 class="text-2xl font-black text-center mb-10">모든작품들 🌏</h1>
+        <h1 class="text-2xl font-black text-center mb-10 text-slate-800">모든작품들 🌏</h1>
         <div id="workList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-[1000px] mx-auto"></div>
     </section>
 
@@ -67,7 +67,7 @@
                 <div id="screen"></div>
                 <div class="absolute bottom-3 w-full px-3 flex gap-2">
                     <button onclick="addObj()" class="flex-1 bg-white border border-blue-500 text-blue-500 py-2 rounded-lg font-bold text-xs">+ 오브젝트</button>
-                    <button onclick="playProject()" class="flex-1 entry-blue text-white py-2 rounded-lg font-bold text-xs">▶ 시작하기</button>
+                    <button onclick="playProject()" class="flex-1 entry-blue text-white py-2 rounded-lg font-bold text-xs shadow-lg">▶ 시작하기</button>
                 </div>
             </div>
             <div class="flex-grow flex flex-col overflow-hidden bg-slate-50">
@@ -77,9 +77,9 @@
         </div>
 
         <div class="work-area">
-            <div class="flex bg-white border-b">
-                <button onclick="switchTab('block')" id="tabBlock" class="tab-btn active">코드</button>
-                <button onclick="switchTab('costume')" id="tabCostume" class="tab-btn">모양</button>
+            <div class="flex bg-white border-b shadow-sm">
+                <button onclick="switchTab('block')" id="tabBlock" class="tab-btn active">코드 조립</button>
+                <button onclick="switchTab('costume')" id="tabCostume" class="tab-btn">모양 편집</button>
             </div>
             <div id="blocklyArea" class="flex-grow relative">
                 <div id="blocklyDiv"></div>
@@ -119,8 +119,8 @@
 </xml>
 
 <script>
-// 기본 한글 메시지 설정
-const msg = {
+// 한글화 설정
+const KO = {
     "EVENT_WHENFLAGCLICKED": "▶ 시작하기를 클릭했을 때",
     "CONTROLS_REPEAT_TITLE": "%1 번 반복하기",
     "CONTROLS_REPEAT_INPUT_DO": "실행",
@@ -130,17 +130,20 @@ const msg = {
     "CHANGE_Y_TITLE": "y 좌표를 %1 만큼 바꾸기",
     "NEXT_COSTUME_TITLE": "다음 모양으로 바꾸기",
     "SET_SIZE_TITLE": "크기를 %1 % 로 정하기",
-    "NEW_VARIABLE": "변수 만들기...", "VARIABLE_ALREADY_EXISTS": "이미 있는 이름이야!", "DELETE_VARIABLE": "변수 삭제", "RENAME_VARIABLE": "이름 변경"
+    "NEW_VARIABLE": "변수 만들기",
+    "VARIABLE_ALREADY_EXISTS": "이미 있는 이름이에요!",
+    "DELETE_VARIABLE": "변수 삭제",
+    "RENAME_VARIABLE": "이름 변경"
 };
-for (let key in msg) { Blockly.Msg[key] = msg[key]; }
+for (let key in KO) { Blockly.Msg[key] = KO[key]; }
 
-// 블록 정의
-Blockly.Blocks['event_whenflagclicked'] = { init: function() { this.appendDummyInput().appendField(msg["EVENT_WHENFLAGCLICKED"]); this.setNextStatement(true); this.setColour("#33b233"); }};
-Blockly.Blocks['controls_forever'] = { init: function() { this.appendDummyInput().appendField(msg["CONTROLS_FOREVER_TITLE"]); this.appendStatementInput("DO").appendField(msg["CONTROLS_REPEAT_INPUT_DO"]); this.setPreviousStatement(true); this.setColour("#ccb233"); }};
+// 블록 로직
+Blockly.Blocks['event_whenflagclicked'] = { init: function() { this.appendDummyInput().appendField(KO["EVENT_WHENFLAGCLICKED"]); this.setNextStatement(true); this.setColour("#33b233"); }};
+Blockly.Blocks['controls_forever'] = { init: function() { this.appendDummyInput().appendField(KO["CONTROLS_FOREVER_TITLE"]); this.appendStatementInput("DO").appendField(KO["CONTROLS_REPEAT_INPUT_DO"]); this.setPreviousStatement(true); this.setColour("#ccb233"); }};
 Blockly.Blocks['move_steps'] = { init: function() { this.appendValueInput("STEPS").setCheck("Number").appendField("앞으로"); this.appendDummyInput().appendField("만큼 움직이기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); }};
 Blockly.Blocks['change_x'] = { init: function() { this.appendValueInput("VAL").setCheck("Number").appendField("x 좌표를"); this.appendDummyInput().appendField("만큼 바꾸기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); }};
 Blockly.Blocks['change_y'] = { init: function() { this.appendValueInput("VAL").setCheck("Number").appendField("y 좌표를"); this.appendDummyInput().appendField("만큼 바꾸기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); }};
-Blockly.Blocks['next_costume'] = { init: function() { this.appendDummyInput().appendField(msg["NEXT_COSTUME_TITLE"]); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ff66cc"); }};
+Blockly.Blocks['next_costume'] = { init: function() { this.appendDummyInput().appendField(KO["NEXT_COSTUME_TITLE"]); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ff66cc"); }};
 Blockly.Blocks['set_size'] = { init: function() { this.appendValueInput("SIZE").setCheck("Number").appendField("크기를"); this.appendDummyInput().appendField("(으)로 정하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ff66cc"); }};
 Blockly.Blocks['wait_seconds'] = { init: function() { this.appendValueInput("SEC").setCheck("Number").appendField(""); this.appendDummyInput().appendField("초 기다리기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); }};
 
@@ -166,13 +169,28 @@ function showSection(name) {
 }
 
 function initBlockly() {
-    workspace = Blockly.inject('blocklyDiv', { toolbox: document.getElementById('toolbox'), zoom:{controls:true, wheel:true} });
-    workspace.addChangeListener((e) => { if(e.type === Blockly.Events.UI) setTimeout(() => Blockly.svgResize(workspace), 50); });
+    workspace = Blockly.inject('blocklyDiv', { 
+        toolbox: document.getElementById('toolbox'), 
+        zoom: {controls: true, wheel: true, startScale: 1.0, maxScale: 3, minScale: 0.3, scaleSpeed: 1.2}
+    });
+
+    // 🚨 [변수 소환 버그 방지] 변수 추가/변경 감지 시 강제 리사이즈 🚨
+    workspace.addChangeListener((e) => {
+        if(e.type === Blockly.Events.VAR_CREATE || e.type === Blockly.Events.VAR_RENAME || e.type === Blockly.Events.UI) {
+            // 변수가 생기면 0.5초 동안 여러 번 리사이즈를 때려서 무조건 보이게 함
+            let count = 0;
+            const timer = setInterval(() => {
+                Blockly.svgResize(workspace);
+                count++;
+                if(count > 5) clearInterval(timer);
+            }, 100);
+        }
+    });
     addObj();
 }
 
 function addObj() {
-    const id = "obj_" + Date.now();
+    const id = "zizon_" + Date.now();
     objects.push({ id, name: "오브젝트 " + (objCounter++), x: 190, y: 140, size: 70, costumes: [null], currentIdx: 0, xml: "" });
     renderObjList();
     selectObj(id);
@@ -186,12 +204,17 @@ function selectObj(id) {
     selectedId = id;
     const o = objects.find(o => o.id === id);
     workspace.clear();
-    if(o.xml) try { Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(o.xml), workspace); } catch(e) {}
+    if(o.xml) {
+        try { 
+            const dom = Blockly.Xml.textToDom(o.xml);
+            Blockly.Xml.domToWorkspace(dom, workspace); 
+        } catch(e) { console.error("XML Load Error", e); }
+    }
     currentCosIdx = o.currentIdx;
     renderObjList();
     renderStage();
     renderCosThumbs();
-    setTimeout(() => Blockly.svgResize(workspace), 20);
+    setTimeout(() => Blockly.svgResize(workspace), 50);
 }
 
 function renderObjList() {
@@ -200,7 +223,7 @@ function renderObjList() {
         const div = document.createElement('div');
         div.className = `obj-item ${o.id === selectedId ? 'active' : ''}`;
         div.onclick = () => selectObj(o.id);
-        div.innerHTML = `<span class="font-bold text-sm text-slate-600">${o.name}</span><button onclick="event.stopPropagation(); deleteObj('${o.id}')" class="text-slate-300 hover:text-red-400 font-bold">×</button>`;
+        div.innerHTML = `<span class="font-bold text-sm text-slate-600">${o.name}</span><button onclick="event.stopPropagation(); deleteObj('${o.id}')" class="text-slate-300 hover:text-red-400 font-bold px-2">×</button>`;
         list.appendChild(div);
     });
 }
@@ -261,17 +284,19 @@ function switchTab(tab) {
     document.getElementById('costumeDiv').classList.toggle('hidden', tab !== 'costume');
     document.getElementById('tabBlock').classList.toggle('active', tab === 'block');
     document.getElementById('tabCostume').classList.toggle('active', tab === 'costume');
-    if(tab === 'block') setTimeout(() => Blockly.svgResize(workspace), 10);
+    if(tab === 'block') setTimeout(() => Blockly.svgResize(workspace), 30);
     else renderCosThumbs();
 }
 
-// 로그인
-document.getElementById("doLoginBtn").onclick = () => auth.signInWithEmailAndPassword(document.getElementById('loginId').value.trim() + "@zizon.com", document.getElementById('loginPw').value.trim()).catch(() => alert("아이디/비번 틀림!"));
+// 로그인/가입
+document.getElementById("doLoginBtn").onclick = () => auth.signInWithEmailAndPassword(document.getElementById('loginId').value.trim() + "@zizon.com", document.getElementById('loginPw').value.trim()).catch(() => alert("아이디/비번 다시 확인해봐!"));
 document.getElementById("doSignupBtn").onclick = () => {
-    const id = prompt("아이디")+"@zizon.com", pw = prompt("비번"), nick = prompt("닉네임");
+    const id = prompt("아이디")+"@zizon.com", pw = prompt("비번 (6자이상)"), nick = prompt("닉네임");
     auth.createUserWithEmailAndPassword(id, pw).then(res => db.ref('users/'+res.user.uid).set({ nickname: nick }));
 };
 auth.onAuthStateChanged(async user => { if(user) { const snap = await db.ref('users/'+user.uid).once('value'); document.getElementById('userNick').innerText = snap.val().nickname; document.getElementById('topNav').classList.remove('hidden'); showSection('main'); } });
+
+window.addEventListener('resize', () => { if(workspace) Blockly.svgResize(workspace); });
 </script>
 </body>
 </html>
