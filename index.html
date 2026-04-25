@@ -13,32 +13,30 @@
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fbff; margin: 0; }
         .hidden { display: none !important; }
-        .login-card { background: white; padding: 40px; border-radius: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); width: 100%; max-width: 400px; border: 1px solid #f1f5f9; }
-        .input-box { width: 100%; background: #f8fafc; border: 2px solid #f1f5f9; padding: 14px; border-radius: 16px; outline: none; font-weight: 600; margin-bottom: 12px; display: block; }
-        #blocklyDiv { width: 100%; height: 600px; border-radius: 20px; border: 2px solid #e2e8f0; margin-top: 10px; }
+        .login-card { background: white; padding: 40px; border-radius: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        .input-box { width: 100%; background: #f8fafc; border: 2px solid #f1f5f9; padding: 12px; border-radius: 12px; outline: none; margin-bottom: 10px; font-weight: bold; }
+        #blocklyDiv { width: 100%; height: 500px; border-radius: 0 0 20px 20px; border: 2px solid #e2e8f0; }
+        .obj-item { cursor: pointer; transition: 0.2s; border: 2px solid transparent; }
+        .obj-item.active { border-color: #3b82f6; background: #eff6ff; }
+        .status-input { width: 60px; background: #f1f5f9; border-radius: 6px; padding: 2px 5px; text-align: center; font-size: 13px; font-weight: bold; border: 1px solid #e2e8f0; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50">
 
 <nav id="topNav" class="bg-white border-b px-6 py-4 flex justify-between items-center hidden sticky top-0 z-50">
     <div class="text-xl font-black text-blue-600 italic cursor-pointer" onclick="showSection('main')">지존짱짱 🚀</div>
-    <div class="flex items-center gap-4">
-        <button class="font-bold text-slate-600 hover:text-blue-600" onclick="showSection('main')">갤러리</button>
-        <button class="font-bold text-slate-600 hover:text-blue-600" onclick="showSection('create')">만들기</button>
-        <button class="font-bold text-slate-600 hover:text-blue-600" onclick="showSection('story')">이야기</button>
-        <div class="flex items-center gap-2 ml-4">
-            <span id="userNick" class="text-sm font-bold text-slate-700 border-r pr-3"></span>
-            <button id="logoutBtn" class="text-xs text-red-500 font-bold underline">로그아웃</button>
-        </div>
+    <div class="flex items-center gap-4 font-bold text-slate-600">
+        <button onclick="showSection('main')">갤러리</button>
+        <button onclick="showSection('create')">만들기</button>
+        <button onclick="showSection('story')">이야기</button>
+        <span id="userNick" class="text-sm border-l pl-3 ml-2 text-slate-400"></span>
+        <button id="logoutBtn" class="text-xs text-red-500 underline">로그아웃</button>
     </div>
 </nav>
 
 <div id="authBox" class="flex-grow flex items-center justify-center p-6">
-    <div class="login-card">
-        <div class="text-center mb-8">
-            <h2 class="text-3xl font-black text-slate-800">지존짱짱 👋</h2>
-            <p class="text-xs text-blue-500 font-bold mt-1 uppercase tracking-widest">Made by 어쩌다코딩</p>
-        </div>
+    <div class="login-card shadow-2xl">
+        <div class="text-center mb-8"><h2 class="text-3xl font-black text-slate-800">지존짱짱 👋</h2><p class="text-xs text-blue-500 font-bold mt-1 uppercase">Made by 어쩌다코딩</p></div>
         <div id="loginView">
             <input id="loginId" type="text" placeholder="아이디" class="input-box">
             <input id="loginPw" type="password" placeholder="비밀번호" class="input-box">
@@ -56,18 +54,35 @@
 </div>
 
 <main id="mainView" class="hidden p-8 max-w-5xl mx-auto w-full">
-    <h1 class="text-3xl font-black mb-10 text-slate-800">모두의 작품 🌍</h1>
+    <h1 class="text-3xl font-black text-slate-800 mb-10">모두의 작품 🌍</h1>
     <div id="workList" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
 </main>
 
-<section id="createView" class="hidden p-8 max-w-6xl mx-auto w-full">
-    <div class="bg-white p-6 rounded-3xl shadow-lg border border-slate-100">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-black text-slate-800">코딩 스튜디오 🛠️</h2>
-            <button id="saveWorkBtn" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-black">작품 저장</button>
+<section id="createView" class="hidden p-4 max-w-7xl mx-auto w-full">
+    <div class="flex gap-4">
+        <div class="w-1/3 flex flex-col gap-4">
+            <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex gap-2">
+                <button onclick="playProject()" class="flex-1 bg-green-500 text-white py-3 rounded-xl font-black shadow-md">▶ 시작하기</button>
+                <button onclick="stopProject()" class="flex-1 bg-red-500 text-white py-3 rounded-xl font-black shadow-md">■ 정지하기</button>
+            </div>
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex-grow">
+                <div class="flex justify-between items-center mb-4"><h3 class="font-black text-slate-700">오브젝트</h3><button onclick="addObj()" class="text-xs bg-slate-100 px-3 py-1 rounded-lg font-bold">+ 추가</button></div>
+                <div id="objList" class="space-y-2 h-40 overflow-y-auto"></div>
+                <div id="statusPanel" class="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-200 hidden">
+                    <div class="grid grid-cols-2 gap-3 text-xs font-bold text-slate-500">
+                        <div>X <input type="number" id="stX" class="status-input ml-1" onchange="updateObjStatus()"></div>
+                        <div>Y <input type="number" id="stY" class="status-input ml-1" onchange="updateObjStatus()"></div>
+                        <div>크기 <input type="number" id="stSize" class="status-input ml-1" onchange="updateObjStatus()"></div>
+                        <div>방향 <input type="number" id="stDir" class="status-input ml-1" onchange="updateObjStatus()"></div>
+                    </div>
+                </div>
+            </div>
+            <button id="saveWorkBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg">작품 저장하기</button>
         </div>
-        <input id="workTitle" type="text" placeholder="작품 이름을 입력하세요" class="input-box">
-        <div id="blocklyDiv"></div>
+        <div class="w-2/3">
+            <div class="bg-blue-600 p-3 rounded-t-2xl text-white font-black flex justify-between items-center"><span>블록 조립소</span><input id="workTitle" type="text" placeholder="작품 이름" class="bg-blue-700 text-white px-3 py-1 rounded-lg outline-none text-sm w-1/2"></div>
+            <div id="blocklyDiv"></div>
+        </div>
     </div>
 </section>
 
@@ -81,23 +96,15 @@
 </section>
 
 <xml id="toolbox" style="display: none">
-    <category name="시작" colour="#33b233">
-        <block type="when_run"></block>
-    </category>
+    <category name="시작" colour="#33b233"><block type="when_run"></block></category>
     <category name="움직임" colour="#33b2cc">
         <block type="move_x"><value name="VAL"><block type="math_number"><field name="NUM">10</field></block></value></block>
         <block type="move_y"><value name="VAL"><block type="math_number"><field name="NUM">10</field></block></value></block>
         <block type="move_dir"><value name="VAL"><block type="math_number"><field name="NUM">10</field></block></value></block>
     </category>
-    <category name="흐름" colour="#ccb233">
-        <block type="controls_repeat_ext"></block>
-        <block type="controls_if"></block>
-    </category>
+    <category name="흐름" colour="#ccb233"><block type="controls_repeat_ext"></block><block type="controls_if"></block></category>
     <category name="변수" colour="#cc3333" custom="VARIABLE"></category>
-    <category name="계산" colour="#3333cc">
-        <block type="math_number"></block>
-        <block type="math_arithmetic"></block>
-    </category>
+    <category name="계산" colour="#3333cc"><block type="math_number"></block><block type="math_arithmetic"></block></category>
 </xml>
 
 <script>
@@ -111,145 +118,108 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
-let currentUser = null;
-let workspace = null;
 
-// 엔트리 스타일 블록 정의
-Blockly.Blocks['when_run'] = {
-  init: function() {
-    this.appendDummyInput().appendField("▶ 시작하기를 클릭했을 때");
-    this.setNextStatement(true, null);
-    this.setColour("#33b233");
-  }
-};
+let currentUser = null, workspace = null, objects = [], selectedObjId = null;
 
-Blockly.Blocks['move_x'] = {
-  init: function() {
-    this.appendValueInput("VAL").setCheck("Number").appendField("x좌표를");
-    this.appendDummyInput().appendField("만큼 이동하기");
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour("#33b2cc");
-  }
-};
+// 한글 블록 정의 (엔트리 스타일)
+Blockly.Blocks['when_run'] = { init: function() { this.appendDummyInput().appendField("▶ 시작하기를 클릭했을 때"); this.setNextStatement(true); this.setColour("#33b233"); } };
+Blockly.Blocks['move_x'] = { init: function() { this.appendValueInput("VAL").setCheck("Number").appendField("x좌표를"); this.appendDummyInput().appendField("만큼 이동하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
+Blockly.Blocks['move_y'] = { init: function() { this.appendValueInput("VAL").setCheck("Number").appendField("y좌표를"); this.appendDummyInput().appendField("만큼 이동하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
+Blockly.Blocks['move_dir'] = { init: function() { this.appendValueInput("VAL").setCheck("Number").appendField("이동방향으로"); this.appendDummyInput().appendField("만큼 이동하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
 
-Blockly.Blocks['move_y'] = {
-  init: function() {
-    this.appendValueInput("VAL").setCheck("Number").appendField("y좌표를");
-    this.appendDummyInput().appendField("만큼 이동하기");
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour("#33b2cc");
-  }
-};
-
-Blockly.Blocks['move_dir'] = {
-  init: function() {
-    this.appendValueInput("VAL").setCheck("Number").appendField("이동방향으로");
-    this.appendDummyInput().appendField("만큼 이동하기");
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour("#33b2cc");
-  }
-};
+// 인터페이스 한국어 강제 설정
+Blockly.Msg["CONTROLS_REPEAT_TITLE"] = "%1번 반복하기";
+Blockly.Msg["CONTROLS_IF_MSG_IF"] = "만약";
+Blockly.Msg["VARIABLES_DEFAULT_NAME"] = "변수";
+Blockly.Msg["MATH_NUMBER_HELPURL"] = "";
 
 function showSection(name) {
     ['mainView', 'createView', 'storyView'].forEach(id => document.getElementById(id).classList.add('hidden'));
     document.getElementById(name + 'View').classList.remove('hidden');
     if(name === 'create' && !workspace) {
-        workspace = Blockly.inject('blocklyDiv', { 
-            toolbox: document.getElementById('toolbox'),
-            zoom: { controls: true, wheel: true } 
-        });
+        workspace = Blockly.inject('blocklyDiv', { toolbox: document.getElementById('toolbox') });
+        if(objects.length === 0) addObj();
     }
     if(name === 'main') loadWorks();
     if(name === 'story') loadStories();
 }
 
-// 데이터 로드/저장/로그인 로직
+function addObj() {
+    const id = Date.now();
+    objects.push({ id, name: "오브젝트" + (objects.length + 1), x: 0, y: 0, size: 100, dir: 90, defX: 0, defY: 0 });
+    renderObjList(); selectObj(id);
+}
+
+function selectObj(id) {
+    selectedObjId = id; const obj = objects.find(o => o.id === id);
+    document.getElementById('statusPanel').classList.remove('hidden');
+    document.getElementById('stX').value = obj.x; document.getElementById('stY').value = obj.y;
+    document.getElementById('stSize').value = obj.size; document.getElementById('stDir').value = obj.dir;
+    renderObjList();
+}
+
+function updateObjStatus() {
+    const obj = objects.find(o => o.id === selectedObjId); if(!obj) return;
+    obj.x = Number(document.getElementById('stX').value); obj.y = Number(document.getElementById('stY').value);
+    obj.size = Number(document.getElementById('stSize').value); obj.dir = Number(document.getElementById('stDir').value);
+    obj.defX = obj.x; obj.defY = obj.y;
+}
+
+function renderObjList() {
+    const list = document.getElementById('objList'); list.innerHTML = '';
+    objects.forEach(o => {
+        list.innerHTML += `<div onclick="selectObj(${o.id})" class="obj-item p-3 rounded-xl bg-slate-50 flex justify-between items-center ${o.id === selectedObjId ? 'active' : ''}">
+            <span class="text-sm font-bold text-slate-700">🖼️ ${o.name}</span>
+        </div>`;
+    });
+}
+
+function playProject() { alert("코드가 실행됩니다!"); }
+function stopProject() { 
+    objects.forEach(o => { o.x = o.defX; o.y = o.defY; }); 
+    if(selectedObjId) selectObj(selectedObjId);
+    alert("정지! 처음 위치로 돌아갑니다."); 
+}
+
+function loadWorks() {
+    db.ref('works').on('value', snap => {
+        const list = document.getElementById('workList'); list.innerHTML = ''; if(!snap.val()) return;
+        Object.entries(snap.val()).reverse().forEach(([key, w]) => {
+            const isStaff = w.isStaff ? `<span class="bg-yellow-400 text-white text-[10px] px-2 py-1 rounded-full ml-2">⭐ 스선</span>` : '';
+            const staffBtn = (currentUser && currentUser.nickname === '어쩌다코딩') ? `<button onclick="db.ref('works/${key}/isStaff').set(${!w.isStaff})" class="text-[10px] text-blue-500 ml-2">[스선설정]</button>` : '';
+            list.innerHTML += `<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm"><h3 class="font-black text-xl mb-2">${w.title}${isStaff}</h3><p class="text-xs font-bold text-slate-400">By ${w.nickname}${staffBtn}</p></div>`;
+        });
+    });
+}
+
 function loadStories() {
-    db.ref('stories').off();
     db.ref('stories').on('value', snap => {
-        const list = document.getElementById('storyList');
-        list.innerHTML = '';
-        if(!snap.val()) return;
+        const list = document.getElementById('storyList'); list.innerHTML = ''; if(!snap.val()) return;
         Object.entries(snap.val()).reverse().forEach(([key, s]) => {
-            const isManager = currentUser && currentUser.nickname === '어쩌다코딩';
-            const delBtn = isManager ? `<button onclick="db.ref('stories/${key}').remove()" class="text-red-400 text-xs ml-2">[삭제]</button>` : '';
+            const delBtn = (currentUser && currentUser.nickname === '어쩌다코딩') ? `<button onclick="db.ref('stories/${key}').remove()" class="text-red-400 text-xs ml-2">[삭제]</button>` : '';
             list.innerHTML += `<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm"><p class="text-xs font-black text-blue-600 mb-1">${s.nickname}${delBtn}</p><p class="text-slate-700">${s.text}</p></div>`;
         });
     });
 }
 
-function loadWorks() {
-    db.ref('works').off();
-    db.ref('works').on('value', snap => {
-        const list = document.getElementById('workList');
-        list.innerHTML = '';
-        if(!snap.val()) return;
-        Object.values(snap.val()).reverse().forEach(w => {
-            list.innerHTML += `<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm"><h3 class="font-black text-xl mb-2">${w.title}</h3><p class="text-xs font-bold text-blue-500">By ${w.nickname}</p></div>`;
-        });
-    });
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("goSignupBtn").onclick = () => {
-        document.getElementById("loginView").classList.add("hidden");
-        document.getElementById("signupView").classList.remove("hidden");
-    };
-    document.getElementById("goLoginBtn").onclick = () => {
-        document.getElementById("signupView").classList.add("hidden");
-        document.getElementById("loginView").classList.remove("hidden");
-    };
-    document.getElementById("doSignupBtn").onclick = async () => {
-        const id = document.getElementById('regId').value.trim();
-        const nick = document.getElementById('regNick').value.trim();
-        const pw = document.getElementById('regPw').value.trim();
-        if(!id || !nick || pw.length < 6) return alert("똑바로 입력해줘!");
-        try {
-            const res = await auth.createUserWithEmailAndPassword(id + "@zizon.com", pw);
-            await db.ref('users/' + res.user.uid).set({ id, nickname: nick });
-            location.reload();
-        } catch(e) { alert("가입 실패!"); }
-    };
-    document.getElementById("doLoginBtn").onclick = () => {
-        const id = document.getElementById('loginId').value.trim();
-        const pw = document.getElementById('loginPw').value.trim();
-        auth.signInWithEmailAndPassword(id + "@zizon.com", pw).catch(() => alert("실패!"));
-    };
-    document.getElementById("logoutBtn").onclick = () => auth.signOut().then(() => location.reload());
-    document.getElementById("postStoryBtn").onclick = async () => {
-        const text = document.getElementById('storyInput').value.trim();
-        if(!text || !currentUser) return;
-        await db.ref('stories').push({ text, nickname: currentUser.nickname, time: Date.now() });
-        document.getElementById('storyInput').value = '';
-    };
-    document.getElementById("saveWorkBtn").onclick = async () => {
-        const title = document.getElementById('workTitle').value.trim();
-        if(!title || !currentUser) return alert("제목을 입력해줘!");
-        const xml = Blockly.Xml.workspaceToDom(workspace);
-        const xmlText = Blockly.Xml.domToText(xml);
-        await db.ref('works').push({ title, code: xmlText, nickname: currentUser.nickname });
-        alert("작품이 갤러리에 올라갔어!");
-        showSection('main');
-    };
-});
+// 가입/로그인/저장 로직
+document.getElementById("doLoginBtn").onclick = () => auth.signInWithEmailAndPassword(document.getElementById('loginId').value.trim() + "@zizon.com", document.getElementById('loginPw').value.trim()).catch(()=>alert("실패!"));
+document.getElementById("doSignupBtn").onclick = async () => {
+    const id = document.getElementById('regId').value.trim(), nick = document.getElementById('regNick').value.trim(), pw = document.getElementById('regPw').value.trim();
+    const res = await auth.createUserWithEmailAndPassword(id + "@zizon.com", pw);
+    await db.ref('users/' + res.user.uid).set({ id, nickname: nick }); location.reload();
+};
+document.getElementById("saveWorkBtn").onclick = async () => {
+    const xml = Blockly.Xml.workspaceToDom(workspace);
+    await db.ref('works').push({ title: document.getElementById('workTitle').value || "무제", code: Blockly.Xml.domToText(xml), nickname: currentUser.nickname, isStaff: false });
+    alert("저장 완료!"); showSection('main');
+};
+document.getElementById("logoutBtn").onclick = () => auth.signOut().then(() => location.reload());
 
 auth.onAuthStateChanged(async user => {
     if(user) {
-        const snap = await db.ref('users/' + user.uid).once('value');
-        currentUser = snap.val();
-        if(currentUser) {
-            document.getElementById('authBox').classList.add('hidden');
-            document.getElementById('topNav').classList.remove('hidden');
-            document.getElementById('userNick').innerText = currentUser.nickname;
-            if(currentUser.nickname === '어쩌다코딩') document.getElementById('userNick').classList.add('text-blue-600');
-            showSection('main');
-        }
-    } else {
-        document.getElementById('authBox').classList.remove('hidden');
-        document.getElementById('topNav').classList.add('hidden');
+        const snap = await db.ref('users/' + user.uid).once('value'); currentUser = snap.val();
+        if(currentUser) { document.getElementById('authBox').classList.add('hidden'); document.getElementById('topNav').classList.remove('hidden'); document.getElementById('userNick').innerText = currentUser.nickname; showSection('main'); }
     }
 });
 </script>
