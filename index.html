@@ -3,164 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지존짱짱 SUPREME - 어쩌다코딩 전용</title>
+    <title>지존짱짱 SUPREME - OWNER: 어쩌다코딩</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
     <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
     <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
     <script src="https://unpkg.com/blockly/msg/ko.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        :root { --z-blue: #4f80ff; --z-purple: #7c3aed; --z-green: #00c73c; }
-        body { font-family: 'Pretendard', sans-serif; background: #f8fafc; margin: 0; overflow: hidden; height: 100vh; }
+        :root { 
+            --z-blue: #4f80ff; --z-deep-blue: #3b66db; --z-purple: #7c3aed; 
+            --z-green: #00c73c; --z-red: #ff4d4d; --z-bg: #f5f7fa; 
+        }
         
-        /* [NAV] */
-        .zizon-nav { height: 64px; background: white; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; padding: 0 40px; position: fixed; top: 0; width: 100%; z-index: 2000; }
-        .logo-group { display: flex; gap: 4px; margin-right: 50px; cursor: pointer; }
-        .l-block { width: 32px; height: 32px; border-radius: 8px; color: white; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; }
-        .nav-item { font-weight: 700; color: #333; cursor: pointer; padding: 10px 20px; border-radius: 12px; transition: 0.2s; font-size: 15px; }
-        .nav-item:hover { color: var(--z-blue); background: #f0f4ff; }
-        .nav-item.active { color: var(--z-blue); background: #eef2ff; }
+        * { box-sizing: border-box; outline: none; }
+        body { font-family: 'Pretendard', sans-serif; background: var(--z-bg); margin: 0; overflow: hidden; height: 100vh; color: #1e293b; }
+        
+        /* [1. HEADER SYSTEM] */
+        .zizon-nav { 
+            height: 64px; background: white; border-bottom: 1px solid #e2e8f0; 
+            display: flex; align-items: center; padding: 0 40px; position: fixed; 
+            top: 0; width: 100%; z-index: 2000; justify-content: space-between;
+        }
+        .logo-area { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .logo-box { 
+            width: 32px; height: 32px; border-radius: 8px; color: white; 
+            display: flex; align-items: center; justify-content: center; 
+            font-weight: 900; font-size: 16px; transition: 0.3s;
+        }
+        .nav-menu { display: flex; gap: 10px; position: absolute; left: 200px; }
+        .nav-item { 
+            font-weight: 800; color: #64748b; cursor: pointer; padding: 10px 24px; 
+            border-radius: 14px; transition: 0.3s; font-size: 15px;
+        }
+        .nav-item:hover { color: var(--z-blue); background: #f1f5f9; }
+        .nav-item.active { color: var(--z-blue); background: #eff6ff; }
 
-        /* [SECTIONS] */
-        .content-section { margin-top: 64px; height: calc(100vh - 64px); display: none; padding: 30px; overflow-y: auto; }
-        .content-section.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* [2. LAYOUT SECTIONS] */
+        .content-section { margin-top: 64px; height: calc(100vh - 64px); display: none; overflow-y: auto; }
+        .content-section.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* [EDITOR] */
+        /* [3. PROFESSIONAL EDITOR] */
         #editor-container { display: none; height: calc(100vh - 64px); margin-top: 64px; background: white; }
         #editor-container.active { display: flex; }
-        .sidebar { width: 400px; border-right: 1px solid #eee; display: flex; flex-direction: column; background: #fff; }
-        #stage { width: 360px; height: 270px; background: #fff; margin: 20px auto; border: 1px solid #eee; border-radius: 12px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
+        
+        .editor-sidebar { 
+            width: 420px; border-right: 1px solid #edf2f7; display: flex; 
+            flex-direction: column; background: #fff; box-shadow: 4px 0 15px rgba(0,0,0,0.02);
+        }
+        .stage-wrapper { 
+            width: 380px; height: 285px; background: #fff; margin: 25px auto; 
+            border: 2px solid #f1f5f9; border-radius: 16px; position: relative; 
+            overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+        }
+        .stage-grid {
+            position: absolute; inset: 0; background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px; opacity: 0.5;
+        }
         #blocklyDiv { flex: 1; }
 
-        /* [COMMUNITY - CHAT] */
-        .chat-wrap { max-width: 800px; margin: 0 auto; background: white; height: 100%; border-radius: 20px; display: flex; flex-direction: column; shadow: 0 10px 40px rgba(0,0,0,0.05); }
-        #chat-window { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .msg { padding: 12px 18px; border-radius: 18px; max-width: 70%; font-size: 14px; line-height: 1.5; }
-        .msg.me { align-self: flex-end; background: var(--z-blue); color: white; border-bottom-right-radius: 4px; }
-        .msg.other { align-self: flex-start; background: #f1f5f9; color: #334155; border-bottom-left-radius: 4px; }
+        /* [4. CHAT COMMUNITY] */
+        .chat-container { 
+            max-width: 900px; margin: 40px auto; height: 85%; background: white; 
+            border-radius: 28px; display: flex; flex-direction: column; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08); overflow: hidden;
+        }
+        .chat-header { padding: 25px 35px; border-bottom: 1px solid #f1f5f9; background: white; z-index: 10; }
+        #chat-window { 
+            flex: 1; padding: 30px; overflow-y: auto; display: flex; 
+            flex-direction: column; gap: 20px; background: #fafbfc;
+        }
+        .chat-bubble { 
+            padding: 14px 20px; border-radius: 22px; max-width: 75%; 
+            font-size: 15px; font-weight: 500; position: relative; animation: slideUp 0.3s;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .chat-bubble.me { 
+            align-self: flex-end; background: var(--z-blue); color: white; 
+            border-bottom-right-radius: 4px; box-shadow: 0 4px 15px rgba(79,128,255,0.3);
+        }
+        .chat-bubble.other { 
+            align-self: flex-start; background: white; color: #334155; 
+            border-bottom-left-radius: 4px; border: 1px solid #e2e8f0;
+        }
 
-        /* [MYPAGE DRAWER] */
-        #mypage-drawer { position: fixed; right: -450px; top: 64px; width: 400px; height: calc(100vh - 64px); background: white; box-shadow: -10px 0 50px rgba(0,0,0,0.1); z-index: 2500; transition: 0.5s cubic-bezier(0.19, 1, 0.22, 1); padding: 40px; display: flex; flex-direction: column; }
+        /* [5. MYPAGE DRAWER (EXTENDED)] */
+        #mypage-drawer { 
+            position: fixed; right: -500px; top: 64px; width: 450px; 
+            height: calc(100vh - 64px); background: white; z-index: 3000; 
+            box-shadow: -15px 0 60px rgba(0,0,0,0.12); transition: 0.6s cubic-bezier(0.22, 1, 0.36, 1); 
+            padding: 50px; overflow-y: auto;
+        }
         #mypage-drawer.open { right: 0; }
-        .work-card { background: #f8fafc; padding: 15px; border-radius: 15px; margin-bottom: 12px; border: 1px solid #eee; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; }
-        .work-card:hover { transform: scale(1.02); background: #fff; border-color: var(--z-blue); }
-
-        .z-btn { padding: 12px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; border: none; transition: 0.2s; }
-        .z-primary { background: var(--z-blue); color: white; }
+        .work-item { 
+            background: #f8fafc; padding: 20px; border-radius: 20px; 
+            margin-bottom: 15px; border: 1px solid transparent; 
+            transition: 0.3s; display: flex; align-items: center; gap: 15px; cursor: pointer;
+        }
+        .work-item:hover { border-color: var(--z-blue); background: #fff; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        
+        .z-btn { 
+            padding: 14px 28px; border-radius: 16px; font-weight: 900; 
+            cursor: pointer; border: none; transition: 0.2s; display: inline-flex; 
+            align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-run { background: var(--z-blue); color: white; font-size: 18px; width: 100%; box-shadow: 0 8px 25px rgba(79,128,255,0.25); }
+        .btn-run:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
 
     <nav class="zizon-nav">
-        <div class="logo-group" onclick="core.go('main')">
-            <div class="l-block" style="background:var(--z-blue)">지</div>
-            <div class="l-block" style="background:var(--z-purple)">존</div>
+        <div class="logo-area" onclick="core.go('main')">
+            <div class="logo-box" style="background:var(--z-blue)">지</div>
+            <div class="logo-box" style="background:var(--z-purple)">존</div>
+            <span class="ml-2 font-black text-xl tracking-tighter">SUPREME ENGINE</span>
         </div>
-        <div class="flex gap-2">
+        
+        <div class="nav-menu">
             <div id="m-make" class="nav-item" onclick="core.go('make')">만들기</div>
             <div id="m-comm" class="nav-item" onclick="core.go('comm')">커뮤니티</div>
         </div>
-        <div class="ml-auto">
-            <div onclick="core.toggleMypage()" class="flex items-center gap-3 cursor-pointer group">
-                <span class="font-black text-slate-700 group-hover:text-blue-500 transition">마이페이지</span>
-                <div class="w-10 h-10 rounded-xl bg-slate-900 overflow-hidden border-2 border-white shadow-md">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=EojjeodaCoding" alt="User">
+
+        <div onclick="core.toggleMypage()" class="flex items-center gap-4 cursor-pointer group">
+            <div class="text-right hidden sm:block">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Account</p>
+                <p class="font-black text-slate-800 text-sm">마이페이지</p>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 p-[2px]">
+                <div class="w-full h-full bg-white rounded-[14px] overflow-hidden">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=EojjeodaMaster" alt="User Avatar">
                 </div>
             </div>
         </div>
     </nav>
 
-    <section id="sec-main" class="content-section active">
-        <div class="max-w-4xl mx-auto text-center mt-20">
-            <h1 class="text-5xl font-black mb-6">반갑습니다, 어쩌다코딩 두목님!</h1>
-            <p class="text-slate-400 text-xl">오늘도 지존급 작품을 만드실 준비가 되셨나요?</p>
-            <button onclick="core.go('make')" class="mt-10 z-btn z-primary px-20 py-5 text-xl rounded-2xl shadow-xl">창작 시작하기</button>
+    <section id="sec-main" class="content-section active bg-white">
+        <div class="max-w-5xl mx-auto pt-32 px-10">
+            <div class="bg-slate-900 rounded-[40px] p-16 text-white relative overflow-hidden shadow-2xl">
+                <div class="relative z-10">
+                    <h2 class="text-5xl font-black mb-6 leading-tight">어쩌다코딩 두목님,<br>작업을 시작할까요?</h2>
+                    <p class="text-slate-400 text-xl mb-12 max-w-xl">지존짱짱 엔진 v18.5 버전이 어쩌다코딩님의 영감을 기다리고 있습니다. 모든 움직임 블록과 실시간 채팅이 준비되었습니다.</p>
+                    <button onclick="core.go('make')" class="z-btn z-primary bg-white text-blue-600 px-10 py-5 text-xl rounded-2xl">새 작품 만들기</button>
+                </div>
+                <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-blue-600 rounded-full blur-[120px] opacity-20"></div>
+            </div>
         </div>
     </section>
 
     <section id="editor-container">
-        <aside class="sidebar">
-            <div id="stage"><div id="render-layer" class="w-full h-full relative"></div></div>
-            <div class="px-8 flex flex-col gap-3 mb-6">
-                <button id="run-btn" onclick="engine.toggle()" class="z-btn z-primary text-xl shadow-lg">▶ 엔진 가동</button>
+        <aside class="editor-sidebar">
+            <div class="stage-wrapper">
+                <div class="stage-grid"></div>
+                <div id="render-layer" class="w-full h-full relative"></div>
             </div>
+            
+            <div class="px-8 mb-8">
+                <button id="run-btn" onclick="engine.toggle()" class="z-btn btn-run">
+                    <span id="run-icon">▶</span> <span id="run-text">엔진 가동 시작</span>
+                </button>
+            </div>
+
             <div class="px-8 flex-1 flex flex-col overflow-hidden">
-                <div class="flex justify-between items-center mb-4 text-[11px] font-black text-slate-400 tracking-tighter">OBJECT INVENTORY <button onclick="obj.add()" class="text-blue-500">+ ADD</button></div>
-                <div id="obj-list" class="flex-1 overflow-y-auto pb-4"></div>
+                <div class="flex justify-between items-center mb-5">
+                    <span class="text-xs font-black text-slate-400 tracking-widest uppercase">Object Inventory</span>
+                    <button onclick="obj.add()" class="text-blue-500 font-bold text-xs hover:underline">+ ADD NEW</button>
+                </div>
+                <div id="obj-list" class="flex-1 overflow-y-auto space-y-3 pb-6"></div>
             </div>
         </aside>
-        <main class="flex-1 flex flex-col">
+
+        <main class="flex-1 flex flex-col bg-slate-50">
+            <div class="h-14 bg-white border-b flex items-center px-10 gap-8">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <span class="font-black text-sm text-slate-700">Workspace Master</span>
+                </div>
+            </div>
             <div id="blocklyDiv"></div>
         </main>
     </section>
 
     <section id="sec-comm" class="content-section bg-slate-50">
-        <div class="chat-wrap shadow-2xl">
-            <div class="p-6 border-b flex justify-between items-center bg-white rounded-t-2xl">
-                <span class="font-black text-xl">지존 실시간 채팅방 💬</span>
-                <span class="text-xs text-green-500 font-bold">● 4,281명 접속 중</span>
+        <div class="chat-container">
+            <div class="chat-header flex items-center justify-between">
+                <div>
+                    <h3 class="text-xl font-black text-slate-800">지존 실시간 광장</h3>
+                    <p class="text-xs text-blue-500 font-bold mt-1">● 어쩌다코딩 님으로 접속 중</p>
+                </div>
+                <div class="flex -space-x-2">
+                    <div class="w-8 h-8 rounded-full border-2 border-white bg-slate-200"></div>
+                    <div class="w-8 h-8 rounded-full border-2 border-white bg-slate-300"></div>
+                    <div class="w-8 h-8 rounded-full border-2 border-white bg-blue-500 flex items-center justify-center text-[10px] text-white font-bold">+12</div>
+                </div>
             </div>
             <div id="chat-window">
-                <div class="msg other"><b>운영자:</b> 어쩌다코딩 두목님, 환영합니다!</div>
-                <div class="msg other"><b>코딩천재:</b> 와.. 진짜 어쩌다코딩님이 나타났다!!</div>
+                <div class="chat-bubble other"><b>[공지]</b> 어쩌다코딩 두목님이 입장하셨습니다. 모두 예우를 갖추세요!</div>
+                <div class="chat-bubble other"><b>익명1:</b> 오오.. 드디어 나타나셨다!</div>
+                <div class="chat-bubble other"><b>코딩고수:</b> 두목님 이번 v18.5 엔진 너무 좋습니다!</div>
             </div>
-            <div class="p-5 border-t bg-white rounded-b-2xl flex gap-3">
-                <input id="chat-input" type="text" placeholder="메시지를 입력하세요..." class="flex-1 bg-slate-100 border-none rounded-xl px-5 outline-none focus:ring-2 ring-blue-400 transition">
-                <button onclick="chat.send()" class="z-btn z-primary">전송</button>
+            <div class="p-6 bg-white border-t flex gap-4">
+                <input id="chat-input" type="text" placeholder="메시지를 입력하고 엔터를 누르세요..." class="flex-1 bg-slate-100 border-none rounded-2xl px-6 py-4 outline-none focus:ring-2 ring-blue-500 transition">
+                <button onclick="chat.send()" class="z-btn z-primary px-8">전송</button>
             </div>
         </div>
     </section>
 
     <div id="mypage-drawer">
-        <div class="text-center mb-10">
-            <div class="w-24 h-24 bg-blue-600 rounded-3xl mx-auto mb-5 flex items-center justify-center text-white text-4xl font-black shadow-xl">OC</div>
-            <h2 class="text-2xl font-black">어쩌다코딩</h2>
-            <p class="text-blue-500 font-bold">지존 마스터 계정</p>
+        <div class="flex justify-between items-start mb-12">
+            <div>
+                <h2 id="owner-name" class="text-3xl font-black text-slate-900 mb-2">어쩌다코딩</h2>
+                <p class="text-blue-500 font-bold uppercase tracking-widest text-xs">Supreme Creator</p>
+            </div>
+            <button onclick="core.toggleMypage()" class="text-slate-300 hover:text-slate-800 transition text-2xl">✕</button>
         </div>
-        <div class="flex-1 overflow-y-auto">
-            <h4 class="font-black text-slate-400 text-xs mb-4 uppercase">나의 지존 작품들</h4>
-            <div id="my-works">
-                <div class="work-card"><span>🎮</span> <b>어쩌다 만든 미로 게임</b></div>
-                <div class="work-card"><span>🚀</span> <b>지존 좌표 물리 엔진</b></div>
-                <div class="work-card"><span>💎</span> <b>코딩 황제의 복수 v2.1</b></div>
-                <div class="work-card"><span>🔥</span> <b>실시간 랭킹 시스템</b></div>
+
+        <div class="grid grid-cols-2 gap-4 mb-12">
+            <div class="bg-slate-50 p-6 rounded-[24px]">
+                <p class="text-xs font-bold text-slate-400 mb-1">작품수</p>
+                <p class="text-2xl font-black text-slate-800">42</p>
+            </div>
+            <div class="bg-slate-50 p-6 rounded-[24px]">
+                <p class="text-xs font-bold text-slate-400 mb-1">지존력</p>
+                <p class="text-2xl font-black text-orange-500">9.9k</p>
             </div>
         </div>
-        <button onclick="core.toggleMypage()" class="mt-10 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black hover:bg-slate-200 transition">닫기</button>
+
+        <div class="mb-8 flex justify-between items-center">
+            <h4 class="font-black text-slate-400 text-xs uppercase tracking-widest">My Projects</h4>
+            <span class="text-[10px] text-blue-500 font-bold">최근 순</span>
+        </div>
+
+        <div id="project-list" class="space-y-4">
+            </div>
+
+        <div class="mt-20 pt-10 border-t border-slate-100">
+            <button onclick="location.reload()" class="w-full py-5 bg-red-50 text-red-500 rounded-2xl font-black hover:bg-red-100 transition">시스템 전체 로그아웃</button>
+        </div>
     </div>
 
 <xml id="toolbox" style="display:none">
-    <category name="시작" colour="#33b233"><block type="e_start"></block></category>
+    <category name="시작" colour="#33b233">
+        <block type="e_start"></block>
+        <block type="e_click"></block>
+    </category>
     <category name="움직임" colour="#33b2cc">
         <block type="m_x_by"><value name="V"><block type="math_number"><field name="NUM">10</field></block></value></block>
         <block type="m_y_by"><value name="V"><block type="math_number"><field name="NUM">10</field></block></value></block>
         <block type="m_x_set"><value name="V"><block type="math_number"><field name="NUM">0</field></block></value></block>
         <block type="m_y_set"><value name="V"><block type="math_number"><field name="NUM">0</field></block></value></block>
-        <block type="m_rotate"><value name="V"><block type="math_number"><field name="NUM">90</field></block></value></block>
+        <block type="m_goto_mouse"></block>
+        <block type="m_rotate_by"><value name="V"><block type="math_number"><field name="NUM">15</field></block></value></block>
+        <block type="m_rotate_set"><value name="V"><block type="math_number"><field name="NUM">90</field></block></value></block>
         <block type="m_bounce"></block>
+        <block type="m_look_mouse"></block>
     </category>
     <category name="흐름" colour="#ccb233">
         <block type="f_wait"><value name="S"><block type="math_number"><field name="NUM">1</field></block></value></block>
         <block type="f_forever"></block>
         <block type="f_repeat"><value name="T"><block type="math_number"><field name="NUM">10</field></block></value></block>
+        <block type="f_if"></block>
     </category>
     <category name="생김새" colour="#cc33cc">
         <block type="l_say"><value name="T"><block type="text"><field name="TEXT">두목!</field></block></value></block>
+        <block type="l_show"></block>
+        <block type="l_hide"></block>
     </category>
     <category name="자료(변수)" colour="#ff8b3d" custom="VARIABLE"></category>
+    <category name="계산" colour="#52b7ff">
+        <block type="math_arithmetic"></block>
+        <block type="math_random_int"></block>
+    </category>
 </xml>
 
 <script>
-/** [ZIZON CORE v18.0 - MASTER: EOJJEO DA CODING] **/
+/** [ZIZON CORE v18.5 - EOJJEO DA CODING ULTIMATE] **/
+
+const USER_NAME = "어쩌다코딩";
 
 const core = {
     go: function(dest) {
         document.querySelectorAll('.content-section, #editor-container').forEach(e => e.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+        
         if(dest === 'make') {
             document.getElementById('editor-container').classList.add('active');
             document.getElementById('m-make').classList.add('active');
@@ -173,37 +302,82 @@ const core = {
         }
         document.getElementById('mypage-drawer').classList.remove('open');
     },
-    toggleMypage: () => document.getElementById('mypage-drawer').classList.toggle('open')
+    toggleMypage: function() {
+        const d = document.getElementById('mypage-drawer');
+        d.classList.toggle('open');
+        if(d.classList.contains('open')) this.loadProjects();
+    },
+    loadProjects: function() {
+        const projects = [
+            { id: 1, name: "지존 좌표 물리 엔진 v3", icon: "🚀", date: "2시간 전" },
+            { id: 2, name: "어쩌다 만든 갓-게임", icon: "🎮", date: "어제" },
+            { id: 3, name: "무한 반복 연산 툴", icon: "♾️", date: "3일 전" },
+            { id: 4, name: "어쩌다코딩의 비밀 기지", icon: "🏰", date: "1주일 전" }
+        ];
+        document.getElementById('project-list').innerHTML = projects.map(p => `
+            <div class="work-item" onclick="alert('${p.name} 프로젝트를 로드합니다.')">
+                <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-xl">${p.icon}</div>
+                <div class="flex-1">
+                    <p class="font-black text-slate-800 text-sm">${p.name}</p>
+                    <p class="text-[10px] text-slate-400 font-bold">${p.date}</p>
+                </div>
+                <span class="text-slate-300">❯</span>
+            </div>
+        `).join('');
+    }
 };
 
 const engine = {
-    workspace: null, isRunning: false, objects: [],
+    workspace: null, isRunning: false, objects: [], mouse: {x:0, y:0},
     init: function() {
         this.define();
-        this.workspace = Blockly.inject('blocklyDiv', { toolbox: document.getElementById('toolbox'), renderer: 'zelos' });
+        this.workspace = Blockly.inject('blocklyDiv', { 
+            toolbox: document.getElementById('toolbox'), 
+            renderer: 'zelos',
+            theme: Blockly.Themes.Modern
+        });
         obj.add();
         window.addEventListener('resize', () => Blockly.svgResize(this.workspace));
+        document.addEventListener('mousemove', e => {
+            const rect = document.getElementById('stage').getBoundingClientRect();
+            this.mouse.x = e.clientX - rect.left - 190;
+            this.mouse.y = 142 - (e.clientY - rect.top);
+        });
     },
     define: function() {
-        // [움직임 블록 엔진 복구]
-        Blockly.Blocks['e_start'] = { init: function() { this.appendDummyInput().appendField("🚩 시작했을 때"); this.setNextStatement(true); this.setColour("#33b233"); } };
-        Blockly.Blocks['m_x_by'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("X 좌표를"); this.appendDummyInput().appendField("만큼 바꾸기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
-        Blockly.Blocks['m_y_by'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("Y 좌표를"); this.appendDummyInput().appendField("만큼 바꾸기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
-        Blockly.Blocks['m_x_set'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("X 좌표를"); this.appendDummyInput().appendField("(으)로 정하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
-        Blockly.Blocks['m_y_set'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("Y 좌표를"); this.appendDummyInput().appendField("(으)로 정하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
-        Blockly.Blocks['m_rotate'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("방향을"); this.appendDummyInput().appendField("만큼 회전하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
-        Blockly.Blocks['m_bounce'] = { init: function() { this.appendDummyInput().appendField("화면에 닿으면 튕기기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
-        Blockly.Blocks['f_wait'] = { init: function() { this.appendValueInput("S").appendField("기다리기:"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); } };
-        Blockly.Blocks['f_forever'] = { init: function() { this.appendDummyInput().appendField("계속 반복하기"); this.appendStatementInput("DO"); this.setPreviousStatement(true); this.setColour("#ccb233"); } };
-        Blockly.Blocks['l_say'] = { init: function() { this.appendValueInput("T").appendField("말하기:"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc"); } };
-
+        const B = Blockly.Blocks;
         const JS = javascript.javascriptGenerator;
+
+        // [시작]
+        B['e_start'] = { init: function() { this.appendDummyInput().appendField("🚩 시작했을 때"); this.setNextStatement(true); this.setColour("#33b233"); } };
+        B['e_click'] = { init: function() { this.appendDummyInput().appendField("🖱️ 오브젝트를 클릭했을 때"); this.setNextStatement(true); this.setColour("#33b233"); } };
+
+        // [움직임 - 세부 로직]
+        B['m_x_by'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("X 좌표를"); this.appendDummyInput().appendField("만큼 바꾸기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
+        B['m_y_by'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("Y 좌표를"); this.appendDummyInput().appendField("만큼 바꾸기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
+        B['m_x_set'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("X 위치를"); this.appendDummyInput().appendField("(으)로 정하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
+        B['m_y_set'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("Y 위치를"); this.appendDummyInput().appendField("(으)로 정하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
+        B['m_rotate_by'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("방향을"); this.appendDummyInput().appendField("만큼 회전하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
+        B['m_rotate_set'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("방향을"); this.appendDummyInput().appendField("도로 정하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
+        B['m_goto_mouse'] = { init: function() { this.appendDummyInput().appendField("마우스 포인터 위치로 이동하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
+        B['m_look_mouse'] = { init: function() { this.appendDummyInput().appendField("마우스 포인터 쪽 보기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
+        B['m_bounce'] = { init: function() { this.appendDummyInput().appendField("화면에 닿으면 튕기기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
+
+        // [흐름/생김새]
+        B['f_wait'] = { init: function() { this.appendValueInput("S").appendField("기다리기:"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); } };
+        B['f_forever'] = { init: function() { this.appendDummyInput().appendField("계속 반복하기"); this.appendStatementInput("DO"); this.setPreviousStatement(true); this.setColour("#ccb233"); } };
+        B['l_say'] = { init: function() { this.appendValueInput("T").appendField("말하기:"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc"); } };
+
+        // [JS Generator]
         JS.forBlock['e_start'] = () => "";
         JS.forBlock['m_x_by'] = (b, g) => `moveX(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
         JS.forBlock['m_y_by'] = (b, g) => `moveY(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
         JS.forBlock['m_x_set'] = (b, g) => `setX(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
         JS.forBlock['m_y_set'] = (b, g) => `setY(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
-        JS.forBlock['m_rotate'] = (b, g) => `rotate(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
+        JS.forBlock['m_rotate_by'] = (b, g) => `rotBy(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
+        JS.forBlock['m_rotate_set'] = (b, g) => `rotSet(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
+        JS.forBlock['m_goto_mouse'] = () => `gotoMouse();\n`;
+        JS.forBlock['m_look_mouse'] = () => `lookMouse();\n`;
         JS.forBlock['m_bounce'] = () => `bounce();\n`;
         JS.forBlock['f_wait'] = (b, g) => `await wait(${g.valueToCode(b, 'S', javascript.Order.ATOMIC) || 0});\n`;
         JS.forBlock['f_forever'] = (b, g) => `while(active()){ ${g.statementToCode(b, 'DO')} await wait(0.01); }\n`;
@@ -211,11 +385,15 @@ const engine = {
     },
     toggle: function() {
         if(!this.isRunning) {
-            this.isRunning = true; document.getElementById('run-btn').innerText = "■ 정지하기";
+            this.isRunning = true; 
+            document.getElementById('run-text').innerText = "엔진 정지하기";
+            document.getElementById('run-icon').innerText = "■";
             const code = javascript.javascriptGenerator.workspaceToCode(this.workspace);
             this.objects.forEach(o => this.run(o, code));
         } else {
-            this.isRunning = false; document.getElementById('run-btn').innerText = "▶ 엔진 가동";
+            this.isRunning = false; 
+            document.getElementById('run-text').innerText = "엔진 가동 시작";
+            document.getElementById('run-icon').innerText = "▶";
             obj.reset();
         }
     },
@@ -224,35 +402,45 @@ const engine = {
         const moveY = v => { target.y += v; obj.render(); };
         const setX = v => { target.x = v; obj.render(); };
         const setY = v => { target.y = v; obj.render(); };
-        const rotate = v => { target.rot += v; obj.render(); };
-        const bounce = () => { if(Math.abs(target.x) > 170) target.x = target.x > 0 ? 170 : -170; if(Math.abs(target.y) > 130) target.y = target.y > 0 ? 130 : -130; obj.render(); };
+        const rotBy = v => { target.rot += v; obj.render(); };
+        const rotSet = v => { target.rot = v; obj.render(); };
+        const gotoMouse = () => { target.x = this.mouse.x; target.y = this.mouse.y; obj.render(); };
+        const lookMouse = () => { 
+            const dx = this.mouse.x - target.x, dy = this.mouse.y - target.y;
+            target.rot = Math.atan2(dy, dx) * 180 / Math.PI; obj.render();
+        };
+        const bounce = () => { 
+            if(Math.abs(target.x) > 180) { target.x = target.x > 0 ? 180 : -180; target.rot = 180 - target.rot; }
+            if(Math.abs(target.y) > 130) { target.y = target.y > 0 ? 130 : -130; target.rot = -target.rot; }
+            obj.render(); 
+        };
         const say = t => { target.say = t; obj.render(); };
         const wait = s => new Promise(r => setTimeout(r, s * 1000));
         const active = () => this.isRunning;
         const AsyncFn = Object.getPrototypeOf(async function(){}).constructor;
-        try { await new AsyncFn('moveX','moveY','setX','setY','rotate','bounce','say','wait','active', code)(moveX,moveY,setX,setY,rotate,bounce,say,wait,active); } catch(e){}
+        try { await new AsyncFn('moveX','moveY','setX','setY','rotBy','rotSet','gotoMouse','lookMouse','bounce','say','wait','active', code)(moveX,moveY,setX,setY,rotBy,rotSet,gotoMouse,lookMouse,bounce,say,wait,active); } catch(e){}
     }
 };
 
 const obj = {
     add: function() {
         const id = "o_" + Date.now();
-        engine.objects.push({ id, name: "오브젝트 " + (engine.objects.length+1), x: 0, y: 0, rot: 0, say: "" });
-        this.update();
+        engine.objects.push({ id, name: "지존 오브젝트 " + (engine.objects.length+1), x: 0, y: 0, rot: 0, say: "" });
+        this.update(); this.render();
     },
     update: () => {
         document.getElementById('obj-list').innerHTML = engine.objects.map(o => `
-            <div class="work-card !mb-2 !p-3">
-                <div class="w-8 h-8 bg-blue-500 rounded-lg"></div>
-                <div class="text-xs font-black">${o.name}</div>
+            <div class="work-item !p-3 !mb-2">
+                <div class="w-8 h-8 bg-blue-600 rounded-lg shadow-sm"></div>
+                <div class="text-[11px] font-black text-slate-700">${o.name}</div>
             </div>
         `).join('');
     },
     render: () => {
         document.getElementById('render-layer').innerHTML = engine.objects.map(o => `
-            <div style="position:absolute; left:${180+o.x}px; top:${135-o.y}px; transform:translate(-50%,-50%) rotate(${o.rot}deg); transition:0.1s;">
-                ${o.say ? `<div class="absolute -top-10 bg-white px-2 py-1 border rounded shadow text-[10px] font-bold whitespace-nowrap">${o.say}</div>` : ''}
-                <div class="w-12 h-12 bg-slate-900 rounded-xl border-2 border-white shadow-lg"></div>
+            <div style="position:absolute; left:${190+o.x}px; top:${142-o.y}px; transform:translate(-50%,-50%) rotate(${o.rot}deg); transition:0.05s;">
+                ${o.say ? `<div class="absolute -top-12 left-1/2 -translate-x-1/2 bg-white px-3 py-1 border-2 border-blue-500 rounded-full shadow-lg text-[10px] font-black whitespace-nowrap animate__animated animate__bounceIn">${o.say}</div>` : ''}
+                <div class="w-14 h-14 bg-slate-900 rounded-2xl border-4 border-white shadow-xl flex items-center justify-center text-white text-xs font-black">Z</div>
             </div>
         `).join('');
     },
@@ -264,14 +452,20 @@ const chat = {
         const inp = document.getElementById('chat-input');
         if(!inp.value) return;
         const win = document.getElementById('chat-window');
-        win.innerHTML += `<div class="msg me"><b>어쩌다코딩:</b> ${inp.value}</div>`;
+        win.innerHTML += `<div class="chat-bubble me"><b>${USER_NAME}:</b> ${inp.value}</div>`;
         inp.value = ""; win.scrollTop = win.scrollHeight;
+        
+        // 봇 응답 시뮬레이션
+        setTimeout(() => {
+            win.innerHTML += `<div class="chat-bubble other"><b>지존 봇:</b> 두목님, 멋진 말씀입니다!</div>`;
+            win.scrollTop = win.scrollHeight;
+        }, 800);
     }
 };
 
-// 엔터 키 채팅 지원
 document.getElementById('chat-input')?.addEventListener('keypress', e => { if(e.key === 'Enter') chat.send(); });
 
+// [INITIALIZE]
 obj.render();
 </script>
 </body>
