@@ -3,60 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지존짱짱 코딩사이트 - 공식 마스터 빌드</title>
+    <title>지존짱짱 코딩사이트 - 엔트리형 아키텍처</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
     <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
     <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/msg/ko.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        :root { --zizon-blue: #4f80ff; --zizon-bg: #f5f7fb; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--zizon-bg); margin: 0; overflow: hidden; }
         
-        :root { --zizon-blue: #4f80ff; --zizon-dark: #1e293b; }
-        body { font-family: 'Pretendard', sans-serif; background-color: #f1f5f9; margin: 0; overflow: hidden; }
-        
-        /* 공통 스타일 */
         .hidden { display: none !important; }
-        .zizon-gradient { background: linear-gradient(135deg, #4f80ff 0%, #6366f1 100%); }
-        .zizon-shadow { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+        .zizon-gradient { background: linear-gradient(135deg, #4f80ff 0%, #7c3aed 100%); }
         
-        /* 채팅창 팝업 */
+        /* 채팅 팝업 (대표님 스타일) */
         #chatPopup {
-            position: fixed; right: 30px; bottom: 100px; width: 380px; height: 550px;
-            z-index: 9999; display: none; flex-direction: column;
+            position: fixed; right: 25px; bottom: 100px; width: 380px; height: 550px;
+            z-index: 10000; display: none; flex-direction: column;
             border-radius: 35px; background: white; border: 2px solid var(--zizon-blue);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
         }
-        #chatPopup.active { display: flex; animation: slideUp 0.3s ease-out; }
+        #chatPopup.active { display: flex; animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* 에디터 레이아웃 */
-        .editor-layout { display: flex; flex: 1; height: calc(100vh - 65px); }
-        .sidebar-zizon { width: 380px; background: white; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
-        #stageBox { height: 280px; border-bottom: 1px solid #f1f5f9; position: relative; background: #fff; }
-        .workspace-zizon { flex: 1; position: relative; background: #fff; }
+        /* 워크스페이스 레이아웃 */
+        .workspace-main { display: flex; flex: 1; height: calc(100vh - 65px); }
+        .zizon-side { width: 380px; background: white; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+        #stageArea { height: 300px; background: #fff; border-bottom: 2px solid #f1f5f9; position: relative; }
+        #blocklyWrapper { flex: 1; position: relative; background: #fff; }
         #blocklyDiv { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
 
-        /* 오브젝트 리스트 디자인 */
-        .obj-item { 
-            padding: 14px; margin: 8px 12px; border-radius: 20px; border: 2px solid #f8fafc;
-            display: flex; justify-content: space-between; align-items: center;
-            cursor: pointer; transition: all 0.2s; background: #fff;
-        }
-        .obj-item.active { border-color: var(--zizon-blue); background: #f0f7ff; transform: scale(1.02); }
-        .obj-item:hover { background: #f8fafc; }
+        /* 오브젝트 디자인 */
+        .obj-box { padding: 14px; margin: 8px 12px; border-radius: 20px; border: 2px solid #f8fafc; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; background: white; }
+        .obj-box.active { border-color: var(--zizon-blue); background: #f0f7ff; box-shadow: 0 4px 6px rgba(79, 128, 255, 0.1); }
 
-        /* 버튼 애니메이션 */
-        .btn-hover { transition: all 0.2s; }
-        .btn-hover:hover { transform: translateY(-2px); filter: brightness(1.1); }
-        .btn-hover:active { transform: translateY(0); }
+        /* 탭 버튼 */
+        .tab-btn { flex: 1; padding: 16px; font-weight: 800; text-align: center; color: #94a3b8; border-bottom: 3px solid transparent; transition: 0.2s; }
+        .tab-btn.active { color: var(--zizon-blue); border-bottom-color: var(--zizon-blue); background: #f8fbff; }
 
-        /* 스크롤바 */
+        /* 커스텀 스크롤 */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
@@ -65,160 +56,144 @@
 
 <div class="flex flex-col h-screen">
     
-    <nav id="navMain" class="zizon-gradient h-[65px] px-8 flex justify-between items-center text-white shadow-lg z-50 hidden">
-        <div class="flex items-center gap-10">
+    <nav id="topNav" class="zizon-gradient h-[65px] px-8 flex justify-between items-center text-white shadow-lg z-50 hidden">
+        <div class="flex items-center gap-12">
             <div class="text-3xl font-black italic tracking-tighter cursor-pointer" onclick="location.reload()">지존짱짱</div>
-            <div class="flex gap-6 text-sm font-bold">
-                <button onclick="changePage('gallery')" class="opacity-80 hover:opacity-100 transition">갤러리</button>
-                <button onclick="changePage('editor')" class="opacity-80 hover:opacity-100 transition">워크스페이스</button>
-                <button onclick="toggleZizonTalk()" class="bg-white/20 px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-white/30 transition">
-                    💬 지존짱짱 이야기
-                    <div id="newChatDot" class="hidden w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                </button>
+            <div class="flex gap-8 text-[13px] font-bold">
+                <button onclick="router('gallery')" class="hover:text-blue-200">지존 갤러리</button>
+                <button onclick="router('editor')" class="hover:text-blue-200">워크스페이스</button>
+                <button onclick="toggleChat()" class="bg-white/20 px-4 py-2 rounded-xl flex items-center gap-2">💬 지존 이야기</button>
             </div>
         </div>
-        <div class="flex items-center gap-5">
-            <div class="bg-black/20 px-4 py-1.5 rounded-full text-[11px] font-black border border-white/10">
-                <span id="displayNick">지존</span> 님 환영합니다
+        <div class="flex items-center gap-6">
+            <div class="bg-black/20 px-4 py-2 rounded-2xl border border-white/10 flex items-center gap-2">
+                <span id="userLabel" class="text-[11px] font-black tracking-tight">지존 유저</span>
             </div>
-            <button onclick="logout()" class="text-xs font-bold opacity-60 hover:opacity-100 underline transition">로그아웃</button>
+            <button onclick="handleSignOut()" class="text-xs opacity-60 hover:opacity-100 underline">로그아웃</button>
         </div>
     </nav>
 
-    <div class="flex-grow relative">
+    <div class="flex-grow relative overflow-hidden">
         
-        <section id="pageAuth" class="absolute inset-0 flex items-center justify-center bg-slate-50 overflow-hidden">
-            <div class="bg-white p-14 rounded-[60px] shadow-2xl w-full max-w-[420px] text-center border-t-[12px] border-blue-500">
-                <h2 class="text-5xl font-black text-slate-800 italic tracking-tighter mb-2">지존짱짱</h2>
-                <p class="text-blue-500 font-black text-[10px] tracking-widest uppercase mb-10">The Ultimate Coding Society</p>
-                
-                <div class="space-y-4 text-left">
-                    <input id="emailField" type="text" placeholder="아이디(ID)" class="w-full bg-slate-50 p-4 rounded-2xl border-2 border-slate-100 outline-none focus:border-blue-400 font-bold transition-all">
-                    <input id="pwField" type="password" placeholder="비밀번호(PW)" class="w-full bg-slate-50 p-4 rounded-2xl border-2 border-slate-100 outline-none focus:border-blue-400 font-bold transition-all">
-                    <button onclick="doLogin()" class="w-full zizon-gradient text-white py-5 rounded-3xl font-black text-xl shadow-xl btn-hover mt-4">지존 입장</button>
-                    <button onclick="doSignup()" class="w-full text-slate-400 text-sm font-bold hover:text-blue-500 transition">아직 회원이 아니신가요?</button>
+        <section id="viewAuth" class="absolute inset-0 flex items-center justify-center bg-slate-50">
+            <div class="bg-white p-14 rounded-[60px] shadow-2xl w-full max-w-[420px] text-center border-t-[10px] border-blue-500">
+                <h2 class="text-5xl font-black italic mb-2">지존짱짱</h2>
+                <p class="text-blue-500 font-black text-[10px] tracking-widest mb-10 uppercase">Advanced Coding System</p>
+                <div class="space-y-4">
+                    <input id="authId" type="text" placeholder="아이디" class="w-full bg-slate-50 p-4 rounded-2xl border-2 border-slate-50 focus:border-blue-400 outline-none font-bold transition-all">
+                    <input id="authPw" type="password" placeholder="비밀번호" class="w-full bg-slate-50 p-4 rounded-2xl border-2 border-slate-50 focus:border-blue-400 outline-none font-bold transition-all">
+                    <button onclick="handleLogin()" class="w-full zizon-gradient text-white py-5 rounded-3xl font-black text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all mt-4">접속하기</button>
+                    <button onclick="handleJoin()" class="text-slate-400 text-xs font-bold hover:text-blue-500 transition">회원가입</button>
                 </div>
             </div>
         </section>
 
-        <section id="pageGallery" class="hidden absolute inset-0 p-12 bg-slate-50 overflow-y-auto">
+        <section id="viewGallery" class="hidden absolute inset-0 p-12 bg-white overflow-y-auto">
             <div class="max-w-[1100px] mx-auto">
-                <div class="flex justify-between items-end mb-16">
+                <div class="flex justify-between items-end mb-12">
                     <div>
-                        <h2 class="text-4xl font-black text-slate-900 italic mb-2">지존 갤러리</h2>
-                        <p class="text-slate-500 font-bold">유령 작품은 존재할 수 없는 클린한 전시 공간입니다.</p>
-                    </div>
-                    <div id="ceoAction" class="hidden">
-                        <button onclick="ceoAward()" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-xs shadow-lg btn-hover">👑 공식 에디션 부여</button>
+                        <h2 class="text-4xl font-black italic text-slate-900">지존 갤러리</h2>
+                        <p class="text-slate-400 font-bold mt-1">대표님, 유령 작품들은 모두 소탕되었습니다.</p>
                     </div>
                 </div>
-                <div id="galleryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    </div>
-                <div id="emptyGallery" class="text-center py-32">
-                    <div class="text-7xl mb-6">🏜️</div>
-                    <p class="text-slate-400 font-black text-lg italic">유령 작품들이 모두 청소되었습니다.<br>대표님의 첫 작품을 기다리고 있어요!</p>
+                <div id="galleryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+                <div id="noData" class="text-center py-40">
+                    <div class="text-7xl mb-6">🏝️</div>
+                    <p class="text-slate-400 font-black text-lg">전시된 작품이 없습니다.<br>멋진 작품을 만들어 갤러리를 채워주세요!</p>
                 </div>
             </div>
         </section>
 
-        <section id="pageEditor" class="hidden absolute inset-0 flex editor-layout">
-            <aside class="sidebar-zizon">
-                <div id="stageBox">
-                    <div id="renderArea" class="w-full h-full relative overflow-hidden"></div>
+        <section id="viewEditor" class="hidden absolute inset-0 flex workspace-main">
+            <aside class="zizon-side">
+                <div id="stageArea">
+                    <div id="playScene" class="w-full h-full relative overflow-hidden bg-white"></div>
                     <div class="absolute bottom-4 left-4 right-4 flex gap-2">
-                        <button onclick="addObject()" class="flex-1 bg-white border-2 border-blue-500 text-blue-500 py-3 rounded-2xl font-black text-[11px] btn-hover">+ 오브젝트</button>
-                        <button onclick="startEngine()" class="flex-1 zizon-blue text-white py-3 rounded-2xl font-black text-[11px] shadow-lg btn-hover">▶ 실행하기</button>
+                        <button onclick="addZizonObj()" class="flex-1 bg-white border-2 border-blue-500 text-blue-500 py-3 rounded-2xl font-black text-[11px] hover:bg-blue-50 transition">+ 오브젝트</button>
+                        <button onclick="alert('지존 엔진 가동!')" class="flex-1 zizon-gradient text-white py-3 rounded-2xl font-black text-[11px] shadow-lg hover:brightness-110 transition">▶ 실행</button>
                     </div>
                 </div>
-                <div class="p-4 bg-slate-50 flex justify-between items-center border-b">
-                    <span class="text-[10px] font-black text-slate-400 tracking-widest uppercase">레이어 목록</span>
-                    <span id="objCounter" class="bg-blue-500 text-white text-[10px] px-2 rounded-md font-black">0</span>
+                <div class="p-4 bg-slate-50 border-b flex justify-between items-center">
+                    <span class="text-[10px] font-black text-slate-400 tracking-widest">LAYER LIST</span>
+                    <span id="objCounter" class="bg-blue-500 text-white text-[10px] px-2 rounded font-black">0</span>
                 </div>
-                <div id="objListScroll" class="flex-grow overflow-y-auto py-2">
-                    </div>
+                <div id="objScroll" class="flex-grow overflow-y-auto py-2"></div>
             </aside>
 
-            <main class="workspace-zizon flex flex-col">
-                <div class="flex h-[55px] bg-white border-b z-10">
-                    <button id="tabCode" onclick="switchTab('code')" class="flex-1 font-black text-sm border-b-4 border-blue-500 text-blue-600 bg-blue-50/50">블록 코딩</button>
-                    <button id="tabDraw" onclick="switchTab('draw')" class="flex-1 font-black text-sm text-slate-400 border-b-4 border-transparent hover:bg-slate-50">모양 그리기</button>
+            <main class="flex-grow flex flex-col">
+                <div class="flex h-[60px] bg-white border-b">
+                    <button id="tabCode" onclick="switchEditor('code')" class="tab-btn active">블록 조립소</button>
+                    <button id="tabDraw" onclick="switchEditor('draw')" class="tab-btn">지존 화방</button>
                 </div>
-                <div id="blocklyDiv"></div>
-                <div id="paintArea" class="hidden flex-grow bg-slate-100 flex items-center justify-center">
+                <div id="blocklyWrapper">
+                    <div id="blocklyDiv"></div>
+                </div>
+                <div id="drawWrapper" class="hidden flex-grow bg-slate-100 flex items-center justify-center">
                     <div class="bg-white p-10 rounded-[50px] shadow-2xl text-center">
-                        <canvas id="pCanvas" width="320" height="320" class="bg-slate-50 rounded-[40px] border-2 border-slate-100 mb-6 cursor-crosshair"></canvas>
+                        <canvas id="zCanvas" width="320" height="320" class="bg-slate-50 rounded-[40px] border-2 border-slate-100 mb-6 cursor-crosshair"></canvas>
                         <div class="flex gap-3 justify-center">
-                            <input type="color" id="pColor" value="#4f80ff" class="w-12 h-12 rounded-xl cursor-pointer">
-                            <button onclick="pReset()" class="px-6 py-3 bg-slate-100 rounded-2xl font-black text-sm text-slate-500">지우기</button>
-                            <button onclick="pSave()" class="px-10 py-3 zizon-blue text-white rounded-2xl font-black text-sm shadow-md btn-hover">적용하기</button>
+                            <input type="color" id="zColor" value="#4f80ff" class="w-12 h-12 rounded-xl cursor-pointer">
+                            <button onclick="zClear()" class="px-6 py-3 bg-slate-100 rounded-2xl font-black text-sm text-slate-500">싹 지우기</button>
+                            <button onclick="zSave()" class="px-10 py-3 zizon-gradient text-white rounded-2xl font-black text-sm shadow-md hover:scale-105 transition">적용하기</button>
                         </div>
                     </div>
                 </div>
             </main>
         </section>
-
     </div>
 
-    <div id="chatPopup" class="flex flex-col">
-        <div class="p-6 border-b flex justify-between items-center bg-white">
-            <div>
-                <h3 class="font-black text-slate-800 italic text-lg">지존짱짱 이야기</h3>
-                <div class="flex items-center gap-1.5 mt-1">
-                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase">Live Communication</span>
-                </div>
-            </div>
-            <button onclick="toggleZizonTalk()" class="text-slate-300 hover:text-red-500 transition-all text-2xl font-black">×</button>
+    <div id="chatPopup">
+        <div class="p-6 border-b flex justify-between items-center bg-slate-50 rounded-t-[35px]">
+            <h3 class="font-black text-slate-800 italic">지존짱짱 이야기</h3>
+            <button onclick="toggleChat()" class="text-slate-300 hover:text-red-500 text-2xl font-black transition">×</button>
         </div>
-        <div id="chatMsgBox" class="flex-grow overflow-y-auto p-5 space-y-4 bg-slate-50/50">
-            </div>
-        <div class="p-5 border-t bg-white">
-            <div class="flex gap-2 relative">
-                <input id="chatInput" type="text" placeholder="메시지를 입력해 보세요..." class="w-full bg-slate-50 p-4 pr-16 rounded-2xl border-2 border-slate-100 outline-none focus:border-blue-400 font-bold text-sm shadow-inner transition-all">
-                <button onclick="sendChat()" class="absolute right-2 top-2 bottom-2 zizon-blue text-white px-5 rounded-xl font-black text-xs btn-hover shadow-lg">전송</button>
+        <div id="chatBox" class="flex-grow overflow-y-auto p-5 space-y-4 bg-white"></div>
+        <div class="p-5 border-t bg-white rounded-b-[35px]">
+            <div class="relative">
+                <input id="chatIn" type="text" placeholder="메시지를 입력하세요..." class="w-full bg-slate-50 p-4 pr-16 rounded-2xl border-2 border-slate-100 outline-none focus:border-blue-400 font-bold text-sm transition-all">
+                <button onclick="handleChat()" class="absolute right-2 top-2 bottom-2 zizon-gradient text-white px-5 rounded-xl font-black text-xs hover:scale-105 transition">보내기</button>
             </div>
         </div>
     </div>
-
 </div>
 
-<xml id="zizonToolbox" style="display: none">
+<xml id="zizonToolbox" style="display:none">
     <category name="시작" colour="#33b233">
         <block type="event_whenflagclicked"></block>
     </category>
     <category name="흐름" colour="#ccb233">
-        <block type="controls_repeat_ext">
-            <value name="TIMES"><block type="math_number"><field name="NUM">10</field></block></value>
-        </block>
+        <block type="controls_repeat_ext"><value name="TIMES"><block type="math_number"><field name="NUM">10</field></block></value></block>
         <block type="controls_forever"></block>
-        <block type="wait_seconds">
-            <value name="SEC"><block type="math_number"><field name="NUM">1</field></block></value>
-        </block>
+        <block type="wait_seconds"><value name="SEC"><block type="math_number"><field name="NUM">1</field></block></value></block>
         <block type="controls_if"></block>
     </category>
     <category name="움직임" colour="#33b2cc">
         <block type="move_steps"><value name="STEPS"><block type="math_number"><field name="NUM">10</field></block></value></block>
-        <block type="turn_right"><value name="DEGREE"><block type="math_number"><field name="NUM">15</field></block></value></block>
         <block type="change_x"><value name="VAL"><block type="math_number"><field name="NUM">10</field></block></value></block>
         <block type="set_x"><value name="VAL"><block type="math_number"><field name="NUM">0</field></block></value></block>
     </category>
     <category name="계산" colour="#3366cc">
         <block type="math_arithmetic"></block>
-        <block type="math_random_int">
-            <value name="FROM"><block type="math_number"><field name="NUM">1</field></block></value>
-            <value name="TO"><block type="math_number"><field name="NUM">10</field></block></value>
-        </block>
+        <block type="logic_compare"></block>
     </category>
     <category name="자료" colour="#cc3333" custom="VARIABLE"></category>
 </xml>
 
 <script>
 /**
- * [지존짱짱 핵심 코어 스크립트]
+ * [지존짱짱 CORE v7.0 - 엔트리형 안정화 빌드]
  * -------------------------------------------------------------------------
  */
 
-// 1. 초기 시스템 설정
+// 1. 블록 엔진 강제 주입
+Blockly.Blocks['event_whenflagclicked'] = { init: function() { this.appendDummyInput().appendField("▶ 시작을 클릭했을 때"); this.setNextStatement(true); this.setColour("#33b233"); }};
+Blockly.Blocks['controls_forever'] = { init: function() { this.appendDummyInput().appendField("무한 반복하기"); this.appendStatementInput("DO").appendField("실행"); this.setPreviousStatement(true); this.setColour("#ccb233"); }};
+Blockly.Blocks['wait_seconds'] = { init: function() { this.appendValueInput("SEC").setCheck("Number").appendField(""); this.appendDummyInput().appendField("초 기다리기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); }};
+Blockly.Blocks['move_steps'] = { init: function() { this.appendValueInput("STEPS").setCheck("Number").appendField("앞으로"); this.appendDummyInput().appendField("만큼 이동하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); }};
+Blockly.Blocks['change_x'] = { init: function() { this.appendValueInput("VAL").setCheck("Number").appendField("x 좌표를"); this.appendDummyInput().appendField("만큼 바꾸기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); }};
+Blockly.Blocks['set_x'] = { init: function() { this.appendValueInput("VAL").setCheck("Number").appendField("x 위치를"); this.appendDummyInput().appendField("(으)로 정하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); }};
+
+// 2. 파이어베이스 초기화
 const firebaseConfig = { 
     apiKey: "AIzaSyDdFsRGy_2mZowYinOf9LeQhot08xyaqc4", 
     authDomain: "zizon-coding.firebaseapp.com", 
@@ -228,102 +203,57 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database(), auth = firebase.auth();
 
-let myNick = "", isCEO = false;
-let workspace = null, objects = [], selectedId = null;
+// 글로벌 스테이트
+let myNick = "", isCeo = false, workspace = null, objects = [], selectedId = null;
 
-// 2. 블록 및 엔진 정의 (변수 버그 방어 포함)
-Blockly.Msg["EVENT_WHENFLAGCLICKED"] = "▶ 시작 버튼을 눌렀을 때";
-Blockly.Msg["NEW_VARIABLE"] = "변수 만들기...";
-Blockly.Msg["NEW_VARIABLE_TITLE"] = "변수 이름:";
-
-Blockly.Blocks['event_whenflagclicked'] = { init: function() { this.appendDummyInput().appendField(Blockly.Msg["EVENT_WHENFLAGCLICKED"]); this.setNextStatement(true); this.setColour("#33b233"); }};
-Blockly.Blocks['controls_forever'] = { init: function() { this.appendDummyInput().appendField("계속 무한 반복"); this.appendStatementInput("DO").appendField("실행"); this.setPreviousStatement(true); this.setColour("#ccb233"); }};
-Blockly.Blocks['wait_seconds'] = { init: function() { this.appendValueInput("SEC").setCheck("Number").appendField(""); this.appendDummyInput().appendField("초 기다리기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); }};
-Blockly.Blocks['move_steps'] = { init: function() { this.appendValueInput("STEPS").setCheck("Number").appendField("앞으로"); this.appendDummyInput().appendField("만큼 가기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); }};
-Blockly.Blocks['turn_right'] = { init: function() { this.appendValueInput("DEGREE").setCheck("Number").appendField("오른쪽으로"); this.appendDummyInput().appendField("도 돌기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); }};
-Blockly.Blocks['change_x'] = { init: function() { this.appendValueInput("VAL").setCheck("Number").appendField("x 좌표를"); this.appendDummyInput().appendField("만큼 바꾸기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); }};
-Blockly.Blocks['set_x'] = { init: function() { this.appendValueInput("VAL").setCheck("Number").appendField("x 위치를"); this.appendDummyInput().appendField("(으)로 정하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); }};
-
-/**
- * 3. 지존짱짱 이야기 로직 (실시간 채팅)
+/** * 3. 핵심 리사이즈 로직 (대표님 조언 반영) 
+ * 🚨 UI 탭 이벤트 리스너 완전 제거함
  */
-function toggleZizonTalk() {
-    const pop = document.getElementById('chatPopup');
-    pop.classList.toggle('active');
-    if(pop.classList.contains('active')) document.getElementById('newChatDot').classList.add('hidden');
-}
-
-function sendChat() {
-    const input = document.getElementById('chatInput');
-    const txt = input.value.trim();
-    if(!txt) return;
-    db.ref('talk_v2').push({ sender: myNick, message: txt, ceo: isCEO, ts: Date.now() });
-    input.value = '';
-}
-
-db.ref('talk_v2').limitToLast(40).on('child_added', (snap) => {
-    const d = snap.val();
-    const box = document.getElementById('chatMsgBox');
-    const isMe = d.sender === myNick;
-    const div = document.createElement('div');
-    
-    div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
-    div.innerHTML = `
-        <div class="flex items-center gap-1 mb-1">
-            <span class="text-[10px] font-black ${d.ceo ? 'text-blue-600' : 'text-slate-400'}">${d.sender}</span>
-            ${d.ceo ? '<span class="bg-blue-100 text-blue-600 px-1 rounded text-[8px] font-black">👑CEO</span>' : ''}
-        </div>
-        <div class="${isMe ? 'zizon-blue text-white rounded-tr-none' : 'bg-white text-slate-700 rounded-tl-none'} p-3 rounded-2xl shadow-sm text-sm font-bold max-w-[85%]">
-            ${d.message}
-        </div>
-    `;
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
-    if(!document.getElementById('chatPopup').classList.contains('active')) document.getElementById('newChatDot').classList.remove('hidden');
-});
-
-document.getElementById('chatInput')?.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendChat(); });
-
-/**
- * 4. 에디터 코어 (변수 무한 클릭 버그 해결판)
- */
-function initZizonEditor() {
+function forceZizonResize() {
     if(workspace) {
-        // 🚨 중요: 탭 이동 후 먹통 현상을 막기 위해 워크스페이스를 강제로 리사이즈
-        setTimeout(() => Blockly.svgResize(workspace), 50);
+        Blockly.svgResize(workspace);
+        workspace.render();
+    }
+}
+
+// 윈도우 리사이즈 대응 (이건 안전함)
+window.addEventListener('resize', forceZizonResize);
+
+/** 4. 워크스페이스 엔진 */
+function initZizonWorkspace() {
+    if(workspace) {
+        setTimeout(forceZizonResize, 50);
         return;
     }
+    
+    // 툴박스 인젝션
     workspace = Blockly.inject('blocklyDiv', {
         toolbox: document.getElementById('zizonToolbox'),
         zoom: { controls: true, wheel: true },
         trashcan: true,
         media: 'https://unpkg.com/blockly/media/'
     });
+
+    // ❌ 대표님 말씀대로 여기에 UI 탭 리스너는 절대 넣지 않습니다.
     
-    // 변수 생성 시 코드창 안들어가는 현상 방지
-    workspace.addChangeListener((e) => {
-        if(e.type === Blockly.Events.UI && e.element === 'tab') {
-             Blockly.svgResize(workspace);
-        }
-    });
-
-    addObject();
+    addZizonObj();
 }
 
-function addObject() {
-    const id = "zizon_" + Date.now();
-    objects.push({ id: id, name: "오브젝트 "+(objects.length+1), x: 160, y: 160, xml: "", costume: null });
-    updateObjListUI();
-    selectObject(id);
+function addZizonObj() {
+    const id = "z_" + Date.now();
+    objects.push({ id: id, name: "오브젝트 "+(objects.length+1), x: 160, y: 150, xml: "", costume: null });
+    updateObjUI();
+    selectZizonObj(id);
 }
 
-function selectObject(id) {
-    // 이전 작업 XML로 저장 (동기화)
+function selectZizonObj(id) {
+    // 1. 현재 작업 내용 XML 백업
     if(selectedId && workspace) {
         const prev = objects.find(o => o.id === selectedId);
         if(prev) prev.xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace));
     }
     
+    // 2. 타겟 전환
     selectedId = id;
     const target = objects.find(o => o.id === id);
     workspace.clear();
@@ -331,151 +261,143 @@ function selectObject(id) {
     if(target.xml) {
         try { 
             Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(target.xml), workspace); 
-        } catch(e) { console.error("XML Load Error"); }
+        } catch(e) { console.warn("XML 복원 실패"); }
     }
     
-    updateObjListUI();
+    updateObjUI();
     renderStage();
-    // 🚨 코드창이 먹통되는 것을 방지하기 위해 강제 리사이즈 실행
-    setTimeout(() => {
-        Blockly.svgResize(workspace);
-        workspace.render();
-    }, 50);
+    
+    // 3. 🚨 전환 시에만 안전하게 리사이즈
+    setTimeout(forceZizonResize, 50);
 }
 
-function updateObjListUI() {
-    const box = document.getElementById('objListScroll');
+function updateObjUI() {
+    const list = document.getElementById('objScroll');
     document.getElementById('objCounter').innerText = objects.length;
-    box.innerHTML = '';
-    objects.forEach(o => {
-        const div = document.createElement('div');
-        div.className = `obj-item ${o.id === selectedId ? 'active shadow-md' : 'border-transparent'}`;
-        div.onclick = () => selectObject(o.id);
-        div.innerHTML = `
+    list.innerHTML = objects.map(o => `
+        <div onclick="selectZizonObj('${o.id}')" class="obj-box ${o.id === selectedId ? 'active' : ''}">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-slate-50 rounded-xl overflow-hidden flex items-center justify-center border">
+                <div class="w-10 h-10 bg-slate-50 border rounded-xl flex items-center justify-center overflow-hidden">
                     ${o.costume ? `<img src="${o.costume}" class="w-full h-full object-contain">` : '💎'}
                 </div>
                 <span class="text-xs font-black text-slate-700">${o.name}</span>
             </div>
-            <button onclick="event.stopPropagation(); removeObject('${o.id}')" class="text-slate-300 hover:text-red-500 font-black text-xl px-2">×</button>
-        `;
-        box.appendChild(div);
-    });
+            <button onclick="event.stopPropagation(); removeObj('${o.id}')" class="text-slate-300 hover:text-red-500 font-black text-xl px-2">×</button>
+        </div>
+    `).join('');
 }
 
-function removeObject(id) {
-    if(objects.length <= 1) return alert("최소 한 개의 오브젝트가 필요해요!");
+function removeObj(id) {
+    if(objects.length <= 1) return alert("최소 한 개의 오브젝트는 남겨두세요!");
     objects = objects.filter(o => o.id !== id);
-    selectObject(objects[0].id);
+    selectZizonObj(objects[0].id);
 }
 
 function renderStage() {
-    const area = document.getElementById('renderArea');
-    area.innerHTML = '';
-    objects.forEach(o => {
-        const el = document.createElement('div');
-        el.style.cssText = `position:absolute; left:${o.x}px; top:${o.y}px; transform:translate(-50%, -50%);`;
-        if(o.costume) {
-            el.innerHTML = `<img src="${o.costume}" style="width:80px; height:80px; object-fit:contain;">`;
-        } else {
-            el.innerHTML = `<div class="w-20 h-20 bg-blue-50 border-4 border-blue-400 rounded-[24px] shadow-sm"></div>`;
-        }
-        area.appendChild(el);
-    });
+    const stage = document.getElementById('playScene');
+    stage.innerHTML = objects.map(o => `
+        <div style="position:absolute; left:${o.x}px; top:${o.y}px; transform:translate(-50%, -50%);">
+            ${o.costume ? `<img src="${o.costume}" style="width:100px; height:100px; object-fit:contain;">` : 
+            `<div class="w-20 h-20 bg-blue-100 border-4 border-blue-400 rounded-3xl"></div>`}
+        </div>
+    `).join('');
 }
 
-/**
- * 5. UI 페이지 제어
- */
-function changePage(name) {
-    ['pageAuth', 'pageGallery', 'pageEditor'].forEach(p => document.getElementById(p).classList.add('hidden'));
-    document.getElementById('page' + name.charAt(0).toUpperCase() + name.slice(1)).classList.remove('hidden');
+/** 5. 뷰 라우팅 & 탭 제어 */
+function router(page) {
+    ['viewAuth', 'viewGallery', 'viewEditor'].forEach(v => document.getElementById(v).classList.add('hidden'));
+    document.getElementById('view' + page.charAt(0).toUpperCase() + page.slice(1)).classList.remove('hidden');
     
-    if(name === 'editor') initZizonEditor();
-    if(name === 'gallery') loadZizonGallery();
+    if(page === 'editor') initZizonWorkspace();
+    if(page === 'gallery') renderZizonGallery();
 }
 
-function switchTab(type) {
+function switchEditor(type) {
     const isCode = type === 'code';
-    document.getElementById('blocklyDiv').classList.toggle('hidden', !isCode);
-    document.getElementById('paintArea').classList.toggle('hidden', isCode);
-    document.getElementById('tabCode').className = isCode ? "flex-1 font-black text-sm border-b-4 border-blue-500 text-blue-600 bg-blue-50/50" : "flex-1 font-black text-sm text-slate-400 border-b-4 border-transparent hover:bg-slate-50";
-    document.getElementById('tabDraw').className = !isCode ? "flex-1 font-black text-sm border-b-4 border-blue-500 text-blue-600 bg-blue-50/50" : "flex-1 font-black text-sm text-slate-400 border-b-4 border-transparent hover:bg-slate-50";
+    document.getElementById('blocklyWrapper').classList.toggle('hidden', !isCode);
+    document.getElementById('drawWrapper').classList.toggle('hidden', isCode);
+    document.getElementById('tabCode').classList.toggle('active', isCode);
+    document.getElementById('tabDraw').classList.toggle('active', !isCode);
     
-    if(isCode) {
-        setTimeout(() => {
-            Blockly.svgResize(workspace);
-            workspace.render();
-        }, 50);
-    }
+    if(isCode) setTimeout(forceZizonResize, 50);
 }
 
-function loadZizonGallery() {
+function renderZizonGallery() {
     const grid = document.getElementById('galleryGrid');
-    const empty = document.getElementById('emptyGallery');
+    const noData = document.getElementById('noData');
     grid.innerHTML = ''; // 유령 작품 완전 비우기
-    
-    // (예시) 실제 DB에서 불러오는 로직이 들어갈 자리. 현재는 완전히 비어있음.
-    empty.classList.remove('hidden');
+    noData.classList.remove('hidden');
 }
 
-/**
- * 6. 지존 인증 (Firebase Auth)
- */
-function doLogin() {
-    const id = document.getElementById('emailField').value.trim();
-    const pw = document.getElementById('pwField').value.trim();
-    if(!id || !pw) return alert("입력 정보가 부족합니다!");
-    auth.signInWithEmailAndPassword(id+"@zizon.com", pw).catch(e => alert("인증 실패! 아이디/비번을 확인하세요."));
+/** 6. 지존 인증 & 채팅 */
+function handleLogin() {
+    const id = document.getElementById('authId').value;
+    const pw = document.getElementById('authPw').value;
+    auth.signInWithEmailAndPassword(id + "@zizon.com", pw).catch(() => alert("아이디/비번을 확인하세요."));
 }
 
-function doSignup() {
-    const id = prompt("지존 ID (영문/숫자):");
-    const pw = prompt("지존 PW (6자 이상):");
-    const nick = prompt("활동 닉네임:");
+function handleJoin() {
+    const id = prompt("아이디:"), pw = prompt("비번:"), nick = prompt("닉네임:");
     if(id && pw && nick) {
-        auth.createUserWithEmailAndPassword(id+"@zizon.com", pw).then(res => {
+        auth.createUserWithEmailAndPassword(id + "@zizon.com", pw).then(res => {
             db.ref('users/' + res.user.uid).set({ nickname: nick });
-        }).catch(e => alert(e.message));
+        });
     }
 }
 
-function logout() { auth.signOut().then(() => location.reload()); }
+function handleSignOut() { auth.signOut().then(() => location.reload()); }
+
+function toggleChat() { document.getElementById('chatPopup').classList.toggle('active'); }
+
+function handleChat() {
+    const input = document.getElementById('chatIn');
+    if(!input.value.trim()) return;
+    db.ref('chats_v7').push({ nick: myNick, msg: input.value, isCeo: isCeo, time: Date.now() });
+    input.value = '';
+}
+
+db.ref('chats_v7').limitToLast(50).on('child_added', snap => {
+    const d = snap.val();
+    const box = document.getElementById('chatBox');
+    const div = document.createElement('div');
+    const isMe = d.nick === myNick;
+    div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
+    div.innerHTML = `
+        <div class="text-[10px] font-black ${d.isCeo ? 'text-blue-600' : 'text-slate-400'} mb-1">${d.nick} ${d.isCeo ? '👑' : ''}</div>
+        <div class="${isMe ? 'zizon-gradient text-white' : 'bg-slate-100 text-slate-700'} p-3 px-4 rounded-2xl shadow-sm text-sm font-bold max-w-[80%]">
+            ${d.msg}
+        </div>
+    `;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+});
 
 auth.onAuthStateChanged(async user => {
     if(user) {
         const snap = await db.ref('users/' + user.uid).once('value');
-        myNick = snap.val()?.nickname || "신규지존";
-        isCEO = (myNick === "어쩌다코딩");
-        document.getElementById('displayNick').innerText = myNick;
-        document.getElementById('navMain').classList.remove('hidden');
-        if(isCEO) document.getElementById('ceoAction').classList.remove('hidden');
-        changePage('gallery');
+        myNick = snap.val()?.nickname || "지존";
+        isCeo = (myNick === "어쩌다코딩");
+        document.getElementById('userLabel').innerText = myNick + " 님 환영합니다";
+        document.getElementById('topNav').classList.remove('hidden');
+        router('gallery');
     } else {
-        document.getElementById('navMain').classList.add('hidden');
-        changePage('auth');
+        document.getElementById('topNav').classList.add('hidden');
+        router('auth');
     }
 });
 
-// 그림판(그리기) 엔진
-const canv = document.getElementById('pCanvas'), ctx = canv.getContext('2d');
+// 그림판 로직
+const canv = document.getElementById('zCanvas'), ctx = canv.getContext('2d');
 let drawing = false;
 canv.onmousedown = (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); };
-canv.onmousemove = (e) => { if(drawing) { ctx.lineWidth = 12; ctx.lineCap='round'; ctx.strokeStyle=document.getElementById('pColor').value; ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } };
+canv.onmousemove = (e) => { if(drawing) { ctx.lineWidth = 10; ctx.lineCap='round'; ctx.strokeStyle=document.getElementById('zColor').value; ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } };
 canv.onmouseup = () => drawing = false;
-function pReset() { ctx.clearRect(0,0,canv.width,canv.height); }
-function pSave() {
+function zClear() { ctx.clearRect(0,0,canv.width,canv.height); }
+function zSave() {
     const target = objects.find(o => o.id === selectedId);
     target.costume = canv.toDataURL();
-    renderStage(); updateObjListUI();
-    alert("지존 모양이 저장되었습니다!");
-}
-
-function startEngine() { alert("지존 엔진 5.0 가동! 코드를 실행합니다."); }
-function ceoAward() {
-    const target = prompt("에디션을 부여할 작품 이름:");
-    if(target) alert(`'${target}' 작품을 지존 공식 에디션으로 선포합니다!`);
+    renderStage(); updateObjUI();
+    alert("지존 모양 저장 완료!");
 }
 </script>
 </body>
