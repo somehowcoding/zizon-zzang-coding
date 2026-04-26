@@ -21,38 +21,35 @@
         .hidden { display: none !important; }
         .grad-text { background: linear-gradient(135deg, var(--z-blue), var(--z-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* [좌표계 보정] */
+        /* [중앙 0,0 좌표 스테이지] */
         #stage-canvas { 
             width: 400px; height: 300px; background: white; position: relative; overflow: hidden;
             background-image: linear-gradient(#f1f5f9 1px, transparent 1px), linear-gradient(90deg, #f1f5f9 1px, transparent 1px);
             background-size: 20px 20px; background-position: center;
         }
-        /* 십자 가이드라인 (가운데 0 표시용) */
         .axis-x { position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: #cbd5e1; pointer-events: none; }
         .axis-y { position: absolute; left: 50%; top: 0; width: 1px; height: 100%; background: #cbd5e1; pointer-events: none; }
 
-        /* [포털 & 섹션] */
+        /* [포털 & 메뉴] */
         #main-menu { position: fixed; inset: 0; background: white; z-index: 500; display: flex; flex-direction: column; overflow-y: auto; }
-        .section-view { position: fixed; inset: 0; background: white; z-index: 600; padding: 40px; display: none; overflow-y: auto; }
+        .section-view { position: fixed; inset: 0; background: white; z-index: 600; padding: 50px; display: none; overflow-y: auto; }
         
-        /* [마이페이지 카드] */
-        .project-card { background: var(--z-bg); padding: 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .toggle-btn { padding: 6px 12px; border-radius: 10px; font-size: 10px; font-weight: 900; cursor: pointer; transition: 0.2s; }
-        .toggle-public { background: #4ade80; color: white; }
-        .toggle-private { background: #f87171; color: white; }
+        .project-card { background: var(--z-bg); padding: 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border: 2px solid transparent; }
+        .project-card:hover { border-color: var(--z-blue); }
+        .toggle-badge { padding: 4px 12px; border-radius: 10px; font-size: 11px; font-weight: 900; cursor: pointer; }
+        .badge-public { background: #4ade80; color: white; }
+        .badge-private { background: #f87171; color: white; }
 
-        /* [에디터 레이아웃] */
-        .main-content { display: flex; height: calc(100vh - 60px); }
         .sidebar { width: 380px; background: white; border-right: 1px solid var(--z-border); display: flex; flex-direction: column; }
-        #blocklyDiv { flex: 1; width: 100%; }
         .status-input { background: var(--z-bg); border: none; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; width: 100%; outline: none; }
+        #blocklyDiv { flex: 1; width: 100%; }
     </style>
 </head>
 <body>
 
 <div class="h-screen flex flex-col">
     <section id="auth-overlay" class="fixed inset-0 bg-slate-50 z-[1000] flex items-center justify-center">
-        <div class="bg-white p-12 rounded-[50px] shadow-2xl w-full max-w-[380px] text-center">
+        <div class="bg-white p-12 rounded-[50px] shadow-2xl w-full max-w-[380px] text-center border-b-[10px] border-blue-500">
             <h2 class="text-3xl font-black italic mb-8 grad-text">지존 입장</h2>
             <input id="z-id" type="text" placeholder="아이디" class="w-full bg-slate-50 p-4 rounded-xl mb-4 outline-none border-2 border-transparent focus:border-blue-300 font-bold">
             <input id="z-pw" type="password" placeholder="비번" class="w-full bg-slate-50 p-4 rounded-xl mb-6 outline-none border-2 border-transparent focus:border-blue-300 font-bold">
@@ -62,87 +59,107 @@
     </section>
 
     <section id="main-menu" class="hidden">
-        <nav class="flex justify-between items-center px-12 py-6 border-bottom">
+        <nav class="flex justify-between items-center px-12 py-8">
             <div class="text-2xl font-black italic grad-text">지존짱짱 SUPREME</div>
-            <button onclick="zLogout()" class="text-xs font-bold text-red-400">로그아웃</button>
+            <button onclick="zLogout()" class="text-xs font-bold text-red-400 bg-red-50 px-4 py-2 rounded-full">로그아웃</button>
         </nav>
-        <div class="flex flex-col items-center py-20">
-            <h1 id="portal-user" class="text-5xl font-black mb-12">반갑습니다, 지존님!</h1>
-            <div class="grid grid-cols-4 gap-6 w-full max-w-6xl px-10">
-                <div onclick="openView('story')" class="bg-slate-50 p-10 rounded-[40px] text-center hover:bg-white border-2 border-transparent hover:border-blue-400 cursor-pointer transition-all">
-                    <div class="text-4xl mb-4">📖</div><h3 class="font-black text-lg">지존 이야기</h3>
+        <div class="flex flex-col items-center justify-center flex-1">
+            <h1 id="portal-user" class="text-6xl font-black mb-12">Hello, Supreme!</h1>
+            <div class="grid grid-cols-4 gap-6 w-full max-w-6xl px-12">
+                <div onclick="openView('story')" class="bg-slate-50 p-10 rounded-[40px] text-center hover:bg-white border-2 border-transparent hover:border-blue-500 cursor-pointer transition-all">
+                    <div class="text-5xl mb-4">📖</div><h3 class="font-black text-xl">지존 이야기</h3>
                 </div>
-                <div onclick="startProject()" class="bg-blue-600 p-10 rounded-[40px] text-center hover:shadow-xl cursor-pointer transition-all">
-                    <div class="text-4xl mb-4">🚀</div><h3 class="font-black text-lg text-white">새 작품 만들기</h3>
+                <div onclick="startProject()" class="bg-blue-600 p-10 rounded-[40px] text-center hover:shadow-2xl cursor-pointer transition-all group">
+                    <div class="text-5xl mb-4 group-hover:scale-110 transition">🚀</div><h3 class="font-black text-xl text-white">새 작품 만들기</h3>
                 </div>
-                <div onclick="loadCommunity()" class="bg-slate-50 p-10 rounded-[40px] text-center hover:bg-white border-2 border-transparent hover:border-blue-400 cursor-pointer transition-all">
-                    <div class="text-4xl mb-4">🌍</div><h3 class="font-black text-lg">모든 작품</h3>
+                <div onclick="loadCommunity()" class="bg-slate-50 p-10 rounded-[40px] text-center hover:bg-white border-2 border-transparent hover:border-blue-500 cursor-pointer transition-all">
+                    <div class="text-5xl mb-4">🌍</div><h3 class="font-black text-xl">모든 작품</h3>
                 </div>
-                <div onclick="loadMyPage()" class="bg-slate-50 p-10 rounded-[40px] text-center hover:bg-white border-2 border-transparent hover:border-blue-400 cursor-pointer transition-all">
-                    <div class="text-4xl mb-4">👤</div><h3 class="font-black text-lg">마이페이지</h3>
+                <div onclick="loadMyPage()" class="bg-slate-50 p-10 rounded-[40px] text-center hover:bg-white border-2 border-transparent hover:border-blue-500 cursor-pointer transition-all">
+                    <div class="text-5xl mb-4">👤</div><h3 class="font-black text-xl">마이페이지</h3>
                 </div>
             </div>
         </div>
     </section>
 
-    <div id="view-mypage" class="section-view">
-        <div class="flex justify-between items-center mb-10">
-            <h2 class="text-4xl font-black">나의 보관함</h2>
-            <button onclick="closeView()" class="font-black text-blue-500">닫기</button>
-        </div>
-        <div id="my-project-list" class="flex flex-col gap-4">
+    <div id="view-story" class="section-view">
+        <div class="max-w-4xl mx-auto">
+            <button onclick="closeView()" class="mb-10 font-black text-blue-500 text-lg">← 포털로 돌아가기</button>
+            <h2 class="text-5xl font-black mb-8">지존 이야기 📢</h2>
+            <div class="space-y-6">
+                <div class="bg-blue-50 p-8 rounded-[30px] border-l-8 border-blue-500">
+                    <h4 class="font-black text-xl mb-2">[공지] V15.5 좌표계 혁신 업데이트</h4>
+                    <p class="text-slate-600 font-bold">이제 스테이지의 중심이 (0,0)입니다! 엔트리처럼 편하게 코딩하세요.</p>
+                </div>
+                <div class="bg-slate-50 p-8 rounded-[30px]">
+                    <h4 class="font-black text-xl mb-2">[패치] 프라이버시 시스템 도입</h4>
+                    <p class="text-slate-600 font-bold">내 작품을 '비공개'로 설정하면 나만 볼 수 있습니다. 마이페이지에서 확인하세요.</p>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <div id="view-mypage" class="section-view">
+        <div class="max-w-5xl mx-auto">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="text-5xl font-black">나의 보관함 👤</h2>
+                <button onclick="closeView()" class="font-black text-blue-500">닫기</button>
+            </div>
+            <div id="my-project-list" class="space-y-4"></div>
+        </div>
     </div>
 
     <div id="view-community" class="section-view">
-        <div class="flex justify-between items-center mb-10">
-            <h2 class="text-4xl font-black">지존들의 광장</h2>
-            <button onclick="closeView()" class="font-black text-blue-500">닫기</button>
-        </div>
-        <div id="community-project-list" class="grid grid-cols-3 gap-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="text-5xl font-black">지존들의 광장 🌍</h2>
+                <button onclick="closeView()" class="font-black text-blue-500">닫기</button>
             </div>
+            <div id="community-list" class="grid grid-cols-3 gap-6"></div>
+        </div>
     </div>
 
-    <header id="editor-header" class="hidden h-[60px] bg-white border-b px-6 flex justify-between items-center">
-        <button onclick="goHome()" class="font-black italic text-xl grad-text">지존짱짱 SUPREME</button>
-        <button onclick="saveProject()" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-black text-sm">작품 저장</button>
+    <header id="editor-header" class="hidden zizon-header">
+        <button onclick="goHome()" class="logo font-black italic text-xl grad-text">지존짱짱 SUPREME</button>
+        <div class="flex gap-4">
+            <button onclick="saveProject()" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-black text-sm">작품 저장</button>
+            <div id="user-info" class="text-[11px] font-black text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 flex items-center"></div>
+        </div>
     </header>
 
-    <main id="editor-view" class="hidden main-content">
+    <main id="editor-view" class="hidden flex-1 flex overflow-hidden">
         <aside class="sidebar">
-            <div class="p-6 flex justify-center">
-                <div id="stage-canvas">
+            <div class="p-6">
+                <div id="stage-canvas" class="rounded-3xl shadow-inner border mx-auto">
                     <div class="axis-x"></div><div class="axis-y"></div>
                     <div id="sprite-layer"></div>
                 </div>
             </div>
-            <div class="absolute bottom-[40%] left-[190px] -translate-x-1/2">
-                <button id="toggleBtn" onclick="togglePlay()" class="bg-white shadow-lg border border-slate-100 text-blue-600 font-black px-6 py-2 rounded-full">▶ 시작</button>
+            <div class="flex justify-center -mt-4 mb-4">
+                <button id="toggleBtn" onclick="togglePlay()" class="bg-white shadow-xl border border-slate-100 text-blue-600 font-black px-8 py-2 rounded-full hover:scale-105 transition">▶ 시작</button>
             </div>
-            
-            <div class="obj-panel">
-                <div class="flex justify-between items-center mb-3"><span class="text-[10px] font-black text-slate-400 uppercase">Objects</span><button onclick="createNewObj()" class="bg-blue-600 text-white px-3 py-1 rounded-lg text-[10px] font-black">+ 추가</button></div>
+            <div class="obj-panel px-6">
+                <div class="flex justify-between items-center mb-4"><span class="text-[10px] font-black text-slate-400">OBJECTS</span><button onclick="createNewObj()" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black">+ 추가</button></div>
                 <div id="obj-list-container"></div>
-                <div id="inspector" class="bg-white p-4 rounded-2xl border border-slate-100 mt-4 hidden">
-                    <div class="grid grid-cols-2 gap-2">
+                <div id="inspector" class="bg-white p-5 rounded-3xl border border-slate-100 mt-4 hidden">
+                    <div class="grid grid-cols-2 gap-3">
                         <div class="col-span-2"><label class="text-[9px] font-black text-slate-400">이름</label><input id="ins-name" oninput="updateIns()" class="status-input"></div>
-                        <div><label class="text-[9px] font-black text-slate-400">X (중심0)</label><input id="ins-x" oninput="updateIns()" class="status-input" type="number"></div>
-                        <div><label class="text-[9px] font-black text-slate-400">Y (중심0)</label><input id="ins-y" oninput="updateIns()" class="status-input" type="number"></div>
+                        <div><label class="text-[9px] font-black text-slate-400">X (가운데 0)</label><input id="ins-x" oninput="updateIns()" class="status-input" type="number"></div>
+                        <div><label class="text-[9px] font-black text-slate-400">Y (가운데 0)</label><input id="ins-y" oninput="updateIns()" class="status-input" type="number"></div>
                         <div><label class="text-[9px] font-black text-slate-400">방향</label><input id="ins-rot" oninput="updateIns()" class="status-input" type="number"></div>
                         <div><label class="text-[9px] font-black text-slate-400">크기</label><input id="ins-size" oninput="updateIns()" class="status-input" type="number"></div>
                     </div>
                 </div>
             </div>
         </aside>
-        
         <div class="flex-1 flex flex-col relative">
-            <div class="tabs h-[50px] bg-white border-b flex">
-                <div id="tab-b" onclick="switchTab('b')" class="tab active px-8 flex items-center font-black text-sm">블록 조립소</div>
-                <div id="tab-p" onclick="switchTab('p')" class="tab px-8 flex items-center font-black text-sm">모양 그리기</div>
+            <div class="tabs">
+                <div id="tab-b" onclick="switchTab('b')" class="tab active">블록 조립소</div>
+                <div id="tab-p" onclick="switchTab('p')" class="tab">모양 그리기</div>
             </div>
             <div id="blocklyDiv"></div>
-            <div id="painter-view" class="absolute inset-0 bg-white z-50 flex-col items-center justify-center hidden">
-                <canvas id="drawing-pad" width="400" height="400" class="bg-slate-50 rounded-[40px] border shadow-inner"></canvas>
+            <div id="painter-view" class="absolute inset-0 bg-white z-50 flex flex-col items-center justify-center">
+                <canvas id="drawing-pad" width="400" height="400" class="bg-slate-50 rounded-[40px] border-2"></canvas>
                 <div class="mt-8 flex gap-4">
                     <input type="color" id="brush-color" value="#4f80ff" class="w-12 h-12 rounded-xl">
                     <button onclick="clearPad()" class="px-8 py-3 bg-slate-100 rounded-xl font-black text-slate-400">지우기</button>
@@ -160,17 +177,15 @@
 </xml>
 
 <script>
-/** [Supreme V15.5 JS - Coordinate (0,0) & MyPage Privacy] */
 const conf = { apiKey: "AIzaSyDdFsRGy_2mZowYinOf9LeQhot08xyaqc4", authDomain: "zizon-coding.firebaseapp.com", databaseURL: "https://zizon-coding-default-rtdb.firebaseio.com" };
 firebase.initializeApp(conf);
 const db = firebase.database(), auth = firebase.auth();
 
-let ws = null, objs = [], sid = null, isRunning = false, currentUser = null;
+let ws = null, objs = [], sid = null, isRunning = false, user = null;
 
-// [좌표계 변환 로직] 
-// 스테이지 크기 400x300, 중심(0,0) -> 캔버스(200, 150)
-const toCanvasX = (x) => 200 + x;
-const toCanvasY = (y) => 150 - y;
+// [좌표 변환] 400x300 기준 중심이 (200, 150)
+const getX = (x) => 200 + parseInt(x);
+const getY = (y) => 150 - parseInt(y);
 
 function goHome() { 
     document.getElementById('main-menu').classList.remove('hidden'); 
@@ -185,6 +200,13 @@ function startProject() {
     if(!ws) initEditor(); 
 }
 
+function openView(v) {
+    document.querySelectorAll('.section-view').forEach(el => el.style.display = 'none');
+    document.getElementById('view-' + v).style.display = 'block';
+}
+
+function closeView() { document.querySelectorAll('.section-view').forEach(el => el.style.display = 'none'); }
+
 function initEditor() {
     ws = Blockly.inject('blocklyDiv', { toolbox: document.getElementById('toolbox'), renderer: 'zelos' });
     createNewObj();
@@ -192,7 +214,7 @@ function initEditor() {
 
 function createNewObj() {
     const id = "z_" + Date.now();
-    objs.push({ id, name: "오브젝트 "+(objs.length+1), x: 0, y: 0, rot: 0, size: 100, xml: "", costume: null, say: "" });
+    objs.push({ id, name: "오브젝트 "+(objs.length+1), x: 0, y: 0, rot: 0, size: 100, xml: "", costume: null });
     updateObjUI(); selectObj(id);
 }
 
@@ -211,94 +233,82 @@ function updateIns() {
     const t = objs.find(o => o.id === sid);
     if(!t) return;
     t.name = document.getElementById('ins-name').value;
-    t.x = parseInt(document.getElementById('ins-x').value) || 0;
-    t.y = parseInt(document.getElementById('ins-y').value) || 0;
-    t.rot = parseInt(document.getElementById('ins-rot').value) || 0;
-    t.size = parseInt(document.getElementById('ins-size').value) || 100;
+    t.x = document.getElementById('ins-x').value;
+    t.y = document.getElementById('ins-y').value;
+    t.rot = document.getElementById('ins-rot').value;
+    t.size = document.getElementById('ins-size').value;
     renderStage();
 }
 
 function renderStage() {
     document.getElementById('sprite-layer').innerHTML = objs.map(o => `
-        <div style="position:absolute; left:${toCanvasX(o.x)}px; top:${toCanvasY(o.y)}px; transform:translate(-50%,-50%) rotate(${o.rot}deg) scale(${o.size/100});">
+        <div style="position:absolute; left:${getX(o.x)}px; top:${getY(o.y)}px; transform:translate(-50%,-50%) rotate(${o.rot}deg) scale(${o.size/100});">
             ${o.costume ? `<img src="${o.costume}" style="width:80px; height:80px;">` : '<div class="w-12 h-12 bg-blue-600 rounded-2xl shadow-xl"></div>'}
         </div>
     `).join('');
 }
 
-// [마이페이지 & 공개 설정]
+// [데이터 및 마이페이지]
 async function saveProject() {
-    const name = prompt("작품 제목을 입력하세요", "나의 멋진 작품");
-    if(!name) return;
-    const projectData = {
-        name,
-        uid: currentUser.uid,
-        nickname: document.getElementById('portal-user').innerText.replace("님 환영합니다", ""),
-        objs,
-        isPublic: false, // 기본은 비공개
-        timestamp: Date.now()
-    };
-    await db.ref('projects').push(projectData);
-    alert("저장 완료!");
+    const title = prompt("작품 제목을 입력하세요");
+    if(!title) return;
+    await db.ref('projects').push({
+        title, uid: user.uid, nickname: user.nickname,
+        objs, isPublic: false, time: Date.now()
+    });
+    alert("지존 저장 완료!");
 }
 
 async function loadMyPage() {
     openView('mypage');
-    const snap = await db.ref('projects').orderByChild('uid').equalTo(currentUser.uid).once('value');
+    const snap = await db.ref('projects').orderByChild('uid').equalTo(user.uid).once('value');
     const container = document.getElementById('my-project-list');
     container.innerHTML = "";
-    if(!snap.val()) container.innerHTML = "<p class='text-slate-400 font-bold'>아직 저장된 작품이 없습니다.</p>";
-    snap.forEach(child => {
-        const p = child.val();
+    snap.forEach(c => {
+        const p = c.val();
         container.innerHTML += `
             <div class="project-card">
-                <div><h4 class="font-black">${p.name}</h4><p class="text-[10px] text-slate-400">${new Date(p.timestamp).toLocaleString()}</p></div>
+                <div><h4 class="font-black text-lg">${p.title}</h4><p class="text-xs text-slate-400">저장일: ${new Date(p.time).toLocaleDateString()}</p></div>
                 <div class="flex gap-4 items-center">
-                    <button onclick="togglePrivacy('${child.key}', ${p.isPublic})" class="toggle-btn ${p.isPublic ? 'toggle-public' : 'toggle-private'}">
+                    <span onclick="togglePrivacy('${c.key}', ${p.isPublic})" class="toggle-badge ${p.isPublic ? 'badge-public' : 'badge-private'}">
                         ${p.isPublic ? '공개 중' : '비공개'}
-                    </button>
-                    <button onclick="deleteProject('${child.key}')" class="text-xs text-red-300 font-bold">삭제</button>
+                    </span>
+                    <button onclick="db.ref('projects/${c.key}').remove().then(loadMyPage)" class="text-red-300 font-bold text-xs">삭제</button>
                 </div>
-            </div>
-        `;
+            </div>`;
     });
 }
 
-async function togglePrivacy(key, currentStatus) {
-    await db.ref('projects/' + key).update({ isPublic: !currentStatus });
+async function togglePrivacy(key, current) {
+    await db.ref('projects/'+key).update({ isPublic: !current });
     loadMyPage();
 }
 
 async function loadCommunity() {
     openView('community');
     const snap = await db.ref('projects').orderByChild('isPublic').equalTo(true).once('value');
-    const container = document.getElementById('community-project-list');
+    const container = document.getElementById('community-list');
     container.innerHTML = "";
-    snap.forEach(child => {
-        const p = child.val();
+    snap.forEach(c => {
+        const p = c.val();
         container.innerHTML += `
-            <div class="bg-slate-50 p-6 rounded-[30px] border-2 border-slate-100">
-                <div class="text-3xl mb-4">🎨</div>
-                <h4 class="font-black text-lg">${p.name}</h4>
-                <p class="text-xs font-bold text-blue-500">by ${p.nickname}</p>
-            </div>
-        `;
+            <div class="bg-slate-50 p-8 rounded-[40px] border-2 border-slate-100 hover:border-blue-400 transition">
+                <div class="text-3xl mb-4">🎮</div>
+                <h4 class="font-black text-xl">${p.title}</h4>
+                <p class="text-blue-500 font-black text-xs mt-2">지존: ${p.nickname}</p>
+            </div>`;
     });
 }
 
-function openView(v) { document.getElementById('view-'+v).style.display = 'block'; }
-function closeView() { document.querySelectorAll('.section-view').forEach(el => el.style.display = 'none'); }
-
-// [인증 관련]
-auth.onAuthStateChanged(u => {
+// [기본 앱 로직]
+auth.onAuthStateChanged(async u => {
     if(u) {
-        currentUser = u;
-        db.ref('users/'+u.uid).once('value').then(s => {
-            const nick = s.val()?.nickname || "지존";
-            document.getElementById('portal-user').innerText = nick + " 님 환영합니다";
-            document.getElementById('auth-overlay').classList.add('hidden');
-            document.getElementById('main-menu').classList.remove('hidden');
-        });
+        const s = await db.ref('users/'+u.uid).once('value');
+        user = { uid: u.uid, nickname: s.val()?.nickname || "지존" };
+        document.getElementById('portal-user').innerText = user.nickname + " 님 환영합니다";
+        document.getElementById('user-info').innerText = user.nickname + " 님";
+        document.getElementById('auth-overlay').classList.add('hidden');
+        document.getElementById('main-menu').classList.remove('hidden');
     } else {
         document.getElementById('auth-overlay').classList.remove('hidden');
         document.getElementById('main-menu').classList.add('hidden');
@@ -310,15 +320,33 @@ function zLogin() {
     auth.signInWithEmailAndPassword(id+"@z.com", pw);
 }
 function zJoin() {
-    const id = prompt("ID"), pw = prompt("PW"), nk = prompt("NICK");
+    const id = prompt("ID"), pw = prompt("PW"), nk = prompt("닉네임");
     if(id&&pw&&nk) auth.createUserWithEmailAndPassword(id+"@z.com", pw).then(r=>db.ref('users/'+r.user.uid).set({nickname:nk}));
 }
 function zLogout() { auth.signOut().then(()=>location.reload()); }
 function switchTab(m) {
     const isB = m === 'b';
     document.getElementById('blocklyDiv').style.display = isB ? 'block' : 'none';
-    document.getElementById('painter-view').classList.toggle('hidden', isB);
     document.getElementById('painter-view').style.display = isB ? 'none' : 'flex';
+}
+
+const canvas = document.getElementById('drawing-pad'), ctx = canvas.getContext('2d');
+let draw = false;
+canvas.onmousedown = (e) => { draw = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); };
+canvas.onmousemove = (e) => { if(draw) { ctx.lineWidth=10; ctx.lineCap='round'; ctx.strokeStyle=document.getElementById('brush-color').value; ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); }};
+canvas.onmouseup = () => draw = false;
+function clearPad() { ctx.clearRect(0,0,400,400); }
+function applyCostume() {
+    const t = objs.find(o => o.id === sid);
+    if(t) t.costume = canvas.toDataURL();
+    renderStage(); switchTab('b');
+}
+function updateObjUI() {
+    document.getElementById('obj-list-container').innerHTML = objs.map(o => `
+        <div onclick="selectObj('${o.id}')" class="p-4 mb-2 bg-slate-50 rounded-2xl flex items-center gap-3 border-2 ${o.id === sid ? 'border-blue-500 bg-white shadow-sm' : 'border-transparent'} cursor-pointer transition">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center">${o.costume ? `<img src="${o.costume}" class="w-full h-full object-contain">` : '🔹'}</div>
+            <span class="text-[11px] font-black">${o.name}</span>
+        </div>`).join('');
 }
 </script>
 </body>
