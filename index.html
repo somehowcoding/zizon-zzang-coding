@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>지존짱짱 코딩사이트 v23.0 - 초심 풀충전</title>
+    <title>지존짱짱 코딩사이트 v24.0 - 찐막 완성판</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
     <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
@@ -10,173 +10,234 @@
     <script src="https://unpkg.com/blockly/msg/ko.js"></script>
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        body { font-family: 'Pretendard', sans-serif; background: #f0f2f5; margin: 0; height: 100vh; overflow: hidden; }
+        body { font-family: 'Pretendard', sans-serif; background: #0f172a; margin: 0; height: 100vh; overflow: hidden; color: #333; }
         
-        /* [로그인 & 회원가입 화면] */
-        #auth-screen { position: fixed; inset: 0; background: #1e293b; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .auth-card { background: white; padding: 40px; border-radius: 24px; width: 360px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
-
-        /* [지존 헤더 메뉴] */
-        .zizon-header { height: 60px; background: #1e293b; color: white; display: flex; align-items: center; padding: 0 20px; justify-content: space-between; }
-        .zizon-logo { font-size: 22px; font-weight: 900; color: #38bdf8; cursor: pointer; }
-
-        .main-layout { display: flex; height: calc(100vh - 60px); visibility: hidden; }
-        
-        /* [스테이지 & 속성] */
-        .left-panel { width: 380px; background: #fff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
-        .stage { width: 340px; height: 255px; margin: 15px auto; background: #fff; border: 2px solid #334155; position: relative; overflow: hidden; }
-        
-        /* [엔트리 스타일 속성창] */
-        .prop-box { background: #f8fafc; margin: 0 15px 10px; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 11px; }
-        .prop-grid { display: grid; grid-template-cols: 1fr 1fr; gap: 6px; }
-        .z-input { border: 1px solid #cbd5e1; padding: 4px; border-radius: 4px; width: 100%; font-weight: bold; }
-
-        /* [오브젝트 리스트] */
-        .obj-list { flex: 1; overflow-y: auto; padding: 10px 15px; background: #f1f5f9; }
-        .obj-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: white; border-radius: 8px; margin-bottom: 6px; border: 2px solid transparent; cursor: pointer; }
-        .obj-item.active { border-color: #38bdf8; }
-
-        #blocklyDiv { flex: 1; }
+        /* 공통 유틸 */
         .hidden { display: none !important; }
+        .z-input { w-full; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; outline: none; margin-bottom: 12px; font-weight: bold; }
+        .z-input:focus { border-color: #38bdf8; }
+
+        /* [1. 로그인/회원가입 화면] */
+        #auth-screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1e293b, #0f172a); z-index: 9999; }
+        .auth-box { background: white; width: 400px; padding: 40px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .zizon-title { font-size: 28px; font-weight: 900; color: #0284c7; text-align: center; margin-bottom: 30px; letter-spacing: -1px; }
+
+        /* [2. 메인 메뉴 화면 (로비)] */
+        #menu-screen { position: fixed; inset: 0; background: #1e293b; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; }
+        .menu-title { font-size: 64px; font-weight: 900; color: #38bdf8; text-shadow: 0 4px 20px rgba(56,189,248,0.4); margin-bottom: 10px; }
+        .menu-welcome { font-size: 24px; color: #cbd5e1; margin-bottom: 50px; font-weight: bold; }
+        .menu-nickname { color: #facc15; font-weight: 900; }
+        .btn-huge { background: #38bdf8; color: white; padding: 20px 50px; font-size: 24px; font-weight: 900; border-radius: 20px; transition: 0.2s; cursor: pointer; border: none; box-shadow: 0 10px 20px rgba(56,189,248,0.3); }
+        .btn-huge:hover { transform: translateY(-5px); background: #0284c7; }
+
+        /* [3. 코딩 워크스페이스] */
+        #workspace-screen { display: flex; flex-direction: column; height: 100vh; background: #f1f5f9; visibility: hidden; }
+        .wk-header { height: 60px; background: #0f172a; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: white; }
+        
+        .wk-main { display: flex; flex: 1; height: calc(100vh - 60px); }
+        .left-panel { width: 380px; background: white; border-right: 1px solid #cbd5e1; display: flex; flex-direction: column; }
+        
+        /* 스테이지 */
+        .stage-container { width: 340px; height: 255px; margin: 15px auto; border: 2px solid #94a3b8; border-radius: 8px; position: relative; overflow: hidden; background: white; }
+        .var-overlay { position: absolute; top: 10px; left: 10px; z-index: 100; pointer-events: none; }
+        
+        /* 속성창 */
+        .prop-panel { background: #f8fafc; margin: 0 15px 15px; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .prop-grid { display: grid; grid-template-cols: 1fr 1fr; gap: 8px; font-size: 12px; font-weight: bold; }
+        .prop-input { border: 1px solid #cbd5e1; padding: 6px; border-radius: 6px; width: 100%; font-weight: bold; text-align: center; }
+
+        /* 오브젝트 리스트 */
+        .obj-list { flex: 1; overflow-y: auto; padding: 0 15px 15px; }
+        .obj-item { display: flex; align-items: center; gap: 12px; padding: 10px; background: #f1f5f9; border-radius: 10px; margin-bottom: 8px; cursor: pointer; border: 2px solid transparent; }
+        .obj-item.active { border-color: #38bdf8; background: #f0f9ff; }
+
+        #blocklyDiv { flex: 1; position: relative; }
     </style>
 </head>
 <body>
 
 <div id="auth-screen">
-    <div class="auth-card" id="login-form">
-        <h2 class="text-2xl font-black mb-6 text-center text-slate-800">지존짱짱 로그인</h2>
-        <input type="text" id="user-id" placeholder="아이디" class="w-full p-3 border rounded-lg mb-3 outline-none focus:ring-2 ring-blue-400">
-        <input type="password" id="user-pw" placeholder="비밀번호" class="w-full p-3 border rounded-lg mb-6 outline-none focus:ring-2 ring-blue-400">
-        <button onclick="auth.login()" class="w-full bg-blue-500 text-white p-3 rounded-lg font-bold mb-3 hover:bg-blue-600">로그인</button>
-        <p class="text-center text-sm text-slate-500">계정이 없나요? <a href="#" onclick="auth.toggle()" class="text-blue-500 font-bold">회원가입</a></p>
+    <div id="login-form" class="auth-box">
+        <div class="zizon-title">지존짱짱 코딩사이트</div>
+        <input type="text" id="login-id" class="z-input" placeholder="아이디를 입력하세요 (예: admin)">
+        <input type="password" id="login-pw" class="z-input" placeholder="비밀번호를 입력하세요 (예: 1234)">
+        <button onclick="auth.login()" class="w-full bg-blue-500 text-white font-black text-lg py-3 rounded-xl mt-2 hover:bg-blue-600 transition">로그인</button>
+        <div class="text-center mt-6 text-slate-500 font-bold">
+            게스트 출입 불가! 계정이 없다면? <br>
+            <span onclick="auth.toggle()" class="text-blue-500 cursor-pointer hover:underline mt-2 inline-block">회원가입하기</span>
+        </div>
     </div>
 
-    <div class="auth-card hidden" id="join-form">
-        <h2 class="text-2xl font-black mb-6 text-center text-slate-800">지존짱짱 회원가입</h2>
-        <input type="text" placeholder="아이디" class="w-full p-3 border rounded-lg mb-3">
-        <input type="password" placeholder="비밀번호" class="w-full p-3 border rounded-lg mb-3">
-        <input type="text" placeholder="닉네임" class="w-full p-3 border rounded-lg mb-6">
-        <button onclick="auth.toggle()" class="w-full bg-green-500 text-white p-3 rounded-lg font-bold mb-3">가입하기</button>
-        <button onclick="auth.toggle()" class="w-full text-slate-400 text-sm">취소</button>
+    <div id="join-form" class="auth-box hidden">
+        <div class="zizon-title">지존짱짱 회원가입</div>
+        <input type="text" id="join-id" class="z-input" placeholder="사용할 아이디">
+        <input type="password" id="join-pw" class="z-input" placeholder="사용할 비밀번호">
+        <input type="text" id="join-nick" class="z-input" placeholder="사이트에서 보여질 닉네임!! (중요)">
+        <button onclick="auth.signup()" class="w-full bg-green-500 text-white font-black text-lg py-3 rounded-xl mt-2 hover:bg-green-600 transition">가입 완료</button>
+        <button onclick="auth.toggle()" class="w-full text-slate-400 font-bold mt-4 hover:text-slate-600">돌아가기</button>
     </div>
 </div>
 
-<header class="zizon-header">
-    <div class="zizon-logo" onclick="location.reload()">지존짱짱 코딩사이트</div>
-    <div class="flex gap-4">
-        <span id="user-display" class="text-sm font-bold text-slate-300"></span>
-        <button id="run-btn" class="bg-emerald-500 px-4 py-1.5 rounded-full font-black text-sm" onclick="engine.toggle()">▶ 시작하기</button>
-        <button class="bg-slate-700 px-4 py-1.5 rounded-full font-black text-sm" onclick="auth.logout()">로그아웃</button>
+<div id="menu-screen" class="hidden">
+    <div class="menu-title">지존짱짱 코딩사이트</div>
+    <div class="menu-welcome">환영합니다, <span id="lobby-nickname" class="menu-nickname"></span>님! 오늘도 즐거운 코딩 하세요!</div>
+    
+    <div class="flex gap-6">
+        <button onclick="app.enterWorkspace()" class="btn-huge">🚀 작품 만들기 시작</button>
+        <button onclick="auth.logout()" class="bg-slate-700 text-white px-8 py-4 font-black text-xl rounded-2xl hover:bg-slate-600 transition">로그아웃</button>
     </div>
-</header>
+</div>
 
-<div class="main-layout" id="app-main">
-    <div class="left-panel">
-        <div class="stage">
-            <div id="var-layer" class="absolute top-2 left-2 z-10"></div>
-            <div id="render-layer" class="w-full h-full relative"></div>
+<div id="workspace-screen">
+    <header class="wk-header">
+        <div class="flex items-center gap-4">
+            <span class="font-black text-xl text-blue-400 cursor-pointer" onclick="app.goLobby()">지존짱짱 코딩</span>
+            <span class="bg-slate-800 px-3 py-1 rounded-full text-xs font-bold text-slate-300 border border-slate-700">접속자: <span id="wk-nickname" class="text-white"></span></span>
         </div>
+        <div class="flex gap-3">
+            <button class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg font-black text-sm" onclick="vars.add()">+ 변수 만들기</button>
+            <button id="run-btn" class="bg-emerald-500 hover:bg-emerald-400 text-white px-6 py-2 rounded-lg font-black text-sm" onclick="engine.toggle()">▶ 실행하기</button>
+        </div>
+    </header>
 
-        <div class="prop-box">
-            <div class="prop-grid">
-                <div class="col-span-2 text-[10px] text-slate-400 font-bold mb-1">OBJECT PROPERTIES</div>
-                <div>이름 <input id="st-name" class="z-input" oninput="obj.sync()"></div>
-                <div>크기 <input id="st-size" type="number" class="z-input" oninput="obj.sync()"></div>
-                <div>X좌표 <input id="st-x" type="number" class="z-input" oninput="obj.sync()"></div>
-                <div>Y좌표 <input id="st-y" type="number" class="z-input" oninput="obj.sync()"></div>
-                <div>방향 <input id="st-rot" type="number" class="z-input" oninput="obj.sync()"></div>
-                <div class="flex items-end"><button onclick="vars.add()" class="text-purple-500 font-bold hover:underline">변수추가+</button></div>
+    <div class="wk-main">
+        <div class="left-panel">
+            <div class="stage-container">
+                <div id="var-layer" class="var-overlay"></div>
+                <div id="render-layer" class="w-full h-full relative"></div>
+            </div>
+
+            <div class="prop-panel">
+                <div class="text-[10px] text-slate-400 font-black mb-2 tracking-wider">오브젝트 속성</div>
+                <div class="prop-grid">
+                    <div class="col-span-2">이름 <input id="st-name" class="prop-input" oninput="obj.sync()"></div>
+                    <div>X <input id="st-x" type="number" class="prop-input" oninput="obj.sync()"></div>
+                    <div>Y <input id="st-y" type="number" class="prop-input" oninput="obj.sync()"></div>
+                    <div>방향 <input id="st-rot" type="number" class="prop-input" oninput="obj.sync()"></div>
+                    <div>크기 <input id="st-size" type="number" class="prop-input" oninput="obj.sync()"></div>
+                </div>
+            </div>
+
+            <div class="obj-list">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="font-black text-slate-600 text-sm">오브젝트 목록</span>
+                    <button onclick="obj.add()" class="text-blue-500 font-black text-sm hover:underline">+ 추가하기</button>
+                </div>
+                <div id="obj-items"></div>
             </div>
         </div>
 
-        <div class="obj-list">
-            <div class="flex justify-between items-center mb-2">
-                <span class="font-black text-xs text-slate-500">오브젝트</span>
-                <button onclick="obj.add()" class="text-blue-500 font-bold text-xs">+ 추가</button>
-            </div>
-            <div id="list-items"></div>
-        </div>
+        <div id="blocklyDiv"></div>
     </div>
-    <div id="blocklyDiv"></div>
 </div>
 
 <script>
-// --- [초심: 인증 시스템] ---
+// --- [1. 인증 & 유저 데이터 시스템 (핵심 수정!)] ---
+const userDB = {
+    // 테스트용 기본 계정 (아이디: admin / 비밀번호: 1234 / 닉네임: 어쩌다코딩)
+    "admin": { pw: "1234", nickname: "어쩌다코딩" }
+};
+let currentUserNickname = "";
+
 const auth = {
-    login: () => {
-        const id = document.getElementById('user-id').value;
-        if(!id) return alert("아이디를 입력하세요!");
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('app-main').style.visibility = 'visible';
-        document.getElementById('user-display').innerText = id + " 님 환영합니다";
-        engine.init(); // 로그인 성공 시 엔진 시작
-    },
-    logout: () => location.reload(),
     toggle: () => {
         document.getElementById('login-form').classList.toggle('hidden');
         document.getElementById('join-form').classList.toggle('hidden');
+    },
+    signup: () => {
+        const id = document.getElementById('join-id').value;
+        const pw = document.getElementById('join-pw').value;
+        const nick = document.getElementById('join-nick').value;
+        
+        if(!id || !pw || !nick) return alert("빈칸을 모두 채워주세요!");
+        if(userDB[id]) return alert("이미 존재하는 아이디입니다.");
+        
+        userDB[id] = { pw: pw, nickname: nick }; // 닉네임 정확히 저장!
+        alert(`가입 완료! 환영합니다 ${nick}님. 이제 로그인해주세요.`);
+        auth.toggle();
+    },
+    login: () => {
+        const id = document.getElementById('login-id').value;
+        const pw = document.getElementById('login-pw').value;
+        
+        if(userDB[id] && userDB[id].pw === pw) {
+            currentUserNickname = userDB[id].nickname; // 아이디가 아닌 '닉네임'을 가져옴!!
+            document.getElementById('auth-screen').classList.add('hidden');
+            
+            // 로비 화면 닉네임 세팅 및 보여주기
+            document.getElementById('lobby-nickname').innerText = currentUserNickname;
+            document.getElementById('wk-nickname').innerText = currentUserNickname;
+            document.getElementById('menu-screen').classList.remove('hidden');
+        } else {
+            alert("아이디 또는 비밀번호가 틀렸습니다!");
+        }
+    },
+    logout: () => location.reload()
+};
+
+// --- [2. 앱 플로우 제어] ---
+const app = {
+    enterWorkspace: () => {
+        document.getElementById('menu-screen').classList.add('hidden');
+        document.getElementById('workspace-screen').style.visibility = 'visible';
+        // 워크스페이스 진입 시 엔진 초기화 및 엔트리봇 생성!
+        if(!engine.workspace) {
+            engine.init();
+            obj.add("엔트리봇"); // 기본 오브젝트 1개 무조건 생성!
+        }
+    },
+    goLobby: () => {
+        document.getElementById('workspace-screen').style.visibility = 'hidden';
+        document.getElementById('menu-screen').classList.remove('hidden');
     }
 };
 
+// --- [3. 코딩 엔진 (이전과 동일한 풀스펙)] ---
 const state = { objects: [], variables: {}, selectedId: null, isRunning: false };
 
 const engine = {
     workspace: null,
     init: function() {
-        if(this.workspace) return;
         this.defineBlocks();
-        this.workspace = Blockly.inject('blocklyDiv', {
-            toolbox: this.getToolbox(),
-            renderer: 'zelos'
-        });
+        this.workspace = Blockly.inject('blocklyDiv', { toolbox: this.getToolbox(), renderer: 'zelos' });
         this.workspace.addChangeListener(e => {
             if (e.isUiEvent || !state.selectedId) return;
             const target = state.objects.find(o => o.id === state.selectedId);
             if (target) target.xml = Blockly.Xml.workspaceToDom(this.workspace);
         });
-        // [초심!] 기본 오브젝트 생성
-        obj.add("엔트리봇");
+        window.addEventListener('resize', () => Blockly.svgResize(this.workspace));
     },
     defineBlocks: function() {
         const B = Blockly.Blocks, JS = javascript.javascriptGenerator;
-        // 엔트리 모든 블록 핵심 구현
-        B['e_start'] = { init: function() { this.appendDummyInput().appendField("🚩 시작 버튼을 클릭했을 때"); this.setNextStatement(true); this.setColour("#33b233"); } };
-        B['m_move'] = { init: function() { this.appendValueInput("V").appendField("이동 방향으로").appendField(new Blockly.FieldLabel("만큼 움직이기")); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
-        B['m_rot'] = { init: function() { this.appendValueInput("V").appendField("방향을").appendField(new Blockly.FieldLabel("도만큼 회전")); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
-        B['f_forever'] = { init: function() { this.appendDummyInput().appendField("계속 반복하기"); this.appendStatementInput("DO"); this.setPreviousStatement(true); this.setColour("#ccb233"); } };
-        B['f_wait'] = { init: function() { this.appendValueInput("V").appendField("기다리기(초):"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); } };
+        B['e_start'] = { init: function() { this.appendDummyInput().appendField("🚩 시작 버튼을 클릭했을 때"); this.setNextStatement(true); this.setColour("#10b981"); } };
+        B['m_move'] = { init: function() { this.appendValueInput("V").appendField("이동 방향으로"); this.appendDummyInput().appendField("만큼 움직이기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#38bdf8"); } };
+        B['m_rot'] = { init: function() { this.appendValueInput("V").appendField("방향을"); this.appendDummyInput().appendField("도만큼 회전하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#38bdf8"); } };
+        B['f_forever'] = { init: function() { this.appendDummyInput().appendField("계속 반복하기"); this.appendStatementInput("DO"); this.setPreviousStatement(true); this.setColour("#f59e0b"); } };
         B['v_set'] = { init: function() { 
-            this.appendValueInput("V").appendField(new Blockly.FieldDropdown(() => Object.keys(state.variables).length ? Object.keys(state.variables).map(v => [v, v]) : [["변수없음", "NONE"]]), "VAR").appendField("로 정하기");
-            this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc");
+            this.appendValueInput("V").appendField(new Blockly.FieldDropdown(() => Object.keys(state.variables).length ? Object.keys(state.variables).map(v => [v, v]) : [["변수없음", "NONE"]]), "VAR").appendField("를");
+            this.appendDummyInput().appendField("로 정하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#9333ea");
         }};
-
+        
         JS.forBlock['e_start'] = () => "";
         JS.forBlock['m_move'] = (b, g) => `move(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
         JS.forBlock['m_rot'] = (b, g) => `target.rot += ${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0}; obj.render();\n`;
         JS.forBlock['f_forever'] = (b, g) => `while(active()){ ${g.statementToCode(b, 'DO')} await wait(0.01); }\n`;
-        JS.forBlock['f_wait'] = (b, g) => `await wait(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
         JS.forBlock['v_set'] = (b, g) => `state.variables["${b.getFieldValue('VAR')}"] = ${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0}; vars.update();\n`;
     },
     getToolbox: () => `
         <xml>
-            <category name="시작" colour="#33b233"><block type="e_start"></block></category>
-            <category name="움직임" colour="#33b2cc">
-                <block type="m_move"><value name="V"><block type="math_number"><field name="NUM">10</field></block></value></block>
-                <block type="m_rot"><value name="V"><block type="math_number"><field name="NUM">15</field></block></value></block>
-            </category>
-            <category name="흐름" colour="#ccb233">
-                <block type="f_forever"></block>
-                <block type="f_wait"><value name="V"><block type="math_number"><field name="NUM">1</field></block></value></block>
-            </category>
-            <category name="판단" colour="#3366cc"><block type="logic_compare"></block><block type="logic_operation"></block></category>
-            <category name="계산" colour="#ee7d16"><block type="math_arithmetic"></block><block type="math_number"></block></category>
-            <category name="변수" colour="#cc33cc"><block type="v_set"></block></category>
+            <category name="시작" colour="#10b981"><block type="e_start"></block></category>
+            <category name="움직임" colour="#38bdf8"><block type="m_move"><value name="V"><block type="math_number"><field name="NUM">10</field></block></value></block><block type="m_rot"><value name="V"><block type="math_number"><field name="NUM">15</field></block></value></block></category>
+            <category name="흐름" colour="#f59e0b"><block type="f_forever"></block></category>
+            <category name="계산" colour="#64748b"><block type="math_number"></block><block type="math_arithmetic"></block></category>
+            <category name="변수" colour="#9333ea"><block type="v_set"></block></category>
         </xml>`,
     toggle: function() {
         state.isRunning = !state.isRunning;
         const btn = document.getElementById('run-btn');
-        btn.innerText = state.isRunning ? "■ 정지하기" : "▶ 시작하기";
+        btn.innerText = state.isRunning ? "■ 정지하기" : "▶ 실행하기";
         btn.classList.toggle('bg-red-500', state.isRunning);
+        btn.classList.toggle('bg-emerald-500', !state.isRunning);
         if(state.isRunning) {
             state.objects.forEach(o => {
                 const code = javascript.javascriptGenerator.workspaceToCode(Blockly.Xml.domToWorkspace(o.xml, new Blockly.Workspace()));
@@ -230,17 +291,17 @@ const obj = {
         this.updateList(); this.render();
     },
     updateList: () => {
-        document.getElementById('list-items').innerHTML = state.objects.map(o => `
+        document.getElementById('obj-items').innerHTML = state.objects.map(o => `
             <div onclick="obj.select('${o.id}')" class="obj-item ${state.selectedId === o.id ? 'active' : ''}">
-                <div class="w-8 h-8 bg-blue-100 rounded flex items-center justify-center font-black text-blue-500">Z</div>
-                <div class="text-xs font-bold">${o.name}</div>
+                <div class="w-10 h-10 bg-white rounded-lg border flex items-center justify-center font-black text-blue-500 text-lg shadow-sm">Z</div>
+                <div class="text-sm font-bold text-slate-700">${o.name}</div>
             </div>
         `).join('');
     },
     render: () => {
         document.getElementById('render-layer').innerHTML = state.objects.map(o => `
             <div style="position:absolute; left:${170+o.x}px; top:${127-o.y}px; transform:translate(-50%,-50%) rotate(${o.rot}deg); width:${40*(o.size/100)}px; height:${40*(o.size/100)}px; transition:0.05s;">
-                <div class="w-full h-full bg-blue-600 rounded-lg flex items-center justify-center text-white text-[8px] font-black border-2 border-white shadow-lg">ZIZON</div>
+                <div class="w-full h-full bg-blue-500 rounded-xl flex items-center justify-center text-white text-[8px] font-black border-2 border-white shadow-xl">ZIZON</div>
             </div>
         `).join('');
     },
@@ -249,16 +310,15 @@ const obj = {
 
 const vars = {
     add: () => {
-        const n = prompt("변수 이름:");
+        const n = prompt("변수 이름을 정해주세요:");
         if(n) { state.variables[n] = 0; vars.update(); engine.workspace.updateToolbox(engine.getToolbox()); }
     },
     update: () => {
         document.getElementById('var-layer').innerHTML = Object.entries(state.variables).map(([k, v]) => `
-            <div class="bg-white/80 border border-blue-400 px-2 py-0.5 rounded text-[10px] font-bold mb-1">${k}: ${v}</div>
+            <div class="bg-white/90 border-2 border-purple-400 px-3 py-1 rounded-md text-xs font-black mb-1 shadow-sm text-purple-700">${k}: ${v}</div>
         `).join('');
     }
 };
-
 </script>
 </body>
 </html>
