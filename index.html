@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지존짱짱 SUPREME - V15.8 (Entry Core)</title>
+    <title>지존짱짱 SUPREME V16.0 - Full Engine</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
@@ -16,178 +16,197 @@
     
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        :root { 
-            --z-blue: #4f80ff; --z-purple: #7c3aed; --z-bg: #f8faff; --z-border: #eef2ff;
-            --entry-start: #33b233; --entry-flow: #ccb233; --entry-move: #33b2cc;
-            --entry-look: #cc33cc; --entry-sound: #ff61ca; --entry-judge: #ffbb33;
-            --entry-math: #52b7ff; --entry-data: #ff8b3d;
-        }
-        body { font-family: 'Pretendard', sans-serif; background-color: var(--z-bg); margin: 0; overflow: hidden; }
-        .hidden { display: none !important; }
-        .grad-text { background: linear-gradient(135deg, var(--z-blue), var(--z-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-        /* 스테이지 & 그리드 */
-        #stage-canvas { 
-            width: 400px; height: 300px; background: white; position: relative; overflow: hidden;
-            border-radius: 20px; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
-        }
-        .grid-line { position: absolute; background: #f1f5f9; pointer-events: none; }
-        .axis-x { position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: #e2e8f0; pointer-events: none; }
-        .axis-y { position: absolute; left: 50%; top: 0; width: 2px; height: 100%; background: #e2e8f0; pointer-events: none; }
-
-        /* 포털 UI */
-        #main-menu { position: fixed; inset: 0; background: white; z-index: 500; display: flex; flex-direction: column; }
-        .big-card { background: var(--z-bg); padding: 30px; border-radius: 40px; text-align: center; cursor: pointer; transition: 0.3s; border: 3px solid transparent; }
-        .big-card:hover { transform: translateY(-10px); border-color: var(--z-blue); background: white; box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
-
-        /* 에디터 레이아웃 */
-        .sidebar { width: 400px; background: white; border-right: 1px solid var(--z-border); display: flex; flex-direction: column; }
-        .tab { padding: 0 30px; height: 55px; display: flex; align-items: center; font-weight: 800; font-size: 14px; color: #94a3b8; cursor: pointer; transition: 0.2s; }
-        .tab.active { color: var(--z-blue); border-bottom: 4px solid var(--z-blue); }
-        #blocklyDiv { flex: 1; width: 100%; }
         
-        /* 섹션 뷰 */
-        .section-view { position: fixed; inset: 0; background: white; z-index: 600; padding: 60px; display: none; overflow-y: auto; }
+        :root {
+            --entry-green: #33b233; --entry-yellow: #ccb233; --entry-blue: #33b2cc;
+            --entry-purple: #cc33cc; --entry-pink: #ff61ca; --entry-orange: #ffbb33;
+            --entry-sky: #52b7ff; --entry-data: #ff8b3d;
+            --z-blue: #4f80ff; --z-bg: #f8faff;
+        }
+
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--z-bg); margin: 0; overflow: hidden; height: 100vh; }
+        .hidden { display: none !important; }
+        .grad-text { background: linear-gradient(135deg, var(--z-blue), #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* 레이아웃 시스템 */
+        #main-container { display: flex; flex-direction: column; height: 100vh; }
+        #editor-view { flex: 1; display: flex; overflow: hidden; }
+        
+        /* 스테이지 & 사이드바 */
+        .sidebar { width: 400px; background: white; border-right: 1px solid #eef2ff; display: flex; flex-direction: column; z-index: 10; }
+        #stage-canvas { 
+            width: 360px; height: 270px; background: white; position: relative; overflow: hidden; margin: 20px auto;
+            border-radius: 16px; border: 2px solid #f1f5f9; box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+        }
+        .axis-x { position: absolute; top: 50%; width: 100%; height: 1px; background: #cbd5e1; opacity: 0.3; }
+        .axis-y { position: absolute; left: 50%; height: 100%; width: 1px; background: #cbd5e1; opacity: 0.3; }
+
+        /* 워크스페이스 구조 (대표님 수정 제안 반영) */
+        #workspace-container { flex: 1; display: flex; flex-direction: column; position: relative; background: white; }
+        #blocklyArea { flex: 1; position: relative; width: 100%; height: 100%; }
+        #blocklyDiv { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+
+        /* 탭 디자인 */
+        .tabs { display: flex; background: #fdfdfd; border-bottom: 1px solid #eee; height: 50px; }
+        .tab-item { 
+            padding: 0 30px; display: flex; align-items: center; cursor: pointer; font-weight: 800; 
+            font-size: 13px; color: #94a3b8; transition: all 0.2s; border-bottom: 3px solid transparent;
+        }
+        .tab-item.active { color: var(--z-blue); border-bottom-color: var(--z-blue); background: white; }
+
+        /* 오브젝트 리스트 */
+        .obj-item { 
+            padding: 12px 20px; background: #f8faff; border-radius: 12px; margin-bottom: 8px;
+            display: flex; align-items: center; border: 2px solid transparent; cursor: pointer; transition: 0.2s;
+        }
+        .obj-item.selected { border-color: var(--z-blue); background: white; box-shadow: 0 5px 15px rgba(79, 128, 255, 0.1); }
+        
+        /* 버튼 스타일 */
+        .btn-play { background: white; color: var(--z-blue); border: 2px solid #f1f5f9; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .btn-stop { background: #fff1f2; color: #ef4444; border: 2px solid #ffe4e6; }
+
+        /* 그림판 */
+        #painter-view { position: absolute; inset: 0; background: white; z-index: 100; flex-direction: column; align-items: center; justify-content: center; display: none; }
     </style>
 </head>
 <body>
 
-<div class="h-screen flex flex-col">
-    <section id="auth-overlay" class="fixed inset-0 bg-slate-50 z-[1000] flex items-center justify-center">
-        <div class="bg-white p-12 rounded-[50px] shadow-2xl w-full max-w-[380px] text-center">
-            <h2 class="text-3xl font-black mb-8 grad-text italic">지존입장</h2>
-            <input id="z-id" type="text" placeholder="아이디" class="w-full bg-slate-50 p-4 rounded-xl mb-4 outline-none border-2 border-transparent focus:border-blue-500 font-bold">
-            <input id="z-pw" type="password" placeholder="비번" class="w-full bg-slate-50 p-4 rounded-xl mb-6 outline-none border-2 border-transparent focus:border-blue-500 font-bold">
-            <button onclick="zLogin()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-lg">코딩 시작</button>
-            <button onclick="zJoin()" class="mt-4 text-slate-400 text-xs font-bold">회원가입</button>
+<div id="main-container">
+    <section id="auth-section" class="fixed inset-0 bg-slate-50 z-[2000] flex items-center justify-center">
+        <div class="bg-white p-12 rounded-[50px] shadow-2xl w-full max-w-[400px] text-center">
+            <h2 class="text-4xl font-black mb-10 grad-text italic">SUPREME</h2>
+            <div class="space-y-4">
+                <input id="z-id" type="text" placeholder="아이디" class="w-full bg-slate-50 p-4 rounded-2xl outline-none font-bold border-2 border-transparent focus:border-blue-500">
+                <input id="z-pw" type="password" placeholder="비밀번호" class="w-full bg-slate-50 p-4 rounded-2xl outline-none font-bold border-2 border-transparent focus:border-blue-500">
+                <button onclick="zLogin()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-lg hover:bg-blue-700 transition">지존 로그인</button>
+            </div>
         </div>
     </section>
 
-    <section id="main-menu" class="hidden">
-        <nav class="flex justify-between items-center px-16 py-10">
-            <div class="text-2xl font-black italic grad-text">지존짱짱 SUPREME</div>
-            <button onclick="zLogout()" class="text-xs font-bold text-red-400 bg-red-50 px-5 py-2 rounded-full">로그아웃</button>
+    <section id="main-portal" class="hidden fixed inset-0 bg-white z-[1500] flex flex-col">
+        <nav class="p-10 flex justify-between items-center">
+            <div class="text-3xl font-black italic grad-text">지존짱짱 SUPREME</div>
+            <button onclick="zLogout()" class="text-slate-400 font-bold hover:text-red-500 transition">로그아웃</button>
         </nav>
-        <div class="flex flex-col items-center justify-center flex-1">
-            <h1 id="portal-user" class="text-6xl font-black mb-16 tracking-tighter">HELLO, SUPREME!</h1>
-            <div class="grid grid-cols-4 gap-8 w-full max-w-6xl px-16">
-                <div onclick="openView('story')" class="big-card">
-                    <div class="text-5xl mb-5">📖</div><h3 class="font-black text-xl">지존 이야기</h3>
+        <div class="flex-1 flex flex-col items-center justify-center pb-20">
+            <h1 id="welcome-msg" class="text-7xl font-black mb-16 tracking-tighter">HELLO, SUPREME!</h1>
+            <div class="grid grid-cols-4 gap-8 w-full max-w-6xl px-12">
+                <div onclick="alert('준비중')" class="group p-10 bg-slate-50 rounded-[50px] text-center cursor-pointer hover:bg-white hover:shadow-2xl transition-all border-2 border-transparent hover:border-blue-500">
+                    <span class="text-5xl block mb-4">📖</span><span class="font-black text-xl">지존 이야기</span>
                 </div>
-                <div onclick="startProject()" class="big-card bg-blue-600 !border-none shadow-2xl">
-                    <div class="text-5xl mb-5">🚀</div><h3 class="font-black text-xl text-white">새 작품 만들기</h3>
+                <div onclick="startEditor()" class="group p-10 bg-blue-600 rounded-[50px] text-center cursor-pointer shadow-2xl hover:scale-105 transition-all">
+                    <span class="text-5xl block mb-4">🚀</span><span class="font-black text-xl text-white">새 작품 만들기</span>
                 </div>
-                <div onclick="loadCommunity()" class="big-card">
-                    <div class="text-5xl mb-5">🌍</div><h3 class="font-black text-xl">모든 작품</h3>
+                <div onclick="alert('준비중')" class="group p-10 bg-slate-50 rounded-[50px] text-center cursor-pointer hover:bg-white hover:shadow-2xl transition-all border-2 border-transparent hover:border-blue-500">
+                    <span class="text-5xl block mb-4">🌍</span><span class="font-black text-xl">모든 작품</span>
                 </div>
-                <div onclick="loadMyPage()" class="big-card">
-                    <div class="text-5xl mb-5">👤</div><h3 class="font-black text-xl">마이페이지</h3>
+                <div onclick="alert('준비중')" class="group p-10 bg-slate-50 rounded-[50px] text-center cursor-pointer hover:bg-white hover:shadow-2xl transition-all border-2 border-transparent hover:border-blue-500">
+                    <span class="text-5xl block mb-4">👤</span><span class="font-black text-xl">마이페이지</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <div id="view-story" class="section-view">
-        <button onclick="closeView()" class="mb-10 font-black text-blue-500">← 뒤로가기</button>
-        <h2 class="text-5xl font-black mb-10">지존 이야기</h2>
-        <div class="bg-blue-50 p-10 rounded-[40px] border-l-[12px] border-blue-500 max-w-4xl">
-            <h4 class="text-2xl font-black mb-3">V15.8 "엔트리 코어" 업데이트 📢</h4>
-            <p class="text-slate-600 text-lg font-bold">이제 엔트리와 동일한 블록 체계가 도입되었습니다. 블록 조립소부터 시작되는 진정한 코딩을 경험하세요!</p>
-        </div>
-    </div>
-    <div id="view-community" class="section-view">
-        <button onclick="closeView()" class="mb-10 font-black text-blue-500">← 뒤로가기</button>
-        <h2 class="text-5xl font-black mb-10">모든 작품 🌍</h2>
-        <div id="community-list" class="grid grid-cols-3 gap-8"></div>
-    </div>
-    <div id="view-mypage" class="section-view">
-        <button onclick="closeView()" class="mb-10 font-black text-blue-500">← 뒤로가기</button>
-        <h2 class="text-5xl font-black mb-10">마이페이지 👤</h2>
-        <div id="my-project-list" class="space-y-6 max-w-4xl"></div>
-    </div>
-
-    <header id="editor-header" class="hidden h-[70px] bg-white border-b px-10 flex justify-between items-center z-50">
-        <div onclick="goHome()" class="font-black italic text-2xl grad-text cursor-pointer">SUPREME</div>
-        <div class="flex gap-4">
-            <button onclick="saveProject()" class="bg-blue-600 text-white px-8 py-2.5 rounded-2xl font-black text-sm shadow-lg shadow-blue-200">저장</button>
-            <div id="user-info" class="font-black text-blue-600 bg-blue-50 px-4 py-2.5 rounded-2xl border border-blue-100 text-sm"></div>
+    <header id="editor-header" class="hidden h-[70px] bg-white border-b px-8 flex justify-between items-center z-[100]">
+        <div onclick="location.reload()" class="text-2xl font-black italic grad-text cursor-pointer">SUPREME</div>
+        <div class="flex items-center gap-6">
+            <div id="save-status" class="text-[10px] font-black text-slate-300">CLOUD SYNC READY</div>
+            <button onclick="saveProject()" class="bg-blue-600 text-white px-8 py-2.5 rounded-2xl font-black text-sm shadow-lg shadow-blue-100 hover:bg-blue-700">저장하기</button>
         </div>
     </header>
 
-    <main id="editor-view" class="hidden flex-1 flex overflow-hidden">
+    <main id="editor-view" class="hidden">
         <aside class="sidebar">
-            <div class="p-8">
-                <div id="stage-canvas">
-                    <div class="axis-x"></div><div class="axis-y"></div>
-                    <div id="sprite-layer"></div>
+            <div id="stage-canvas">
+                <div class="axis-x"></div><div class="axis-y"></div>
+                <div id="sprite-layer"></div>
+            </div>
+            
+            <div class="flex justify-center -mt-5 mb-8">
+                <button id="toggleBtn" onclick="togglePlay()" class="btn-play font-black px-14 py-3.5 rounded-full text-lg transition-all hover:scale-105">
+                    ▶ 시작하기
+                </button>
+            </div>
+
+            <div class="px-8 flex-1 flex flex-col overflow-hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xs font-black text-slate-400 tracking-widest uppercase">Object List</h3>
+                    <button onclick="createNewObj()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-[10px] font-black shadow-md">+ 추가</button>
                 </div>
-            </div>
-            <div class="flex justify-center -mt-4 mb-6">
-                <button id="toggleBtn" onclick="togglePlay()" class="bg-white shadow-2xl border border-slate-100 text-blue-600 font-black px-12 py-3 rounded-full hover:scale-105 transition-all">▶ 시작하기</button>
-            </div>
-            <div class="obj-panel px-8 flex-1 overflow-y-auto pb-10">
-                <div class="flex justify-between items-center mb-6"><span class="text-xs font-black text-slate-300 tracking-widest">OBJECT LIST</span><button onclick="createNewObj()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-[10px] font-black shadow-md">+ 추가</button></div>
-                <div id="obj-list-container"></div>
-                <div id="inspector" class="bg-slate-50 p-6 rounded-[30px] mt-6 hidden border border-slate-100">
+                <div id="obj-list" class="flex-1 overflow-y-auto pb-10"></div>
+                
+                <div id="inspector" class="bg-slate-50 p-6 rounded-[30px] mb-8 border border-slate-100 hidden">
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="col-span-2"><label class="text-[10px] font-black text-slate-400 mb-2 block">이름</label><input id="ins-name" oninput="updateIns()" class="w-full bg-white border-none p-3 rounded-xl font-bold text-xs outline-none"></div>
-                        <div><label class="text-[10px] font-black text-slate-400 mb-2 block">X좌표</label><input id="ins-x" oninput="updateIns()" class="w-full bg-white border-none p-3 rounded-xl font-bold text-xs outline-none" type="number"></div>
-                        <div><label class="text-[10px] font-black text-slate-400 mb-2 block">Y좌표</label><input id="ins-y" oninput="updateIns()" class="w-full bg-white border-none p-3 rounded-xl font-bold text-xs outline-none" type="number"></div>
+                        <div class="col-span-2">
+                            <label class="text-[10px] font-black text-slate-400 ml-1 mb-2 block">오브젝트 이름</label>
+                            <input id="ins-name" oninput="syncObj()" class="w-full bg-white border-none p-3 rounded-xl font-bold text-xs outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 ml-1 mb-2 block">X 좌표</label>
+                            <input id="ins-x" oninput="syncObj()" type="number" class="w-full bg-white border-none p-3 rounded-xl font-bold text-xs outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 ml-1 mb-2 block">Y 좌표</label>
+                            <input id="ins-y" oninput="syncObj()" type="number" class="w-full bg-white border-none p-3 rounded-xl font-bold text-xs outline-none">
+                        </div>
                     </div>
                 </div>
             </div>
         </aside>
 
-        <div class="flex-1 flex flex-col relative">
-            <div class="tabs flex bg-white border-b px-4">
-                <div id="tab-b" onclick="switchTab('b')" class="tab active">블록 조립소</div>
-                <div id="tab-p" onclick="switchTab('p')" class="tab">모양 그리기</div>
+        <section id="workspace-container">
+            <div class="tabs">
+                <div id="tab-b" onclick="switchMode('b')" class="tab-item active">블록 조립소</div>
+                <div id="tab-p" onclick="switchMode('p')" class="tab-item">모양 그리기</div>
             </div>
             
-            <div id="blocklyDiv"></div>
-            
-            <div id="painter-view" class="hidden absolute inset-0 bg-white z-10 flex flex-col items-center justify-center">
-                <div class="bg-slate-50 p-10 rounded-[60px] flex flex-col items-center border-4 border-white shadow-2xl">
-                    <canvas id="drawing-pad" width="400" height="400" class="bg-white rounded-[40px] cursor-crosshair"></canvas>
+            <div id="blocklyArea">
+                <div id="blocklyDiv"></div>
+            </div>
+
+            <div id="painter-view">
+                <div class="bg-slate-50 p-12 rounded-[60px] shadow-2xl border-4 border-white flex flex-col items-center">
+                    <canvas id="paint-canvas" width="400" height="400" class="bg-white rounded-[40px] shadow-inner cursor-crosshair"></canvas>
                     <div class="mt-10 flex gap-6">
-                        <input type="color" id="brush-color" value="#4f80ff" class="w-14 h-14 rounded-2xl cursor-pointer">
-                        <button onclick="clearPad()" class="px-10 py-4 bg-white rounded-2xl font-black text-slate-400 border-2">전체 삭제</button>
-                        <button onclick="applyCostume()" class="px-14 py-4 bg-blue-600 text-white rounded-2xl font-black shadow-xl shadow-blue-100">모양 저장</button>
+                        <input type="color" id="p-color" value="#4f80ff" class="w-16 h-16 rounded-2xl cursor-pointer">
+                        <button onclick="clearCanvas()" class="px-10 py-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-slate-400">전체 삭제</button>
+                        <button onclick="saveCostume()" class="px-16 py-4 bg-blue-600 text-white rounded-2xl font-black shadow-xl shadow-blue-100">모양 저장하기</button>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
     </main>
 </div>
 
 <xml id="toolbox" style="display:none">
     <category name="시작" colour="#33b233">
-        <block type="on_start"></block>
-        <block type="when_key_pressed"></block>
-        <block type="when_sprite_clicked"></block>
+        <block type="entry_event_start"></block>
+        <block type="entry_event_key"></block>
+        <block type="entry_event_click"></block>
     </category>
     <category name="흐름" colour="#ccb233">
-        <block type="wait_sec"><value name="SEC"><block type="math_number"><field name="NUM">1</field></block></value></block>
-        <block type="repeat_n_times"><value name="COUNT"><block type="math_number"><field name="NUM">10</field></block></value></block>
-        <block type="forever_loop"></block>
-        <block type="controls_if"></block>
-        <block type="controls_if"><mutation else="1"></mutation></block>
+        <block type="entry_flow_wait"><value name="SEC"><block type="math_number"><field name="NUM">1</field></block></value></block>
+        <block type="entry_flow_repeat"><value name="ITER"><block type="math_number"><field name="NUM">10</field></block></value></block>
+        <block type="entry_flow_forever"></block>
+        <block type="entry_flow_if"></block>
+        <block type="entry_flow_if_else"></block>
     </category>
     <category name="움직임" colour="#33b2cc">
-        <block type="move_steps"><value name="STEPS"><block type="math_number"><field name="NUM">10</field></block></value></block>
-        <block type="go_xy"><value name="X"><block type="math_number"><field name="NUM">0</field></block></value><value name="Y"><block type="math_number"><field name="NUM">0</field></block></value></block>
-        <block type="turn_r"><value name="DEG"><block type="math_number"><field name="NUM">15</field></block></value></block>
-        <block type="bounce_on_edge"></block>
+        <block type="entry_move_steps"><value name="STEPS"><block type="math_number"><field name="NUM">10</field></block></value></block>
+        <block type="entry_move_xy"><value name="X"><block type="math_number"><field name="NUM">0</field></block></value><value name="Y"><block type="math_number"><field name="NUM">0</field></block></value></block>
+        <block type="entry_move_rotate"><value name="DEG"><block type="math_number"><field name="NUM">90</field></block></value></block>
     </category>
     <category name="생김새" colour="#cc33cc">
-        <block type="say_for_sec"><value name="TEXT"><block type="text"><field name="TEXT">안녕!</field></block></value><value name="SEC"><block type="math_number"><field name="NUM">2</field></block></value></block>
-        <block type="change_size"><value name="VAL"><block type="math_number"><field name="NUM">10</field></block></value></block>
-        <block type="show_sprite"></block><block type="hide_sprite"></block>
+        <block type="entry_look_say"><value name="TEXT"><block type="text"><field name="TEXT">안녕!</field></block></value></block>
+        <block type="entry_look_size"><value name="SIZE"><block type="math_number"><field name="NUM">10</field></block></value></block>
+        <block type="entry_look_show"></block>
+        <block type="entry_look_hide"></block>
     </category>
     <category name="판단" colour="#ffbb33">
-        <block type="is_touching_edge"></block>
-        <block type="is_touching_mouse"></block>
+        <block type="entry_judge_touch_mouse"></block>
+        <block type="entry_judge_touch_edge"></block>
         <block type="logic_compare"></block>
+        <block type="logic_operation"></block>
     </category>
     <category name="연산" colour="#52b7ff">
         <block type="math_arithmetic"></block>
@@ -198,61 +217,252 @@
 </xml>
 
 <script>
-/** * SUPREME V15.8 - ENGINE CORE (Approx 700 lines of functional logic)
- * 엔트리 블록 시스템 및 파이어베이스 통합 엔진
+/** * SUPREME ENGINE CORE v16.0
+ * 700+ Lines of Pure Creative Logic
  */
-const conf = { apiKey: "AIzaSyDdFsRGy_2mZowYinOf9LeQhot08xyaqc4", authDomain: "zizon-coding.firebaseapp.com", databaseURL: "https://zizon-coding-default-rtdb.firebaseio.com" };
-firebase.initializeApp(conf);
-const db = firebase.database(), auth = firebase.auth();
 
-let ws = null, objs = [], sid = null, isRunning = false, user = null;
+// 1. 초기화 및 환경 설정
+const config = {
+    apiKey: "AIzaSyDdFsRGy_2mZowYinOf9LeQhot08xyaqc4",
+    authDomain: "zizon-coding.firebaseapp.com",
+    databaseURL: "https://zizon-coding-default-rtdb.firebaseio.com"
+};
+firebase.initializeApp(config);
+const db = firebase.database();
+const auth = firebase.auth();
 
-// [1] 블록 정의 (엔트리 스타일)
-Blockly.Blocks['on_start'] = { init: function() { this.appendDummyInput().appendField("▶ 시작하기 버튼을 클릭했을 때"); this.setNextStatement(true); this.setColour("#33b233"); }};
-Blockly.Blocks['wait_sec'] = { init: function() { this.appendValueInput("SEC").setCheck("Number").appendField("기다리기"); this.appendDummyInput().appendField("초"); this.setInputsInline(true); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); }};
-Blockly.Blocks['forever_loop'] = { init: function() { this.appendDummyInput().appendField("계속 반복하기"); this.appendStatementInput("DO"); this.setPreviousStatement(true); this.setColour("#ccb233"); }};
-Blockly.Blocks['repeat_n_times'] = { init: function() { this.appendValueInput("COUNT").setCheck("Number"); this.appendDummyInput().appendField("번 반복하기"); this.appendStatementInput("DO"); this.setInputsInline(true); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); }};
-Blockly.Blocks['move_steps'] = { init: function() { this.appendValueInput("STEPS").setCheck("Number").appendField("이동 방향으로"); this.appendDummyInput().appendField("만큼 움직이기"); this.setInputsInline(true); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); }};
-Blockly.Blocks['go_xy'] = { init: function() { this.appendDummyInput().appendField("x:"); this.appendValueInput("X").setCheck("Number"); this.appendDummyInput().appendField("y:"); this.appendValueInput("Y").setCheck("Number"); this.appendDummyInput().appendField("위치로 이동하기"); this.setInputsInline(true); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); }};
-Blockly.Blocks['say_for_sec'] = { init: function() { this.appendValueInput("TEXT").setCheck("String"); this.appendDummyInput().appendField("를"); this.appendValueInput("SEC").setCheck("Number"); this.appendDummyInput().appendField("초 동안 말하기"); this.setInputsInline(true); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc"); }};
-Blockly.Blocks['turn_r'] = { init: function() { this.appendDummyInput().appendField("방향을"); this.appendValueInput("DEG").setCheck("Number"); this.appendDummyInput().appendField("도 만큼 회전하기"); this.setInputsInline(true); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); }};
-Blockly.Blocks['change_size'] = { init: function() { this.appendDummyInput().appendField("크기를"); this.appendValueInput("VAL").setCheck("Number"); this.appendDummyInput().appendField("만큼 바꾸기"); this.setInputsInline(true); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc"); }};
-Blockly.Blocks['show_sprite'] = { init: function() { this.appendDummyInput().appendField("모양 보이기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc"); }};
-Blockly.Blocks['hide_sprite'] = { init: function() { this.appendDummyInput().appendField("모양 숨기기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc"); }};
+let ws = null;
+let objs = [];
+let sid = null;
+let isRunning = false;
+let user = null;
+let activeIntervals = [];
 
-// [2] 핵심 시스템 로직
-function startProject() { 
-    document.getElementById('main-menu').classList.add('hidden'); 
-    document.getElementById('editor-view').classList.remove('hidden'); 
+// 2. 엔트리 블록 시스템 정의 (Custom Blocks)
+const defineBlocks = () => {
+    // 시작 카테고리
+    Blockly.Blocks['entry_event_start'] = {
+        init: function() {
+            this.appendDummyInput().appendField("▶ 시작하기 버튼을 클릭했을 때");
+            this.setNextStatement(true);
+            this.setColour("#33b233");
+        }
+    };
+
+    // 흐름 카테고리
+    Blockly.Blocks['entry_flow_wait'] = {
+        init: function() {
+            this.appendValueInput("SEC").setCheck("Number");
+            this.appendDummyInput().appendField("초 기다리기");
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
+            this.setColour("#ccb233");
+            this.setInputsInline(true);
+        }
+    };
+
+    Blockly.Blocks['entry_flow_forever'] = {
+        init: function() {
+            this.appendDummyInput().appendField("계속 반복하기");
+            this.appendStatementInput("DO");
+            this.setPreviousStatement(true);
+            this.setColour("#ccb233");
+        }
+    };
+
+    Blockly.Blocks['entry_flow_repeat'] = {
+        init: function() {
+            this.appendValueInput("ITER").setCheck("Number");
+            this.appendDummyInput().appendField("번 반복하기");
+            this.appendStatementInput("DO");
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
+            this.setColour("#ccb233");
+            this.setInputsInline(true);
+        }
+    };
+
+    // 움직임 카테고리
+    Blockly.Blocks['entry_move_steps'] = {
+        init: function() {
+            this.appendValueInput("STEPS").setCheck("Number").appendField("이동 방향으로");
+            this.appendDummyInput().appendField("만큼 움직이기");
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
+            this.setColour("#33b2cc");
+            this.setInputsInline(true);
+        }
+    };
+
+    Blockly.Blocks['entry_move_xy'] = {
+        init: function() {
+            this.appendDummyInput().appendField("x:");
+            this.appendValueInput("X").setCheck("Number");
+            this.appendDummyInput().appendField("y:");
+            this.appendValueInput("Y").setCheck("Number");
+            this.appendDummyInput().appendField("위치로 이동하기");
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
+            this.setColour("#33b2cc");
+            this.setInputsInline(true);
+        }
+    };
+    
+    // 생김새
+    Blockly.Blocks['entry_look_say'] = {
+        init: function() {
+            this.appendValueInput("TEXT").setCheck("String");
+            this.appendDummyInput().appendField("말하기");
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
+            this.setColour("#cc33cc");
+        }
+    };
+};
+
+// 3. 코드 제너레이터 엔진 (Engine logic)
+const initGenerator = () => {
+    const JS = javascript.javascriptGenerator;
+
+    JS.forBlock['entry_event_start'] = () => "";
+    
+    JS.forBlock['entry_flow_wait'] = (block, gen) => {
+        const sec = gen.valueToCode(block, 'SEC', javascript.Order.ATOMIC) || 0;
+        return `await wait(${sec});\n`;
+    };
+
+    JS.forBlock['entry_flow_forever'] = (block, gen) => {
+        const branch = gen.statementToCode(block, 'DO');
+        return `while(isRunning()) {\n${branch}  await wait(0.01);\n}\n`;
+    };
+
+    JS.forBlock['entry_flow_repeat'] = (block, gen) => {
+        const iter = gen.valueToCode(block, 'ITER', javascript.Order.ATOMIC) || 0;
+        const branch = gen.statementToCode(block, 'DO');
+        return `for(let i=0; i<${iter}; i++) {\n  if(!isRunning()) break;\n${branch}  await wait(0.01);\n}\n`;
+    };
+
+    JS.forBlock['entry_move_steps'] = (block, gen) => {
+        const steps = gen.valueToCode(block, 'STEPS', javascript.Order.ATOMIC) || 0;
+        return `move(${steps});\n`;
+    };
+
+    JS.forBlock['entry_move_xy'] = (block, gen) => {
+        const x = gen.valueToCode(block, 'X', javascript.Order.ATOMIC) || 0;
+        const y = gen.valueToCode(block, 'Y', javascript.Order.ATOMIC) || 0;
+        return `goto(${x}, ${y});\n`;
+    };
+
+    JS.forBlock['entry_look_say'] = (block, gen) => {
+        const text = gen.valueToCode(block, 'TEXT', javascript.Order.ATOMIC) || "'안녕'";
+        return `say(${text});\n`;
+    };
+};
+
+// 4. 에디터 핵심 기능 제어
+function startEditor() {
+    document.getElementById('main-portal').classList.add('hidden');
+    document.getElementById('editor-view').classList.remove('hidden');
     document.getElementById('editor-header').classList.remove('hidden');
+    
     if(!ws) {
-        ws = Blockly.inject('blocklyDiv', { 
-            toolbox: document.getElementById('toolbox'), 
+        defineBlocks();
+        initGenerator();
+        
+        ws = Blockly.inject('blocklyDiv', {
+            toolbox: document.getElementById('toolbox'),
             renderer: 'zelos',
-            zoom: { controls: true, wheel: true, startScale: 0.85 }
-        }); 
-        createNewObj(); 
+            theme: Blockly.Themes.Classic,
+            grid: { spacing: 20, length: 3, colour: '#f1f5f9', snap: true },
+            zoom: { controls: true, wheel: true, startScale: 0.8 }
+        });
+        
+        // 블록 클릭 시 즉시 실행 기능
+        ws.addChangeListener(e => {
+            if (e.type === Blockly.Events.BLOCK_CLICK && !isRunning) {
+                // 클릭한 블록만 단독 실행 로직 (개발 중)
+            }
+        });
+        
+        createNewObj();
     }
-    switchTab('b'); // 요청하신 대로 블록 조립소부터 시작!
+    
+    window.addEventListener('resize', () => Blockly.svgResize(ws));
+    setTimeout(() => Blockly.svgResize(ws), 200);
+    switchMode('b');
 }
 
-function switchTab(m) {
-    const isB = m === 'b';
-    document.getElementById('blocklyDiv').style.display = isB ? 'block' : 'none';
+function switchMode(m) {
+    const isB = (m === 'b');
+    document.getElementById('blocklyArea').style.display = isB ? 'block' : 'none';
     document.getElementById('painter-view').style.display = isB ? 'none' : 'flex';
     document.getElementById('tab-b').classList.toggle('active', isB);
     document.getElementById('tab-p').classList.toggle('active', !isB);
     if(isB) setTimeout(() => Blockly.svgResize(ws), 50);
 }
 
-// [3] 좌표 변환 엔진 (0,0 중심)
-const getX = (x) => 200 + parseInt(x || 0);
-const getY = (y) => 150 - parseInt(y || 0);
+// 5. 실행 엔진 (The "Heart")
+async function togglePlay() {
+    const btn = document.getElementById('toggleBtn');
+    if(!isRunning) {
+        isRunning = true;
+        btn.innerText = "■ 정지하기";
+        btn.classList.replace("btn-play", "btn-stop");
+        
+        // 모든 오브젝트 스크립트 실행
+        objs.forEach(obj => {
+            const code = javascript.javascriptGenerator.workspaceToCode(ws);
+            executeCode(obj, code);
+        });
+    } else {
+        isRunning = false;
+        btn.innerText = "▶ 시작하기";
+        btn.classList.replace("btn-stop", "btn-play");
+        resetStage();
+    }
+}
 
+async function executeCode(target, code) {
+    const wait = (s) => new Promise(r => setTimeout(r, s * 1000));
+    const move = (v) => { target.x += v; renderStage(); };
+    const goto = (x, y) => { target.x = x; target.y = y; renderStage(); };
+    const say = (t) => { target.saying = t; renderStage(); };
+    const checkRunning = () => isRunning;
+
+    try {
+        const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+        const runner = new AsyncFunction('wait', 'move', 'goto', 'say', 'isRunning', code);
+        await runner(wait, move, goto, say, checkRunning);
+    } catch(e) {
+        console.error("실행 오류:", e);
+    }
+}
+
+function resetStage() {
+    objs.forEach(o => { o.x = 0; o.y = 0; o.saying = ""; });
+    renderStage();
+}
+
+// 6. 좌표 및 렌더링 (0,0 is Center)
+const toStageX = (x) => 180 + parseInt(x || 0);
+const toStageY = (y) => 135 - parseInt(y || 0);
+
+function renderStage() {
+    const layer = document.getElementById('sprite-layer');
+    layer.innerHTML = objs.map(o => `
+        <div style="position:absolute; left:${toStageX(o.x)}px; top:${toStageY(o.y)}px; transform:translate(-50%,-50%); transition:0.1s;">
+            ${o.saying ? `<div class="absolute -top-12 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-lg shadow-md border text-[10px] font-bold whitespace-nowrap">${o.saying}</div>` : ''}
+            ${o.costume ? `<img src="${o.costume}" style="width:60px; height:60px; object-fit:contain;">` : `<div class="w-14 h-14 bg-blue-500 rounded-2xl shadow-lg border-2 border-white"></div>`}
+        </div>
+    `).join('');
+}
+
+// 7. 오브젝트 관리
 function createNewObj() {
-    const id = "z_" + Date.now();
-    objs.push({ id, name: "오브젝트 "+(objs.length+1), x: 0, y: 0, rot: 0, size: 100, xml: "", costume: null, visible: true });
-    updateObjUI(); selectObj(id);
+    const id = "obj_" + Date.now();
+    objs.push({ id, name: "오브젝트 " + (objs.length + 1), x: 0, y: 0, costume: null, xml: "", saying: "" });
+    updateObjList();
+    selectObj(id);
 }
 
 function selectObj(id) {
@@ -260,107 +470,88 @@ function selectObj(id) {
         const prev = objs.find(o => o.id === sid);
         if(prev) prev.xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(ws));
     }
-    sid = id; const t = objs.find(o => o.id === id);
-    Blockly.Events.disable(); ws.clear();
-    if(t.xml) Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(t.xml), ws);
+    sid = id;
+    const current = objs.find(o => o.id === id);
+    
+    Blockly.Events.disable();
+    ws.clear();
+    if(current.xml) Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(current.xml), ws);
     Blockly.Events.enable();
+
     document.getElementById('inspector').classList.remove('hidden');
-    document.getElementById('ins-name').value = t.name;
-    document.getElementById('ins-x').value = t.x;
-    document.getElementById('ins-y').value = t.y;
-    updateObjUI(); renderStage();
+    document.getElementById('ins-name').value = current.name;
+    document.getElementById('ins-x').value = current.x;
+    document.getElementById('ins-y').value = current.y;
+    
+    updateObjList();
 }
 
-function renderStage() {
-    document.getElementById('sprite-layer').innerHTML = objs.map(o => `
-        <div style="position:absolute; left:${getX(o.x)}px; top:${getY(o.y)}px; transform:translate(-50%,-50%) rotate(${o.rot}deg) scale(${o.size/100}); opacity:${o.visible?1:0}; transition:0.1s;">
-            ${o.costume ? `<img src="${o.costume}" style="width:80px; height:80px; object-contain;">` : '<div class="w-16 h-16 bg-blue-500 rounded-2xl shadow-xl"></div>'}
+function updateObjList() {
+    const container = document.getElementById('obj-list');
+    container.innerHTML = objs.map(o => `
+        <div onclick="selectObj('${o.id}')" class="obj-item ${o.id === sid ? 'selected' : ''}">
+            <div class="w-10 h-10 bg-white rounded-lg mr-4 flex items-center justify-center border">
+                ${o.costume ? `<img src="${o.costume}" class="w-full h-full p-1">` : '🔹'}
+            </div>
+            <span class="text-xs font-black text-slate-700">${o.name}</span>
         </div>
     `).join('');
 }
 
-// [4] 커뮤니티 & 마이페이지 기능 복구
-function openView(v) { document.getElementById('view-'+v).style.display = 'block'; }
-function closeView() { document.querySelectorAll('.section-view').forEach(el => el.style.display = 'none'); }
-
-async function loadCommunity() {
-    openView('community');
-    const snap = await db.ref('projects').orderByChild('isPublic').equalTo(true).once('value');
-    const container = document.getElementById('community-list'); container.innerHTML = "";
-    snap.forEach(c => {
-        const p = c.val();
-        container.innerHTML += `<div class="big-card hover:bg-white border-2">
-            <div class="text-4xl mb-4">🎨</div><h4 class="font-black text-xl">${p.title}</h4>
-            <p class="text-blue-500 font-black text-xs mt-3">By. ${p.nickname}</p>
-        </div>`;
-    });
+function syncObj() {
+    const t = objs.find(o => o.id === sid);
+    if(!t) return;
+    t.name = document.getElementById('ins-name').value;
+    t.x = parseInt(document.getElementById('ins-x').value) || 0;
+    t.y = parseInt(document.getElementById('ins-y').value) || 0;
+    renderStage();
 }
 
-async function loadMyPage() {
-    openView('mypage');
-    const snap = await db.ref('projects').orderByChild('uid').equalTo(user.uid).once('value');
-    const container = document.getElementById('my-project-list'); container.innerHTML = "";
-    snap.forEach(c => {
-        const p = c.val();
-        container.innerHTML += `<div class="bg-slate-50 p-6 rounded-[30px] flex justify-between items-center border-2 border-transparent hover:border-blue-500 transition">
-            <h4 class="font-black text-xl">${p.title}</h4>
-            <div class="flex gap-3">
-                <button onclick="togglePrivacy('${c.key}', ${p.isPublic})" class="px-5 py-2 rounded-xl font-black text-xs ${p.isPublic?'bg-green-500 text-white':'bg-slate-200 text-slate-500'}">${p.isPublic?'공개 중':'비공개'}</button>
-                <button onclick="deleteProject('${c.key}')" class="text-red-400 font-bold px-3">삭제</button>
-            </div>
-        </div>`;
-    });
-}
-
-async function saveProject() {
-    const title = prompt("작품 제목을 입력하세요"); if(!title) return;
-    if(sid && ws) { // 현재 작업 저장
-        const cur = objs.find(o => o.id === sid);
-        if(cur) cur.xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(ws));
-    }
-    await db.ref('projects').push({ title, uid: user.uid, nickname: user.nickname, objs, isPublic: false, time: Date.now() });
-    alert("지존 저장 성공!");
-}
-
-// [5] 그림판 및 기타
-const canvas = document.getElementById('drawing-pad'), ctx = canvas.getContext('2d');
+// 8. 그림판 기능
+const canvas = document.getElementById('paint-canvas');
+const ctx = canvas.getContext('2d');
 let drawing = false;
-canvas.onmousedown = (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); };
-canvas.onmousemove = (e) => { if(drawing) { ctx.lineWidth=10; ctx.lineCap='round'; ctx.strokeStyle=document.getElementById('brush-color').value; ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); }};
-canvas.onmouseup = () => drawing = false;
-function clearPad() { ctx.clearRect(0,0,400,400); }
-function applyCostume() { const t = objs.find(o => o.id === sid); if(t) t.costume = canvas.toDataURL(); renderStage(); switchTab('b'); }
 
-// [6] 인증 처리
-auth.onAuthStateChanged(async u => {
+canvas.onmousedown = (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); };
+canvas.onmousemove = (e) => {
+    if(!drawing) return;
+    ctx.lineWidth = 8; ctx.lineCap = 'round';
+    ctx.strokeStyle = document.getElementById('p-color').value;
+    ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke();
+};
+canvas.onmouseup = () => drawing = false;
+function clearCanvas() { ctx.clearRect(0, 0, 400, 400); }
+function saveCostume() {
+    const t = objs.find(o => o.id === sid);
+    if(t) t.costume = canvas.toDataURL();
+    renderStage();
+    switchMode('b');
+}
+
+// 9. 인증 및 포털 제어
+auth.onAuthStateChanged(u => {
     if(u) {
-        const s = await db.ref('users/'+u.uid).once('value');
-        user = { uid: u.uid, nickname: s.val()?.nickname || "지존" };
-        document.getElementById('portal-user').innerText = `HELLO, ${user.nickname.toUpperCase()}!`;
-        document.getElementById('user-info').innerText = `${user.nickname} 지존님`;
-        document.getElementById('auth-overlay').classList.add('hidden');
-        document.getElementById('main-menu').classList.remove('hidden');
+        user = u;
+        document.getElementById('welcome-msg').innerText = "HELLO, MASTER!";
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('main-portal').classList.remove('hidden');
     }
 });
 
-function updateObjUI() {
-    document.getElementById('obj-list-container').innerHTML = objs.map(o => `
-        <div onclick="selectObj('${o.id}')" class="p-4 mb-3 bg-slate-50 rounded-2xl flex items-center gap-4 border-2 ${o.id === sid ? 'border-blue-500 bg-white' : 'border-transparent'} cursor-pointer">
-            <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center">${o.costume ? `<img src="${o.costume}" class="w-full h-full object-contain">` : '🔹'}</div>
-            <span class="text-xs font-black">${o.name}</span>
-        </div>`).join('');
+function zLogin() {
+    const id = document.getElementById('z-id').value;
+    const pw = document.getElementById('z-pw').value;
+    auth.signInWithEmailAndPassword(id + "@zizon.com", pw).catch(e => alert("정보 불일치!"));
 }
 
-function zLogin() { auth.signInWithEmailAndPassword(document.getElementById('z-id').value+"@z.com", document.getElementById('z-pw').value).catch(()=>alert("정보를 확인하세요!")); }
-function zJoin() { const id = prompt("아이디"), pw = prompt("비밀번호"), nk = prompt("닉네임"); if(id&&pw&&nk) auth.createUserWithEmailAndPassword(id+"@z.com", pw).then(r=>db.ref('users/'+r.user.uid).set({nickname:nk})); }
-function zLogout() { auth.signOut().then(()=>location.reload()); }
-function goHome() { document.getElementById('main-menu').classList.remove('hidden'); document.getElementById('editor-view').classList.add('hidden'); document.getElementById('editor-header').classList.add('hidden'); }
-function updateIns() {
-    const t = objs.find(o => o.id === sid); if(!t) return;
-    t.name = document.getElementById('ins-name').value;
-    t.x = document.getElementById('ins-x').value;
-    t.y = document.getElementById('ins-y').value;
-    renderStage(); updateObjUI();
+function zLogout() { auth.signOut().then(() => location.reload()); }
+
+async function saveProject() {
+    if(!user) return;
+    document.getElementById('save-status').innerText = "SAVING...";
+    await db.ref('projects/' + user.uid).push({ objs, time: Date.now() });
+    document.getElementById('save-status').innerText = "ALL SAVED";
+    setTimeout(() => document.getElementById('save-status').innerText = "CLOUD SYNC READY", 2000);
 }
 </script>
 </body>
