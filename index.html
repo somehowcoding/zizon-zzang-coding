@@ -2,87 +2,80 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지존 SUPREME v21.0 - ALL BLOCKS ENTRY</title>
-    
+    <title>지존짱짱 코딩사이트 v22.0 - 초심 복구판</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
     <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
     <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
     <script src="https://unpkg.com/blockly/msg/ko.js"></script>
-    
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        :root { --z-blue: #4f80ff; --z-green: #32d732; --z-purple: #9a51e0; }
-        body { font-family: 'Pretendard', sans-serif; background: #f1f5f9; margin: 0; overflow: hidden; height: 100vh; }
+        body { font-family: 'Pretendard', sans-serif; background: #f0f2f5; margin: 0; height: 100vh; overflow: hidden; }
         
-        /* [TOP MENU] */
-        .zizon-header { height: 50px; background: #3c3c3c; display: flex; align-items: center; padding: 0 15px; color: white; justify-content: space-between; }
-        .tab-btn { padding: 0 20px; height: 100%; display: flex; align-items: center; cursor: pointer; font-size: 13px; font-weight: bold; border-bottom: 3px solid transparent; }
-        .tab-btn.active { background: #505050; border-bottom-color: var(--z-blue); }
+        /* [지존짱짱 헤더] */
+        .zizon-header { height: 60px; background: #1e293b; color: #f8fafc; display: flex; align-items: center; padding: 0 20px; justify-content: space-between; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .zizon-logo { font-size: 24px; font-weight: 900; color: #38bdf8; letter-spacing: -1px; }
 
-        /* [LAYOUT] */
-        .main-container { display: flex; height: calc(100vh - 50px); }
-        .sidebar { width: 380px; background: #e5e7eb; border-right: 1px solid #d1d5db; display: flex; flex-direction: column; }
+        .main-layout { display: flex; height: calc(100vh - 60px); }
         
-        /* [STAGE] */
-        .stage-box { width: 340px; height: 255px; margin: 15px auto; background: white; border: 1px solid #999; position: relative; overflow: hidden; }
-        .var-overlay { position: absolute; top: 5px; left: 5px; pointer-events: none; }
-        .var-item { background: rgba(255,255,255,0.8); border: 1px solid var(--z-blue); padding: 2px 6px; font-size: 11px; margin-bottom: 2px; display: flex; justify-content: space-between; min-width: 80px; }
+        /* [왼쪽 사이드바: 스테이지 + 속성 + 목록] */
+        .left-panel { width: 400px; background: #ffffff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+        .stage { width: 360px; height: 270px; margin: 20px auto; background: #fff; border: 2px solid #334155; border-radius: 12px; position: relative; overflow: hidden; }
+        .variable-panel { position: absolute; top: 10px; left: 10px; z-index: 100; }
+        .v-tag { background: rgba(255,255,255,0.9); border: 1px solid #38bdf8; padding: 2px 8px; font-size: 12px; font-weight: bold; margin-bottom: 4px; border-radius: 4px; }
 
-        /* [OBJECT LIST] */
-        .obj-container { flex: 1; display: flex; flex-direction: column; background: #f3f4f6; }
-        .obj-header { padding: 8px 15px; font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; background: #ddd; }
-        .obj-list { flex: 1; overflow-y: auto; padding: 10px; }
-        .obj-item { background: white; padding: 10px; border-radius: 8px; border: 2px solid transparent; margin-bottom: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
-        .obj-item.active { border-color: var(--z-blue); }
+        /* [상태창/속성창] */
+        .property-box { background: #f8fafc; margin: 0 20px 15px; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .prop-grid { display: grid; grid-template-cols: repeat(2, 1fr); gap: 10px; font-size: 12px; font-weight: 600; }
+        .prop-input { width: 100%; border: 1px solid #cbd5e1; padding: 6px; border-radius: 6px; outline: none; }
 
-        /* [BLOCKLY] */
+        /* [오브젝트 목록] */
+        .obj-list-wrap { flex: 1; overflow-y: auto; padding: 0 20px 20px; }
+        .obj-card { display: flex; align-items: center; gap: 12px; padding: 12px; background: #f1f5f9; border-radius: 12px; border: 2px solid transparent; cursor: pointer; margin-bottom: 8px; }
+        .obj-card.active { border-color: #38bdf8; background: #f0f9ff; }
+        
+        /* [오른쪽: 블록코딩] */
         #blocklyDiv { flex: 1; }
 
-        /* [STATUS MODAL] */
-        .prop-panel { padding: 15px; background: white; }
-        .grid-ui { display: grid; grid-template-cols: 1fr 1fr; gap: 8px; font-size: 11px; }
-        .z-input { border: 1px solid #ccc; padding: 4px; border-radius: 4px; font-weight: bold; }
-        
-        .run-btn { background: var(--z-blue); color: white; padding: 5px 20px; border-radius: 20px; font-weight: 800; cursor: pointer; }
+        .btn-z { padding: 8px 16px; border-radius: 8px; font-weight: 800; transition: 0.2s; cursor: pointer; border: none; }
+        .btn-run { background: #10b981; color: white; }
+        .btn-add { background: #38bdf8; color: white; width: 100%; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <header class="zizon-header">
-    <div class="flex gap-1 items-center">
-        <div class="font-black text-blue-400 mr-4">SUPREME v21.0</div>
-        <div class="tab-btn active">블록 코딩</div>
-        <div class="tab-btn" onclick="vars.add()">변수 만들기</div>
-        <div class="tab-btn" onclick="painter.open()">모양 추가</div>
+    <div class="zizon-logo">지존짱짱 코딩사이트 v22.0</div>
+    <div class="flex gap-3">
+        <button id="run-btn" class="btn-z btn-run" onclick="engine.toggle()">▶ 시작하기</button>
+        <button class="btn-z bg-purple-500 text-white" onclick="vars.create()">+ 변수 만들기</button>
+        <button class="btn-z bg-pink-500 text-white" onclick="painter.draw()">🎨 모양그리기</button>
     </div>
-    <div id="run-btn" class="run-btn" onclick="engine.toggle()">시작하기</div>
 </header>
 
-<div class="main-container">
-    <div class="sidebar">
-        <div class="stage-box">
-            <div id="var-layer" class="var-overlay"></div>
-            <div id="render-layer" class="w-full h-full"></div>
+<div class="main-layout">
+    <div class="left-panel">
+        <div class="stage">
+            <div id="var-layer" class="variable-panel"></div>
+            <div id="render-layer" class="w-full h-full relative"></div>
         </div>
 
-        <div class="prop-panel border-y">
-            <div class="grid-ui">
-                <div class="col-span-2">이름 <input id="st-name" class="z-input w-full" oninput="obj.sync()"></div>
-                <div>X <input id="st-x" type="number" class="z-input w-full" oninput="obj.sync()"></div>
-                <div>Y <input id="st-y" type="number" class="z-input w-full" oninput="obj.sync()"></div>
-                <div>방향 <input id="st-rot" type="number" class="z-input w-full" oninput="obj.sync()"></div>
-                <div>크기 <input id="st-size" type="number" class="z-input w-full" oninput="obj.sync()"></div>
+        <div class="property-box">
+            <div class="prop-grid">
+                <div class="col-span-2">이름 <input id="p-name" class="prop-input" oninput="obj.sync()"></div>
+                <div>X <input id="p-x" type="number" class="prop-input" oninput="obj.sync()"></div>
+                <div>Y <input id="p-y" type="number" class="prop-input" oninput="obj.sync()"></div>
+                <div>회전 <input id="p-rot" type="number" class="prop-input" oninput="obj.sync()"></div>
+                <div>크기 <input id="p-size" type="number" class="prop-input" oninput="obj.sync()"></div>
             </div>
         </div>
 
-        <div class="obj-container">
-            <div class="obj-header">
-                <span>오브젝트</span>
-                <button onclick="obj.add()" class="text-blue-600">+ 추가</button>
+        <div class="obj-list-wrap">
+            <div class="flex justify-between items-center font-black text-slate-500 text-xs mb-2">
+                오브젝트 목록
             </div>
-            <div id="obj-list" class="obj-list"></div>
+            <div id="obj-list"></div>
+            <button class="btn-z btn-add" onclick="obj.add()">+ 오브젝트 추가</button>
         </div>
     </div>
 
@@ -90,13 +83,11 @@
 </div>
 
 <script>
-// --- [데이터 관리] ---
 const state = {
-    variables: {}, // 1. 점수 변수 초기화 (기본 생성 안 함)
     objects: [],
+    variables: {},
     selectedId: null,
-    isRunning: false,
-    signals: ["시작"]
+    isRunning: false
 };
 
 const engine = {
@@ -105,113 +96,71 @@ const engine = {
         this.defineBlocks();
         this.workspace = Blockly.inject('blocklyDiv', {
             toolbox: this.getToolbox(),
-            renderer: 'zelos',
-            theme: 'classic'
+            renderer: 'zelos'
         });
         
+        // 블록 변경 자동 저장
         this.workspace.addChangeListener(e => {
             if (e.isUiEvent || !state.selectedId) return;
             const target = state.objects.find(o => o.id === state.selectedId);
             if (target) target.xml = Blockly.Xml.workspaceToDom(this.workspace);
         });
 
-        // 2. 초기 오브젝트 1개는 반드시 생성
-        obj.add("엔트리봇");
+        // 초심! 기본 오브젝트 1개 무조건 생성
+        obj.add("지존봇");
     },
 
     defineBlocks: function() {
         const B = Blockly.Blocks, JS = javascript.javascriptGenerator;
         
-        // --- 시작 블록군 ---
-        B['e_start'] = { init: function() { this.appendDummyInput().appendField("🚩 시작 버튼을 클릭했을 때"); this.setNextStatement(true); this.setColour("#33b233"); } };
-        B['e_click'] = { init: function() { this.appendDummyInput().appendField("🖱 오브젝트를 클릭했을 때"); this.setNextStatement(true); this.setColour("#33b233"); } };
+        // 엔트리 핵심 블록들
+        B['start'] = { init: function() { this.appendDummyInput().appendField("🚩 시작했을 때"); this.setNextStatement(true); this.setColour("#10b981"); } };
+        B['move'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("이동 방향으로"); this.appendDummyInput().appendField("만큼 움직이기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#38bdf8"); } };
+        B['turn'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("방향을"); this.appendDummyInput().appendField("도만큼 회전"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#38bdf8"); } };
+        B['bounce'] = { init: function() { this.appendDummyInput().appendField("화면에 닿으면 튕기기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#38bdf8"); } };
+        B['forever'] = { init: function() { this.appendDummyInput().appendField("계속 반복하기"); this.appendStatementInput("DO"); this.setPreviousStatement(true); this.setColour("#f59e0b"); } };
+        B['wait'] = { init: function() { this.appendValueInput("V").appendField("기다리기(초):"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#f59e0b"); } };
         
-        // --- 움직임 블록군 ---
-        B['m_move_dir'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("이동 방향으로"); this.appendDummyInput().appendField("만큼 움직이기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
-        B['m_set_x'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("X 좌표를"); this.appendDummyInput().appendField("(으)로 정하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
-        B['m_set_y'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("Y 좌표를"); this.appendDummyInput().appendField("(으)로 정하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
-        B['m_rot_set'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("방향을"); this.appendDummyInput().appendField("도로 정하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
-        B['m_bounce'] = { init: function() { this.appendDummyInput().appendField("화면에 닿으면 튕기기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
+        B['v_set'] = { init: function() {
+            this.appendValueInput("V").appendField(new Blockly.FieldDropdown(() => Object.keys(state.variables).length ? Object.keys(state.variables).map(v => [v, v]) : [["변수없음", "NONE"]]), "VAR").appendField("를");
+            this.appendDummyInput().appendField("(으)로 정하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#9a51e0");
+        }};
 
-        // --- 생김새 블록군 ---
-        B['l_show'] = { init: function() { this.appendDummyInput().appendField("모양 보이기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ff45e1"); } };
-        B['l_hide'] = { init: function() { this.appendDummyInput().appendField("모양 숨기기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ff45e1"); } };
-        B['l_say'] = { init: function() { this.appendValueInput("V").appendField("말하기:"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ff45e1"); } };
-
-        // --- 흐름 블록군 ---
-        B['f_wait'] = { init: function() { this.appendValueInput("V").appendField("초 기다리기:"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); } };
-        B['f_repeat'] = { init: function() { this.appendValueInput("V").appendField("번 반복하기"); this.appendStatementInput("DO"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); } };
-        B['f_forever'] = { init: function() { this.appendDummyInput().appendField("계속 반복하기"); this.appendStatementInput("DO"); this.setPreviousStatement(true); this.setColour("#ccb233"); } };
-
-        // --- 변수 블록군 ---
-        B['v_get'] = { init: function() { this.appendDummyInput().appendField(new Blockly.FieldDropdown(() => Object.keys(state.variables).length ? Object.keys(state.variables).map(v => [v, v]) : [["변수없음", "NONE"]]), "VAR"); this.setOutput(true, "Number"); this.setColour("#cc33cc"); }};
-        B['v_set'] = { init: function() { this.appendValueInput("V").appendField(new Blockly.FieldDropdown(() => Object.keys(state.variables).length ? Object.keys(state.variables).map(v => [v, v]) : [["변수없음", "NONE"]]), "VAR").appendField("를"); this.appendDummyInput().appendField("(으)로 정하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc"); }};
-        B['v_add'] = { init: function() { this.appendValueInput("V").appendField(new Blockly.FieldDropdown(() => Object.keys(state.variables).length ? Object.keys(state.variables).map(v => [v, v]) : [["변수없음", "NONE"]]), "VAR").appendField("에"); this.appendDummyInput().appendField("만큼 더하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc"); }};
-
-        // JS 생성기
-        JS.forBlock['e_start'] = () => "";
-        JS.forBlock['m_move_dir'] = (b, g) => `moveSteps(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
-        JS.forBlock['m_set_x'] = (b, g) => `target.x = ${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0}; obj.render();\n`;
-        JS.forBlock['m_set_y'] = (b, g) => `target.y = ${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0}; obj.render();\n`;
-        JS.forBlock['m_rot_set'] = (b, g) => `target.rot = ${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0}; obj.render();\n`;
-        JS.forBlock['m_bounce'] = () => `bounce();\n`;
-        JS.forBlock['f_wait'] = (b, g) => `await wait(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
-        JS.forBlock['f_forever'] = (b, g) => `while(active()){ ${g.statementToCode(b, 'DO')} await wait(0.01); }\n`;
-        JS.forBlock['f_repeat'] = (b, g) => {
-            const count = g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0;
-            return `for(let i=0; i<${count}; i++){ ${g.statementToCode(b, 'DO')} await wait(0.01); }\n`;
-        };
-        JS.forBlock['v_get'] = (b) => [`state.variables["${b.getFieldValue('VAR')}"]`, javascript.Order.ATOMIC];
+        JS.forBlock['start'] = () => "";
+        JS.forBlock['move'] = (b, g) => `moveS(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
+        JS.forBlock['turn'] = (b, g) => `target.rot += ${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0}; obj.render();\n`;
+        JS.forBlock['bounce'] = () => `bounce();\n`;
+        JS.forBlock['forever'] = (b, g) => `while(active()){ ${g.statementToCode(b, 'DO')} await wait(0.01); }\n`;
+        JS.forBlock['wait'] = (b, g) => `await wait(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
         JS.forBlock['v_set'] = (b, g) => `state.variables["${b.getFieldValue('VAR')}"] = ${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0}; vars.update();\n`;
-        JS.forBlock['v_add'] = (b, g) => `state.variables["${b.getFieldValue('VAR')}"] += ${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0}; vars.update();\n`;
-        JS.forBlock['l_say'] = (b, g) => `console.log(${g.valueToCode(b, 'V', javascript.Order.ATOMIC)});\n`;
     },
 
     getToolbox: () => `
         <xml>
-            <category name="시작" colour="#33b233">
-                <block type="e_start"></block>
-                <block type="e_click"></block>
+            <category name="시작" colour="#10b981"><block type="start"></block></category>
+            <category name="움직임" colour="#38bdf8">
+                <block type="move"><value name="V"><block type="math_number"><field name="NUM">10</field></block></value></block>
+                <block type="turn"><value name="V"><block type="math_number"><field name="NUM">15</field></block></value></block>
+                <block type="bounce"></block>
             </category>
-            <category name="움직임" colour="#33b2cc">
-                <block type="m_move_dir"><value name="V"><block type="math_number"><field name="NUM">10</field></block></value></block>
-                <block type="m_set_x"><value name="V"><block type="math_number"><field name="NUM">0</field></block></value></block>
-                <block type="m_set_y"><value name="V"><block type="math_number"><field name="NUM">0</field></block></value></block>
-                <block type="m_rot_set"><value name="V"><block type="math_number"><field name="NUM">90</field></block></value></block>
-                <block type="m_bounce"></block>
+            <category name="흐름" colour="#f59e0b">
+                <block type="forever"></block>
+                <block type="wait"><value name="V"><block type="math_number"><field name="NUM">1</field></block></value></block>
             </category>
-            <category name="생김새" colour="#ff45e1">
-                <block type="l_show"></block>
-                <block type="l_hide"></block>
-                <block type="l_say"><value name="V"><block type="text"><field name="TEXT">안녕!</field></block></value></block>
-            </category>
-            <category name="흐름" colour="#ccb233">
-                <block type="f_wait"><value name="V"><block type="math_number"><field name="NUM">1</field></block></value></block>
-                <block type="f_repeat"><value name="V"><block type="math_number"><field name="NUM">10</field></block></value></block>
-                <block type="f_forever"></block>
-                <block type="controls_if"></block>
-            </category>
-            <category name="판단" colour="#3366cc">
-                <block type="logic_compare"></block>
-                <block type="logic_operation"></block>
-                <block type="logic_boolean"></block>
-            </category>
-            <category name="계산" colour="#ee7d16">
-                <block type="math_arithmetic"></block>
+            <category name="변수" colour="#9a51e0"><block type="v_set"></block></category>
+            <category name="계산/판단" colour="#64748b">
                 <block type="math_number"></block>
-                <block type="math_random_int"><value name="FROM"><block type="math_number"><field name="NUM">1</field></block></value><value name="TO"><block type="math_number"><field name="NUM">10</field></block></value></block>
-            </category>
-            <category name="변수" colour="#cc33cc">
-                <block type="v_get"></block>
-                <block type="v_set"><value name="V"><block type="math_number"><field name="NUM">10</field></block></value></block>
-                <block type="v_add"><value name="V"><block type="math_number"><field name="NUM">1</field></block></value></block>
+                <block type="math_arithmetic"></block>
+                <block type="logic_compare"></block>
             </category>
         </xml>`,
 
     toggle: function() {
         state.isRunning = !state.isRunning;
-        document.getElementById('run-btn').innerText = state.isRunning ? "정지하기" : "시작하기";
-        document.getElementById('run-btn').style.background = state.isRunning ? "#ff4b4b" : "#4f80ff";
+        const btn = document.getElementById('run-btn');
+        btn.innerText = state.isRunning ? "■ 정지하기" : "▶ 시작하기";
+        btn.style.background = state.isRunning ? "#ef4444" : "#10b981";
+        
         if(state.isRunning) {
             state.objects.forEach(o => {
                 const code = javascript.javascriptGenerator.workspaceToCode(Blockly.Xml.domToWorkspace(o.xml, new Blockly.Workspace()));
@@ -223,69 +172,71 @@ const engine = {
     run: async function(target, code) {
         const wait = s => new Promise(r => setTimeout(r, s * 1000));
         const active = () => state.isRunning;
-        const moveSteps = s => {
-            const rad = (target.rot * Math.PI) / 180;
-            target.x += Math.cos(rad) * s;
-            target.y += Math.sin(rad) * s;
+        const moveS = s => {
+            const r = (target.rot * Math.PI) / 180;
+            target.x += Math.cos(r) * s; target.y += Math.sin(r) * s;
             obj.render();
         };
         const bounce = () => {
-            if(Math.abs(target.x) > 155) { target.x = target.x > 0 ? 155 : -155; target.rot = 180 - target.rot; }
-            if(Math.abs(target.y) > 115) { target.y = target.y > 0 ? 115 : -115; target.rot = -target.rot; }
+            if(Math.abs(target.x) > 160) { target.x = target.x > 0 ? 160 : -160; target.rot = 180 - target.rot; }
+            if(Math.abs(target.y) > 110) { target.y = target.y > 0 ? 110 : -110; target.rot = -target.rot; }
             obj.render();
         };
         const AsyncFn = Object.getPrototypeOf(async function(){}).constructor;
-        try { await new AsyncFn('wait','active','target','state','vars','obj','moveSteps','bounce', code)(wait,active,target,state,vars,obj,moveSteps,bounce); } catch(e){}
+        try { await new AsyncFn('wait','active','target','state','moveS','bounce','obj','vars', code)(wait,active,target,state,moveS,bounce,obj,vars); } catch(e){}
     }
 };
 
 const obj = {
     add: function(name = null) {
-        const id = "o_" + Date.now();
+        const id = "obj_" + Date.now();
         state.objects.push({
             id, name: name || "오브젝트 " + (state.objects.length + 1),
             x: 0, y: 0, rot: 0, size: 100, img: null,
-            xml: Blockly.Xml.textToDom('<xml xmlns="https://developers.google.com/blockly/xml"><block type="e_start" x="20" y="20"></block></xml>')
+            xml: Blockly.Xml.textToDom('<xml xmlns="https://developers.google.com/blockly/xml"><block type="start" x="20" y="20"></block></xml>')
         });
         this.select(id);
+        this.render();
     },
     select: function(id) {
         state.selectedId = id;
         const target = state.objects.find(o => o.id === id);
         engine.workspace.clear();
         Blockly.Xml.domToWorkspace(target.xml, engine.workspace);
-        document.getElementById('st-name').value = target.name;
-        document.getElementById('st-x').value = Math.round(target.x);
-        document.getElementById('st-y').value = Math.round(target.y);
-        document.getElementById('st-rot').value = target.rot;
-        document.getElementById('st-size').value = target.size;
+        
+        document.getElementById('p-name').value = target.name;
+        document.getElementById('p-x').value = Math.round(target.x);
+        document.getElementById('p-y').value = Math.round(target.y);
+        document.getElementById('p-rot').value = target.rot;
+        document.getElementById('p-size').value = target.size;
+        
         this.updateList();
     },
     sync: function() {
-        const target = state.objects.find(o => o.id === state.selectedId);
-        if(!target) return;
-        target.name = document.getElementById('st-name').value;
-        target.x = Number(document.getElementById('st-x').value);
-        target.y = Number(document.getElementById('st-y').value);
-        target.rot = Number(document.getElementById('st-rot').value);
-        target.size = Number(document.getElementById('st-size').value);
+        const t = state.objects.find(o => o.id === state.selectedId);
+        if(!t) return;
+        t.name = document.getElementById('p-name').value;
+        t.x = Number(document.getElementById('p-x').value);
+        t.y = Number(document.getElementById('p-y').value);
+        t.rot = Number(document.getElementById('p-rot').value);
+        t.size = Number(document.getElementById('p-size').value);
         this.updateList(); this.render();
     },
     updateList: () => {
         document.getElementById('obj-list').innerHTML = state.objects.map(o => `
-            <div onclick="obj.select('${o.id}')" class="obj-item ${state.selectedId === o.id ? 'active' : ''}">
-                <div class="w-8 h-8 bg-slate-200 rounded flex items-center justify-center overflow-hidden">
-                    ${o.img ? `<img src="${o.img}" class="w-full h-full object-contain">` : '🖼'}
+            <div onclick="obj.select('${o.id}')" class="obj-card ${state.selectedId === o.id ? 'active' : ''}">
+                <div class="w-10 h-10 bg-white rounded border flex items-center justify-center overflow-hidden">
+                    ${o.img ? `<img src="${o.img}" class="w-full h-full object-contain">` : '<b class="text-blue-500">Z</b>'}
                 </div>
-                <div class="text-xs font-bold truncate w-24">${o.name}</div>
+                <div class="font-black text-sm">${o.name}</div>
             </div>
         `).join('');
     },
     render: () => {
         document.getElementById('render-layer').innerHTML = state.objects.map(o => `
-            <div style="position:absolute; left:${170+o.x}px; top:${127-o.y}px; transform:translate(-50%,-50%) rotate(${o.rot}deg); transition:0.05s; width:${40*(o.size/100)}px; height:${40*(o.size/100)}px;">
+            <div style="position:absolute; left:${180+o.x}px; top:${135-o.y}px; transform:translate(-50%,-50%) rotate(${o.rot}deg); width:${40*(o.size/100)}px; height:${40*(o.size/100)}px; transition:0.05s;">
                 ${o.img ? `<img src="${o.img}" class="w-full h-full object-contain">` : 
-                `<div class="w-full h-full bg-blue-600 rounded-lg border border-white shadow-md flex items-center justify-center text-white text-[10px] font-black">Z</div>`}
+                `<div class="w-full h-full bg-slate-800 rounded shadow-lg flex items-center justify-center text-white text-[10px] font-black border-2 border-white">ZIZON</div>`}
             </div>
         `).join('');
     },
@@ -293,45 +244,24 @@ const obj = {
 };
 
 const vars = {
-    add: function() {
-        const name = prompt("새 변수 이름을 입력하세요:");
-        if(name && !state.variables[name]) {
-            state.variables[name] = 0;
-            this.update();
-            engine.workspace.updateToolbox(engine.getToolbox());
-        }
+    create: function() {
+        const n = prompt("변수 이름:");
+        if(n) { state.variables[n] = 0; this.update(); engine.workspace.updateToolbox(engine.getToolbox()); }
     },
     update: function() {
-        document.getElementById('var-layer').innerHTML = Object.entries(state.variables).map(([name, val]) => `
-            <div class="var-item"><span>${name}</span><b>${val}</b></div>
-        `).join('');
+        document.getElementById('var-layer').innerHTML = Object.entries(state.variables).map(([k, v]) => `<div class="v-tag">${k}: ${v}</div>`).join('');
     }
 };
 
 const painter = {
-    canvas: null, ctx: null, drawing: false,
-    open: function() {
-        const win = window.open("", "Painter", "width=500,height=500");
-        win.document.write(`
-            <h3>모양 그리기</h3>
-            <canvas id="c" width="400" height="300" style="border:1px solid #000; cursor:crosshair"></canvas><br>
-            <button onclick="save()">저장하고 닫기</button>
-            <script>
-                const c = document.getElementById('c'), ctx = c.getContext('2d');
-                let draw = false;
-                c.onmousedown = () => { draw = true; ctx.beginPath(); };
-                c.onmouseup = () => draw = false;
-                c.onmousemove = (e) => { if(!draw) return; ctx.lineTo(e.clientX-10, e.clientY-40); ctx.stroke(); };
-                function save() { window.opener.painter.callback(c.toDataURL()); window.close(); }
-            <\/script>
-        `);
-    },
-    callback: function(data) {
-        const target = state.objects.find(o => o.id === state.selectedId);
-        if(target) target.img = data;
-        obj.updateList(); obj.render();
+    draw: function() {
+        const data = prompt("모양 URL을 입력하거나, 나중에 그리기 기능을 추가할 예정입니다! (현재는 이미지 주소만 가능)");
+        if(data) {
+            const t = state.objects.find(o => o.id === state.selectedId);
+            if(t) t.img = data; obj.render(); obj.updateList();
+        }
     }
-};
+}
 
 engine.init();
 </script>
