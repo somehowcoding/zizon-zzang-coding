@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지존 SUPREME v20.0 - OBJECT EDITOR</title>
+    <title>지존 SUPREME v20.0 - FIREBASE & TTS</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
@@ -11,255 +11,218 @@
     <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
     <script src="https://unpkg.com/blockly/msg/ko.js"></script>
     
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        :root { --z-blue: #4f80ff; --z-bg: #f8fafc; }
+        :root { --z-blue: #4f80ff; --z-purple: #7c3aed; --z-bg: #f8fafc; }
         body { font-family: 'Pretendard', sans-serif; background: var(--z-bg); margin: 0; overflow: hidden; height: 100vh; }
-        
-        .zizon-nav { height: 64px; background: white; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; padding: 0 40px; position: fixed; top: 0; width: 100%; z-index: 1000; }
+        .zizon-nav { height: 64px; background: white; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; padding: 0 40px; position: fixed; top: 0; width: 100%; z-index: 2000; }
         .content-section { margin-top: 64px; height: calc(100vh - 64px); display: none; }
-        .content-section.active { display: flex; }
-
-        .sidebar { width: 350px; border-right: 1px solid #e2e8f0; background: white; display: flex; flex-direction: column; }
-        .stage-box { width: 320px; height: 240px; background: #fff; margin: 15px auto; border-radius: 20px; border: 1px solid #f1f5f9; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-        
-        /* Object Item */
-        .obj-item { padding: 12px; border-radius: 15px; border: 2px solid transparent; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; background: #f8fafc; }
-        .obj-item.active { border-color: var(--z-blue); background: #eff6ff; }
-        .obj-thumb { width: 40px; height: 40px; background: white; border-radius: 8px; border: 1px solid #eee; overflow: hidden; }
-
-        /* Painter Modal */
-        #painter { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 5000; display: none; align-items: center; justify-content: center; }
-        .painter-win { background: white; p: 20px; border-radius: 30px; padding: 30px; text-align: center; }
-        canvas { border: 2px solid #eee; cursor: crosshair; background: white; border-radius: 10px; }
-
+        .content-section.active { display: block; }
+        #editor-container { display: none; height: calc(100vh - 64px); margin-top: 64px; background: white; }
+        #editor-container.active { display: flex; }
+        .sidebar { width: 400px; border-right: 1px solid #f1f5f9; display: flex; flex-direction: column; }
+        .stage-box { width: 360px; height: 270px; background: #fff; margin: 20px auto; border-radius: 24px; border: 1px solid #f1f5f9; position: relative; overflow: hidden; }
         #blocklyDiv { flex: 1; }
-        .z-btn { padding: 12px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; border: none; }
+        .work-card { background: #f8fafc; padding: 15px; border-radius: 20px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; }
+        #mypage-drawer { position: fixed; right: -450px; top: 0; width: 400px; height: 100vh; background: white; z-index: 3000; transition: 0.4s; padding: 40px; box-shadow: -10px 0 30px rgba(0,0,0,0.05); }
+        #mypage-drawer.open { right: 0; }
+        .z-btn { padding: 14px 20px; border-radius: 15px; font-weight: 800; border: none; cursor: pointer; transition: 0.2s; }
         .z-primary { background: var(--z-blue); color: white; }
     </style>
 </head>
 <body>
 
 <nav class="zizon-nav">
-    <div class="flex items-center gap-2 cursor-pointer" onclick="location.reload()">
+    <div class="flex items-center gap-2 cursor-pointer" onclick="core.go('main')">
         <div class="bg-blue-600 w-8 h-8 rounded-lg flex items-center justify-center text-white font-black">Z</div>
-        <span class="font-black text-xl tracking-tighter">SUPREME ENGINE</span>
+        <span class="font-black text-xl tracking-tighter">SUPREME</span>
+    </div>
+    <div class="flex ml-12 gap-6">
+        <div onclick="core.go('make')" class="font-bold text-slate-400 hover:text-blue-500 cursor-pointer">만들기</div>
+        <div onclick="core.go('comm')" class="font-bold text-slate-400 hover:text-blue-500 cursor-pointer">커뮤니티</div>
+    </div>
+    <div class="ml-auto flex items-center gap-4 cursor-pointer" onclick="core.toggleMypage()">
+        <span class="font-black text-sm text-slate-700">어쩌다코딩</span>
+        <div class="w-10 h-10 rounded-xl bg-slate-200 overflow-hidden">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Eojjeoda" alt="Avatar">
+        </div>
     </div>
 </nav>
 
-<section class="content-section active">
-    <aside class="sidebar">
-        <div class="stage-box">
-            <div id="render-layer" class="w-full h-full relative"></div>
-        </div>
-        
-        <div class="px-5 mb-4 space-y-2">
-            <button onclick="engine.toggle()" id="run-btn" class="z-btn z-primary w-full text-lg">▶ 엔진 가동</button>
-            <button onclick="painter.open()" class="z-btn bg-slate-800 text-white w-full text-sm">🎨 선택 오브젝트 그리기</button>
-        </div>
-
-        <div class="px-5 flex-1 overflow-hidden flex flex-col">
-            <p class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Objects</p>
-            <div id="obj-list" class="flex-1 overflow-y-auto space-y-2 pb-5"></div>
-            <button onclick="obj.add()" class="mb-5 p-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 font-bold hover:text-blue-500">+ 오브젝트 추가</button>
-        </div>
-    </aside>
-
-    <main id="blocklyDiv"></main>
+<section id="sec-main" class="content-section active">
+    <div class="h-full flex flex-col items-center justify-center">
+        <h1 class="text-6xl font-black mb-6">지존 코딩 v20.0</h1>
+        <p class="text-slate-400 text-xl mb-10">파이어베이스 실시간 연동 및 자동 더빙 탑재</p>
+        <button onclick="core.go('make')" class="z-btn z-primary px-12 py-5 text-xl">시작하기</button>
+    </div>
 </section>
 
-<div id="painter">
-    <div class="painter-win">
-        <h2 class="text-2xl font-black mb-4">모양 그리기</h2>
-        <canvas id="paintCanvas" width="200" height="200"></canvas>
-        <div class="flex gap-2 mt-6 justify-center">
-            <button onclick="painter.clear()" class="z-btn bg-slate-100">지우기</button>
-            <button onclick="painter.close(true)" class="z-btn z-primary px-10">저장하기</button>
-            <button onclick="painter.close(false)" class="z-btn bg-red-100 text-red-500">취소</button>
+<section id="editor-container">
+    <aside class="sidebar">
+        <div class="stage-box"><div id="render-layer" class="w-full h-full relative"></div></div>
+        <div class="px-6 mb-4 space-y-2">
+            <button onclick="engine.toggle()" id="run-btn" class="z-btn z-primary w-full text-lg">▶ 엔진 가동</button>
+            <button onclick="fb.saveProject()" class="z-btn bg-slate-800 text-white w-full text-sm">💾 서버에 저장하기</button>
+        </div>
+        <div class="px-6 flex-1 overflow-y-auto" id="obj-list"></div>
+    </aside>
+    <div id="blocklyDiv"></div>
+</section>
+
+<section id="sec-comm" class="content-section">
+    <div class="max-w-3xl mx-auto h-full flex flex-col p-10">
+        <div id="chat-window" class="flex-1 bg-white rounded-3xl p-6 overflow-y-auto mb-4 border border-slate-100 shadow-sm"></div>
+        <div class="flex gap-2">
+            <input id="chat-input" type="text" placeholder="메시지 입력..." class="flex-1 p-5 rounded-2xl border-none bg-white shadow-sm font-bold">
+            <button onclick="fb.sendChat()" class="z-btn z-primary px-10">전송</button>
         </div>
     </div>
+</section>
+
+<div id="mypage-drawer">
+    <h2 class="text-3xl font-black mb-8">My Projects</h2>
+    <div id="project-list" class="space-y-4"></div>
 </div>
 
 <xml id="toolbox" style="display:none">
     <category name="시작" colour="#33b233"><block type="e_start"></block></category>
     <category name="움직임" colour="#33b2cc">
         <block type="m_x_by"><value name="V"><block type="math_number"><field name="NUM">10</field></block></value></block>
-        <block type="m_y_by"><value name="V"><block type="math_number"><field name="NUM">10</field></block></value></block>
         <block type="m_rotate_by"><value name="V"><block type="math_number"><field name="NUM">90</field></block></value></block>
-        <block type="m_bounce"></block>
     </category>
-    <category name="흐름" colour="#ccb233">
-        <block type="f_wait"><value name="S"><block type="math_number"><field name="NUM">1</field></block></value></block>
-        <block type="f_forever"></block>
+    <category name="생김새" colour="#cc33cc">
+        <block type="l_say"><value name="T"><block type="text"><field name="TEXT">안녕!</field></block></value></block>
     </category>
 </xml>
 
 <script>
-/** [ZIZON ENGINE v20.0] **/
+/** [FIREBASE CONFIG] **/
+const firebaseConfig = {
+    databaseURL: "https://zizon-coding-default-rtdb.firebaseio.com"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+/** [CORE SYSTEM] **/
+const fb = {
+    saveProject: function() {
+        const title = prompt("작품 제목:") || "무제";
+        const data = Blockly.serialization.workspaces.save(engine.workspace);
+        db.ref('projects').push({ title, data, user: "어쩌다코딩", isPublic: false });
+        alert("서버 저장 완료!");
+    },
+    sendChat: function() {
+        const inp = document.getElementById('chat-input');
+        if(!inp.value) return;
+        db.ref('chats').push({ user: "어쩌다코딩", msg: inp.value, time: Date.now() });
+        inp.value = "";
+    },
+    togglePublic: function(key, current) {
+        db.ref('projects/' + key).update({ isPublic: !current });
+    }
+};
+
+const core = {
+    go: function(id) {
+        document.querySelectorAll('.content-section, #editor-container').forEach(s => s.classList.remove('active'));
+        if(id === 'make') {
+            document.getElementById('editor-container').classList.add('active');
+            if(!engine.workspace) engine.init();
+        } else {
+            document.getElementById('sec-' + id).classList.add('active');
+        }
+    },
+    toggleMypage: function() {
+        document.getElementById('mypage-drawer').classList.toggle('open');
+    }
+};
 
 const engine = {
-    workspace: null, isRunning: false, objects: [], currentObjId: null,
-    
+    workspace: null, isRunning: false, objects: [],
     init: function() {
-        this.defineBlocks();
+        this.define();
         this.workspace = Blockly.inject('blocklyDiv', { toolbox: document.getElementById('toolbox'), renderer: 'zelos' });
+        obj.add();
+    },
+    define: function() {
+        Blockly.Blocks['e_start'] = { init: function() { this.appendDummyInput().appendField("🚩 시작했을 때"); this.setNextStatement(true); this.setColour("#33b233"); } };
+        Blockly.Blocks['m_x_by'] = { init: function() { this.appendValueInput("V").appendField("X를"); this.appendDummyInput().appendField("만큼 바꾸기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
+        Blockly.Blocks['l_say'] = { init: function() { this.appendValueInput("T").appendField("말하기:"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc"); } };
         
-        // 블록이 바뀔 때마다 현재 오브젝트에 데이터 저장
-        this.workspace.addChangeListener((e) => {
-            if (e.isUiEvent || !this.currentObjId) return;
-            const target = this.objects.find(o => o.id === this.currentObjId);
-            if (target) target.blocks = Blockly.serialization.workspaces.save(this.workspace);
-        });
-
-        obj.add(); // 기본 오브젝트 생성
+        javascript.javascriptGenerator.forBlock['e_start'] = () => "";
+        javascript.javascriptGenerator.forBlock['m_x_by'] = (b, g) => `moveX(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
+        javascript.javascriptGenerator.forBlock['l_say'] = (b, g) => `say(${g.valueToCode(b, 'T', javascript.Order.ATOMIC) || "''"});\n`;
     },
-
-    defineBlocks: function() {
-        const B = Blockly.Blocks; const JS = javascript.javascriptGenerator;
-        B['e_start'] = { init: function() { this.appendDummyInput().appendField("🚩 시작했을 때"); this.setNextStatement(true); this.setColour("#33b233"); } };
-        B['m_x_by'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("X를"); this.appendDummyInput().appendField("만큼 바꾸기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
-        B['m_y_by'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("Y를"); this.appendDummyInput().appendField("만큼 바꾸기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
-        B['m_rotate_by'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("방향을"); this.appendDummyInput().appendField("만큼 회전"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
-        B['m_bounce'] = { init: function() { this.appendDummyInput().appendField("벽에 닿으면 튕기기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
-        B['f_wait'] = { init: function() { this.appendValueInput("S").appendField("기다리기:"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); } };
-        B['f_forever'] = { init: function() { this.appendDummyInput().appendField("계속 반복"); this.appendStatementInput("DO"); this.setPreviousStatement(true); this.setColour("#ccb233"); } };
-
-        JS.forBlock['e_start'] = () => "";
-        JS.forBlock['m_x_by'] = (b, g) => `moveX(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
-        JS.forBlock['m_y_by'] = (b, g) => `moveY(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
-        JS.forBlock['m_rotate_by'] = (b, g) => `rotBy(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
-        JS.forBlock['m_bounce'] = () => `bounce();\n`;
-        JS.forBlock['f_wait'] = (b, g) => `await wait(${g.valueToCode(b, 'S', javascript.Order.ATOMIC) || 0});\n`;
-        JS.forBlock['f_forever'] = (b, g) => `while(active()){ ${g.statementToCode(b, 'DO')} await wait(0.01); }\n`;
-    },
-
     toggle: function() {
         if(!this.isRunning) {
-            this.isRunning = true; document.getElementById('run-btn').innerText = "■ 정지";
-            this.objects.forEach(o => {
-                const code = javascript.javascriptGenerator.workspaceToCode(this.workspace); // 현재는 각자 데이터로 실행하게 수정 필요하지만 간단히 구현
-                this.runObject(o);
-            });
+            this.isRunning = true;
+            const code = javascript.javascriptGenerator.workspaceToCode(this.workspace);
+            this.objects.forEach(o => this.run(o, code));
         } else {
-            this.isRunning = false; document.getElementById('run-btn').innerText = "▶ 엔진 가동";
+            this.isRunning = false;
             obj.reset();
         }
     },
-
-    runObject: async function(target) {
-        if (!target.blocks) return;
-        const tempWS = new Blockly.Workspace();
-        Blockly.serialization.workspaces.load(target.blocks, tempWS);
-        const code = javascript.javascriptGenerator.workspaceToCode(tempWS);
-        
+    run: async function(target, code) {
         const moveX = v => { target.x += v; obj.render(); };
-        const moveY = v => { target.y += v; obj.render(); };
-        const rotBy = v => { target.rot += v; obj.render(); };
-        const bounce = () => {
-            if(Math.abs(target.x) > 150) { target.x = target.x > 0 ? 150 : -150; target.rot = 180 - target.rot; }
-            if(Math.abs(target.y) > 110) { target.y = target.y > 0 ? 110 : -110; target.rot = -target.rot; }
-            obj.render();
+        const say = t => { 
+            target.say = t; obj.render();
+            const s = new SpeechSynthesisUtterance(t);
+            s.lang = 'ko-KR';
+            window.speechSynthesis.speak(s); // [더빙 기능]
         };
         const wait = s => new Promise(r => setTimeout(r, s * 1000));
         const active = () => this.isRunning;
         const AsyncFn = Object.getPrototypeOf(async function(){}).constructor;
-        try { await new AsyncFn('moveX','moveY','rotBy','bounce','wait','active', code)(moveX,moveY,rotBy,bounce,wait,active); } catch(e){}
+        try { await new AsyncFn('moveX','say','wait','active', code)(moveX,say,wait,active); } catch(e){}
     }
 };
 
 const obj = {
     add: function() {
-        const id = "obj_" + Date.now();
-        const newObj = { id, name: "오브젝트 " + (engine.objects.length + 1), x: 0, y: 0, rot: 0, blocks: null, img: null };
-        engine.objects.push(newObj);
-        this.select(id);
-        this.updateList();
+        engine.objects.push({ x: 0, y: 0, say: "" });
+        this.render();
     },
-    select: function(id) {
-        engine.currentObjId = id;
-        const target = engine.objects.find(o => o.id === id);
-        
-        // 블록 로드
-        engine.workspace.clear();
-        if (target.blocks) {
-            Blockly.serialization.workspaces.load(target.blocks, engine.workspace);
-        }
-        this.updateList();
-    },
-    updateList: () => {
-        const list = document.getElementById('obj-list');
-        list.innerHTML = engine.objects.map(o => `
-            <div class="obj-item ${o.id === engine.currentObjId ? 'active' : ''}" onclick="obj.select('${o.id}')">
-                <div class="obj-thumb">
-                    ${o.img ? `<img src="${o.img}" class="w-full h-full">` : `<div class="w-full h-full bg-slate-800 flex items-center justify-center text-white text-[10px]">Z</div>`}
-                </div>
-                <div class="text-sm font-bold text-slate-700">${o.name}</div>
+    render: function() {
+        document.getElementById('render-layer').innerHTML = engine.objects.map(o => `
+            <div style="position:absolute; left:${180+o.x}px; top:135px; transform:translate(-50%,-50%); transition:0.1s;">
+                ${o.say ? `<div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full shadow-sm text-xs font-bold border border-blue-200">${o.say}</div>` : ''}
+                <div class="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-white font-black">Z</div>
             </div>
         `).join('');
     },
-    render: () => {
-        const layer = document.getElementById('render-layer');
-        layer.innerHTML = engine.objects.map(o => `
-            <div style="position:absolute; left:${160+o.x}px; top:${120-o.y}px; transform:translate(-50%,-50%) rotate(${o.rot}deg); transition:0.05s;">
-                ${o.img ? `<img src="${o.img}" style="width:50px; height:50px;">` : `<div class="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-white font-black">Z</div>`}
-            </div>
-        `).join('');
-    },
-    reset: () => {
-        engine.objects.forEach(o => { o.x = 0; o.y = 0; o.rot = 0; });
-        obj.render();
-    }
+    reset: () => { engine.objects.forEach(o => { o.x = 0; o.say = ""; }); obj.render(); }
 };
 
-/** [PAINTER SYSTEM] **/
-const painter = {
-    canvas: null, ctx: null, drawing: false,
-    init: function() {
-        this.canvas = document.getElementById('paintCanvas');
-        this.ctx = this.canvas.getContext('2d');
-        this.ctx.lineWidth = 10;
-        this.ctx.lineCap = 'round';
-        this.ctx.strokeStyle = '#000';
+/** [FIREBASE REAL-TIME LISTENERS] **/
+db.ref('chats').limitToLast(20).on('value', snap => {
+    const data = snap.val();
+    if(!data) return;
+    document.getElementById('chat-window').innerHTML = Object.values(data).map(c => `
+        <div class="mb-3">
+            <span class="font-black text-blue-600 text-xs">${c.user}</span>
+            <p class="font-bold text-slate-700">${c.msg}</p>
+        </div>
+    `).join('');
+    const win = document.getElementById('chat-window');
+    win.scrollTop = win.scrollHeight;
+});
 
-        this.canvas.onmousedown = () => this.drawing = true;
-        this.canvas.onmouseup = () => { this.drawing = false; this.ctx.beginPath(); };
-        this.canvas.onmousemove = (e) => {
-            if (!this.drawing) return;
-            const rect = this.canvas.getBoundingClientRect();
-            this.ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-            this.ctx.stroke();
-        };
-    },
-    open: function() {
-        document.getElementById('painter').style.display = 'flex';
-        this.clear();
-        const target = engine.objects.find(o => o.id === engine.currentObjId);
-        if (target.img) {
-            const img = new Image();
-            img.onload = () => this.ctx.drawImage(img, 0, 0);
-            img.src = target.img;
-        }
-    },
-    close: function(save) {
-        if (save) {
-            const target = engine.objects.find(o => o.id === engine.currentObjId);
-            target.img = this.canvas.toDataURL();
-            obj.updateList();
-            obj.render();
-        }
-        document.getElementById('painter').style.display = 'none';
-    },
-    clear: function() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
-};
-
-// [START]
-window.onload = () => {
-    engine.init();
-    painter.init();
-    obj.render();
-};
+db.ref('projects').on('value', snap => {
+    const data = snap.val();
+    if(!data) return;
+    document.getElementById('project-list').innerHTML = Object.entries(data).map(([key, p]) => `
+        <div class="work-card">
+            <div class="flex-1 font-black text-slate-800">${p.title}</div>
+            <button onclick="fb.togglePublic('${key}', ${p.isPublic})" class="text-[10px] font-bold ${p.isPublic ? 'text-green-500' : 'text-slate-400'}">
+                ${p.isPublic ? '공개중' : '비공개'}
+            </button>
+        </div>
+    `).join('');
+});
 </script>
 </body>
 </html>
