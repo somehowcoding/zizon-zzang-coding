@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지존짱짱 SUPREME V16.0 - Full Engine</title>
+    <title>지존짱짱 SUPREME V16.3 - HEAVY BOSS ENGINE</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
@@ -15,162 +15,212 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     
     <style>
+        /* [1. 글로벌 스타일 및 테마 정의] */
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         
         :root {
-            --entry-green: #33b233; --entry-yellow: #ccb233; --entry-blue: #33b2cc;
-            --entry-purple: #cc33cc; --entry-pink: #ff61ca; --entry-orange: #ffbb33;
-            --entry-sky: #52b7ff; --entry-data: #ff8b3d;
-            --z-blue: #4f80ff; --z-bg: #f8faff;
+            --boss-blue: #4f80ff;
+            --boss-purple: #7c3aed;
+            --boss-dark: #0f172a;
+            --boss-bg: #f1f5f9;
+            --entry-green: #33b233;
+            --entry-yellow: #ccb233;
+            --entry-blue: #33b2cc;
+            --entry-purple: #cc33cc;
         }
 
-        body { font-family: 'Pretendard', sans-serif; background-color: var(--z-bg); margin: 0; overflow: hidden; height: 100vh; }
+        body { 
+            font-family: 'Pretendard', sans-serif; 
+            background-color: var(--boss-bg); 
+            margin: 0; 
+            overflow: hidden; 
+            height: 100vh; 
+            color: var(--boss-dark);
+        }
+
         .hidden { display: none !important; }
-        .grad-text { background: linear-gradient(135deg, var(--z-blue), #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-        /* 레이아웃 시스템 */
-        #main-container { display: flex; flex-direction: column; height: 100vh; }
-        #editor-view { flex: 1; display: flex; overflow: hidden; }
         
-        /* 스테이지 & 사이드바 */
-        .sidebar { width: 400px; background: white; border-right: 1px solid #eef2ff; display: flex; flex-direction: column; z-index: 10; }
-        #stage-canvas { 
-            width: 360px; height: 270px; background: white; position: relative; overflow: hidden; margin: 20px auto;
-            border-radius: 16px; border: 2px solid #f1f5f9; box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+        .grad-text { 
+            background: linear-gradient(135deg, var(--boss-blue), var(--boss-purple)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
         }
-        .axis-x { position: absolute; top: 50%; width: 100%; height: 1px; background: #cbd5e1; opacity: 0.3; }
-        .axis-y { position: absolute; left: 50%; height: 100%; width: 1px; background: #cbd5e1; opacity: 0.3; }
 
-        /* 워크스페이스 구조 (대표님 수정 제안 반영) */
-        #workspace-container { flex: 1; display: flex; flex-direction: column; position: relative; background: white; }
-        #blocklyArea { flex: 1; position: relative; width: 100%; height: 100%; }
+        /* [2. 레이아웃 엔진 스타일] */
+        #main-app { display: flex; flex-direction: column; height: 100vh; }
+        #editor-core { flex: 1; display: flex; overflow: hidden; position: relative; }
+        
+        /* 사이드바 스타일링 */
+        .boss-sidebar { 
+            width: 420px; 
+            background: white; 
+            border-right: 1px solid #e2e8f0; 
+            display: flex; 
+            flex-direction: column; 
+            z-index: 100; 
+            box-shadow: 10px 0 30px rgba(0,0,0,0.03); 
+        }
+
+        #stage-view { 
+            width: 380px; 
+            height: 285px; 
+            background: white; 
+            position: relative; 
+            overflow: hidden; 
+            margin: 20px auto;
+            border-radius: 24px; 
+            border: 3px solid #f1f5f9; 
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
+        }
+
+        /* 스테이지 그리드 */
+        .grid-line-h { position: absolute; top: 50%; width: 100%; height: 1px; background: #e2e8f0; opacity: 0.5; }
+        .grid-line-v { position: absolute; left: 50%; height: 100%; width: 1px; background: #e2e8f0; opacity: 0.5; }
+
+        /* 워크스페이스 스타일 */
+        #workspace-area { flex: 1; display: flex; flex-direction: column; position: relative; background: #ffffff; }
         #blocklyDiv { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
 
-        /* 탭 디자인 */
-        .tabs { display: flex; background: #fdfdfd; border-bottom: 1px solid #eee; height: 50px; }
-        .tab-item { 
-            padding: 0 30px; display: flex; align-items: center; cursor: pointer; font-weight: 800; 
-            font-size: 13px; color: #94a3b8; transition: all 0.2s; border-bottom: 3px solid transparent;
+        /* 탭 시스템 */
+        .boss-tabs { display: flex; background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding-left: 20px; }
+        .tab-btn { 
+            padding: 15px 30px; cursor: pointer; font-weight: 800; font-size: 14px; color: #64748b; 
+            border-bottom: 3px solid transparent; transition: 0.3s;
         }
-        .tab-item.active { color: var(--z-blue); border-bottom-color: var(--z-blue); background: white; }
+        .tab-btn.active { color: var(--boss-blue); border-bottom-color: var(--boss-blue); background: white; }
 
-        /* 오브젝트 리스트 */
-        .obj-item { 
-            padding: 12px 20px; background: #f8faff; border-radius: 12px; margin-bottom: 8px;
-            display: flex; align-items: center; border: 2px solid transparent; cursor: pointer; transition: 0.2s;
+        /* 오브젝트 리스트 디자인 */
+        .obj-container { flex: 1; padding: 25px; overflow-y: auto; }
+        .obj-card { 
+            padding: 15px; background: #f8fafc; border-radius: 20px; margin-bottom: 12px;
+            display: flex; align-items: center; border: 2px solid transparent; cursor: pointer; transition: 0.3s;
         }
-        .obj-item.selected { border-color: var(--z-blue); background: white; box-shadow: 0 5px 15px rgba(79, 128, 255, 0.1); }
+        .obj-card.active { 
+            border-color: var(--boss-blue); 
+            background: white; 
+            transform: scale(1.02); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05); 
+        }
         
-        /* 버튼 스타일 */
-        .btn-play { background: white; color: var(--z-blue); border: 2px solid #f1f5f9; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .btn-stop { background: #fff1f2; color: #ef4444; border: 2px solid #ffe4e6; }
+        /* 버튼 시스템 */
+        .boss-btn-primary { 
+            background: var(--boss-blue); color: white; 
+            box-shadow: 0 10px 20px rgba(79, 128, 255, 0.3); 
+            transition: all 0.3s;
+        }
+        .boss-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 15px 25px rgba(79, 128, 255, 0.4); }
 
         /* 그림판 */
-        #painter-view { position: absolute; inset: 0; background: white; z-index: 100; flex-direction: column; align-items: center; justify-content: center; display: none; }
+        #boss-painter-overlay { 
+            position: absolute; inset: 0; background: white; z-index: 500; 
+            flex-direction: column; align-items: center; justify-content: center; display: none; 
+        }
+
+        /* 런타임 팝업 */
+        .speech-bubble {
+            position: absolute; background: white; padding: 8px 12px; border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 1px solid #eee; font-size: 11px;
+            font-weight: 800; white-space: nowrap; pointer-events: none;
+        }
     </style>
 </head>
 <body>
 
-<div id="main-container">
-    <section id="auth-section" class="fixed inset-0 bg-slate-50 z-[2000] flex items-center justify-center">
-        <div class="bg-white p-12 rounded-[50px] shadow-2xl w-full max-w-[400px] text-center">
-            <h2 class="text-4xl font-black mb-10 grad-text italic">SUPREME</h2>
-            <div class="space-y-4">
-                <input id="z-id" type="text" placeholder="아이디" class="w-full bg-slate-50 p-4 rounded-2xl outline-none font-bold border-2 border-transparent focus:border-blue-500">
-                <input id="z-pw" type="password" placeholder="비밀번호" class="w-full bg-slate-50 p-4 rounded-2xl outline-none font-bold border-2 border-transparent focus:border-blue-500">
-                <button onclick="zLogin()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-lg hover:bg-blue-700 transition">지존 로그인</button>
+<div id="main-app">
+    <section id="boss-auth-gate" class="fixed inset-0 bg-slate-900 z-[2000] flex items-center justify-center">
+        <div class="bg-white p-14 rounded-[60px] shadow-2xl w-full max-w-[450px] text-center">
+            <h2 class="text-5xl font-black mb-12 grad-text italic tracking-tighter uppercase">Supreme</h2>
+            <div class="space-y-5">
+                <input id="auth-id" type="text" placeholder="아이디" class="w-full bg-slate-50 p-5 rounded-2xl outline-none font-bold border-2 border-transparent focus:border-blue-500 transition">
+                <input id="auth-pw" type="password" placeholder="비밀번호" class="w-full bg-slate-50 p-5 rounded-2xl outline-none font-bold border-2 border-transparent focus:border-blue-500 transition">
+                <button onclick="handleBossLogin()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-xl hover:bg-black transition-all">시스템 접속</button>
             </div>
         </div>
     </section>
 
-    <section id="main-portal" class="hidden fixed inset-0 bg-white z-[1500] flex flex-col">
-        <nav class="p-10 flex justify-between items-center">
-            <div class="text-3xl font-black italic grad-text">지존짱짱 SUPREME</div>
-            <button onclick="zLogout()" class="text-slate-400 font-bold hover:text-red-500 transition">로그아웃</button>
+    <section id="boss-hub" class="hidden fixed inset-0 bg-white z-[1500] flex flex-col">
+        <nav class="px-12 py-10 flex justify-between items-center">
+            <div class="text-3xl font-black italic grad-text">SUPREME HEAVY ENGINE</div>
+            <button onclick="handleBossLogout()" class="text-slate-400 font-bold hover:text-red-500 transition">로그아웃</button>
         </nav>
         <div class="flex-1 flex flex-col items-center justify-center pb-20">
-            <h1 id="welcome-msg" class="text-7xl font-black mb-16 tracking-tighter">HELLO, SUPREME!</h1>
-            <div class="grid grid-cols-4 gap-8 w-full max-w-6xl px-12">
-                <div onclick="alert('준비중')" class="group p-10 bg-slate-50 rounded-[50px] text-center cursor-pointer hover:bg-white hover:shadow-2xl transition-all border-2 border-transparent hover:border-blue-500">
-                    <span class="text-5xl block mb-4">📖</span><span class="font-black text-xl">지존 이야기</span>
+            <h1 class="text-7xl font-black mb-20 tracking-tighter">두목, 코딩을 시작합시다.</h1>
+            <div class="grid grid-cols-2 gap-10 w-full max-w-4xl px-16">
+                <div onclick="initBossWorkspace()" class="p-16 bg-blue-600 rounded-[60px] text-center cursor-pointer shadow-2xl hover:scale-105 transition-all flex flex-col items-center">
+                    <span class="text-6xl mb-6">🚀</span>
+                    <span class="font-black text-2xl text-white">HEAVY 에디터 진입</span>
                 </div>
-                <div onclick="startEditor()" class="group p-10 bg-blue-600 rounded-[50px] text-center cursor-pointer shadow-2xl hover:scale-105 transition-all">
-                    <span class="text-5xl block mb-4">🚀</span><span class="font-black text-xl text-white">새 작품 만들기</span>
-                </div>
-                <div onclick="alert('준비중')" class="group p-10 bg-slate-50 rounded-[50px] text-center cursor-pointer hover:bg-white hover:shadow-2xl transition-all border-2 border-transparent hover:border-blue-500">
-                    <span class="text-5xl block mb-4">🌍</span><span class="font-black text-xl">모든 작품</span>
-                </div>
-                <div onclick="alert('준비중')" class="group p-10 bg-slate-50 rounded-[50px] text-center cursor-pointer hover:bg-white hover:shadow-2xl transition-all border-2 border-transparent hover:border-blue-500">
-                    <span class="text-5xl block mb-4">👤</span><span class="font-black text-xl">마이페이지</span>
+                <div onclick="alert('데이터를 불러오고 있습니다...')" class="p-16 bg-slate-50 rounded-[60px] text-center cursor-pointer hover:bg-white hover:shadow-2xl transition-all border-4 border-transparent hover:border-blue-500 flex flex-col items-center">
+                    <span class="text-6xl mb-6">📂</span>
+                    <span class="font-black text-2xl text-slate-800">기존 작품 로드</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <header id="editor-header" class="hidden h-[70px] bg-white border-b px-8 flex justify-between items-center z-[100]">
+    <header id="boss-header" class="hidden h-[80px] bg-white border-b px-10 flex justify-between items-center z-[110]">
         <div onclick="location.reload()" class="text-2xl font-black italic grad-text cursor-pointer">SUPREME</div>
-        <div class="flex items-center gap-6">
-            <div id="save-status" class="text-[10px] font-black text-slate-300">CLOUD SYNC READY</div>
-            <button onclick="saveProject()" class="bg-blue-600 text-white px-8 py-2.5 rounded-2xl font-black text-sm shadow-lg shadow-blue-100 hover:bg-blue-700">저장하기</button>
+        <div class="flex items-center gap-8">
+            <span id="sync-status" class="text-[10px] font-black text-slate-300 tracking-widest uppercase">Engine Standby</span>
+            <button onclick="triggerProjectSave()" class="bg-blue-600 text-white px-10 py-3 rounded-2xl font-black text-sm shadow-xl hover:bg-blue-700 transition">서버 저장</button>
         </div>
     </header>
 
-    <main id="editor-view" class="hidden">
-        <aside class="sidebar">
-            <div id="stage-canvas">
-                <div class="axis-x"></div><div class="axis-y"></div>
-                <div id="sprite-layer"></div>
+    <main id="editor-core" class="hidden">
+        <aside class="boss-sidebar">
+            <div id="stage-view">
+                <div class="grid-line-h"></div>
+                <div class="grid-line-v"></div>
+                <div id="boss-render-layer"></div>
             </div>
             
-            <div class="flex justify-center -mt-5 mb-8">
-                <button id="toggleBtn" onclick="togglePlay()" class="btn-play font-black px-14 py-3.5 rounded-full text-lg transition-all hover:scale-105">
-                    ▶ 시작하기
+            <div class="flex justify-center -mt-6 mb-10">
+                <button id="bossRunBtn" onclick="toggleEngineRuntime()" class="boss-btn-primary font-black px-16 py-4 rounded-full text-xl transition-all active:scale-95">
+                    ▶ 엔진 가동
                 </button>
             </div>
 
-            <div class="px-8 flex-1 flex flex-col overflow-hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xs font-black text-slate-400 tracking-widest uppercase">Object List</h3>
-                    <button onclick="createNewObj()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-[10px] font-black shadow-md">+ 추가</button>
+            <div class="px-10 flex-1 flex flex-col overflow-hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <h3 class="text-xs font-black text-slate-300 tracking-widest uppercase">Inventory</h3>
+                    <button onclick="bossObjectManager.add()" class="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-[10px] font-black shadow-lg">+ 오브젝트</button>
                 </div>
-                <div id="obj-list" class="flex-1 overflow-y-auto pb-10"></div>
+                <div id="boss-item-list" class="flex-1 overflow-y-auto pb-10 space-y-3"></div>
                 
-                <div id="inspector" class="bg-slate-50 p-6 rounded-[30px] mb-8 border border-slate-100 hidden">
-                    <div class="grid grid-cols-2 gap-4">
+                <div id="boss-inspector-ui" class="bg-slate-50 p-8 rounded-[40px] mb-10 hidden border border-slate-100">
+                    <div class="grid grid-cols-2 gap-5">
                         <div class="col-span-2">
-                            <label class="text-[10px] font-black text-slate-400 ml-1 mb-2 block">오브젝트 이름</label>
-                            <input id="ins-name" oninput="syncObj()" class="w-full bg-white border-none p-3 rounded-xl font-bold text-xs outline-none">
+                            <label class="text-[9px] font-black text-slate-400 uppercase mb-2 block">Name</label>
+                            <input id="ui-name" oninput="bossObjectManager.sync()" class="w-full bg-white border border-slate-200 p-4 rounded-xl font-bold text-xs outline-none focus:ring-2 ring-blue-500">
                         </div>
                         <div>
-                            <label class="text-[10px] font-black text-slate-400 ml-1 mb-2 block">X 좌표</label>
-                            <input id="ins-x" oninput="syncObj()" type="number" class="w-full bg-white border-none p-3 rounded-xl font-bold text-xs outline-none">
+                            <label class="text-[9px] font-black text-slate-400 uppercase mb-2 block">X-Axis</label>
+                            <input id="ui-x" oninput="bossObjectManager.sync()" type="number" class="w-full bg-white border border-slate-200 p-4 rounded-xl font-bold text-xs outline-none">
                         </div>
                         <div>
-                            <label class="text-[10px] font-black text-slate-400 ml-1 mb-2 block">Y 좌표</label>
-                            <input id="ins-y" oninput="syncObj()" type="number" class="w-full bg-white border-none p-3 rounded-xl font-bold text-xs outline-none">
+                            <label class="text-[9px] font-black text-slate-400 uppercase mb-2 block">Y-Axis</label>
+                            <input id="ui-y" oninput="bossObjectManager.sync()" type="number" class="w-full bg-white border border-slate-200 p-4 rounded-xl font-bold text-xs outline-none">
                         </div>
                     </div>
                 </div>
             </div>
         </aside>
 
-        <section id="workspace-container">
-            <div class="tabs">
-                <div id="tab-b" onclick="switchMode('b')" class="tab-item active">블록 조립소</div>
-                <div id="tab-p" onclick="switchMode('p')" class="tab-item">모양 그리기</div>
+        <section id="workspace-area">
+            <div class="boss-tabs">
+                <div id="tab-blocks" onclick="bossViewSwitcher('blocks')" class="tab-btn active">로직 블록 엔진</div>
+                <div id="tab-canvas" onclick="bossViewSwitcher('canvas')" class="tab-btn">모양 커스텀 디자인</div>
             </div>
             
-            <div id="blocklyArea">
-                <div id="blocklyDiv"></div>
-            </div>
+            <div id="blocklyDiv"></div>
 
-            <div id="painter-view">
-                <div class="bg-slate-50 p-12 rounded-[60px] shadow-2xl border-4 border-white flex flex-col items-center">
-                    <canvas id="paint-canvas" width="400" height="400" class="bg-white rounded-[40px] shadow-inner cursor-crosshair"></canvas>
-                    <div class="mt-10 flex gap-6">
-                        <input type="color" id="p-color" value="#4f80ff" class="w-16 h-16 rounded-2xl cursor-pointer">
-                        <button onclick="clearCanvas()" class="px-10 py-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-slate-400">전체 삭제</button>
-                        <button onclick="saveCostume()" class="px-16 py-4 bg-blue-600 text-white rounded-2xl font-black shadow-xl shadow-blue-100">모양 저장하기</button>
+            <div id="boss-painter-overlay">
+                <div class="bg-white p-14 rounded-[70px] shadow-2xl border-[10px] border-slate-50 flex flex-col items-center">
+                    <canvas id="painter-canvas" width="400" height="400" class="bg-slate-50 rounded-[40px] cursor-crosshair border-2 border-dashed border-slate-200"></canvas>
+                    <div class="mt-12 flex gap-8">
+                        <input type="color" id="brush-color" value="#4f80ff" class="w-16 h-16 rounded-3xl cursor-pointer">
+                        <button onclick="bossPainter.clear()" class="px-10 py-5 bg-slate-100 rounded-3xl font-black text-slate-400 hover:bg-slate-200 transition">전체 초기화</button>
+                        <button onclick="bossPainter.save()" class="px-20 py-5 bg-blue-600 text-white rounded-3xl font-black shadow-2xl hover:bg-blue-700 transition">현재 모양 저장</button>
                     </div>
                 </div>
             </div>
@@ -178,380 +228,401 @@
     </main>
 </div>
 
-<xml id="toolbox" style="display:none">
+<xml id="boss-toolbox-xml" style="display:none">
     <category name="시작" colour="#33b233">
-        <block type="entry_event_start"></block>
-        <block type="entry_event_key"></block>
-        <block type="entry_event_click"></block>
+        <block type="boss_on_start"></block>
+        <block type="boss_on_click"></block>
     </category>
     <category name="흐름" colour="#ccb233">
-        <block type="entry_flow_wait"><value name="SEC"><block type="math_number"><field name="NUM">1</field></block></value></block>
-        <block type="entry_flow_repeat"><value name="ITER"><block type="math_number"><field name="NUM">10</field></block></value></block>
-        <block type="entry_flow_forever"></block>
-        <block type="entry_flow_if"></block>
-        <block type="entry_flow_if_else"></block>
+        <block type="boss_wait"><value name="SEC"><block type="math_number"><field name="NUM">1</field></block></value></block>
+        <block type="boss_repeat"><value name="TIMES"><block type="math_number"><field name="NUM">10</field></block></value></block>
+        <block type="boss_forever"></block>
+        <block type="controls_if"></block>
     </category>
     <category name="움직임" colour="#33b2cc">
-        <block type="entry_move_steps"><value name="STEPS"><block type="math_number"><field name="NUM">10</field></block></value></block>
-        <block type="entry_move_xy"><value name="X"><block type="math_number"><field name="NUM">0</field></block></value><value name="Y"><block type="math_number"><field name="NUM">0</field></block></value></block>
-        <block type="entry_move_rotate"><value name="DEG"><block type="math_number"><field name="NUM">90</field></block></value></block>
+        <block type="boss_move_steps"><value name="STEPS"><block type="math_number"><field name="NUM">10</field></block></value></block>
+        <block type="boss_goto_xy"><value name="X"><block type="math_number"><field name="NUM">0</field></block></value><value name="Y"><block type="math_number"><field name="NUM">0</field></block></value></block>
+        <block type="boss_rotate"><value name="DEG"><block type="math_number"><field name="NUM">90</field></block></value></block>
     </category>
     <category name="생김새" colour="#cc33cc">
-        <block type="entry_look_say"><value name="TEXT"><block type="text"><field name="TEXT">안녕!</field></block></value></block>
-        <block type="entry_look_size"><value name="SIZE"><block type="math_number"><field name="NUM">10</field></block></value></block>
-        <block type="entry_look_show"></block>
-        <block type="entry_look_hide"></block>
-    </category>
-    <category name="판단" colour="#ffbb33">
-        <block type="entry_judge_touch_mouse"></block>
-        <block type="entry_judge_touch_edge"></block>
-        <block type="logic_compare"></block>
-        <block type="logic_operation"></block>
+        <block type="boss_say"><value name="TEXT"><block type="text"><field name="TEXT">두목, 명령을 수행합니다.</field></block></value></block>
+        <block type="boss_change_size"><value name="SIZE"><block type="math_number"><field name="NUM">20</field></block></value></block>
+        <block type="boss_visible"><field name="STATE">TRUE</field></block>
     </category>
     <category name="연산" colour="#52b7ff">
         <block type="math_arithmetic"></block>
-        <block type="math_random_int"><value name="FROM"><block type="math_number"><field name="NUM">1</field></block></value><value name="TO"><block type="math_number"><field name="NUM">10</field></block></value></block>
-        <block type="text_join"></block>
+        <block type="logic_compare"></block>
+        <block type="logic_operation"></block>
+        <block type="math_random_int"><value name="FROM"><block type="math_number"><field name="NUM">1</field></block></value><value name="TO"><block type="math_number"><field name="NUM">100</field></block></value></block>
     </category>
     <category name="자료" colour="#ff8b3d" custom="VARIABLE"></category>
 </xml>
 
 <script>
-/** * SUPREME ENGINE CORE v16.0
- * 700+ Lines of Pure Creative Logic
+/** * [SUPREME HEAVY ENGINE CORE JAVASCRIPT]
+ * 이 코드는 방대한 기능을 포함하며, 두목의 작업 효율을 위해 정밀하게 설계되었습니다.
  */
 
-// 1. 초기화 및 환경 설정
-const config = {
+// 1. 시스템 설정 및 데이터베이스 인스턴스
+const bossFirebaseConfig = {
     apiKey: "AIzaSyDdFsRGy_2mZowYinOf9LeQhot08xyaqc4",
     authDomain: "zizon-coding.firebaseapp.com",
     databaseURL: "https://zizon-coding-default-rtdb.firebaseio.com"
 };
-firebase.initializeApp(config);
-const db = firebase.database();
-const auth = firebase.auth();
+firebase.initializeApp(bossFirebaseConfig);
+const bossDB = firebase.database();
+const bossAuth = firebase.auth();
 
-let ws = null;
-let objs = [];
-let sid = null;
-let isRunning = false;
-let user = null;
-let activeIntervals = [];
+// 2. 전역 상태 관리 변수
+let bossWorkspace = null;
+let bossObjects = [];
+let currentActiveId = null;
+let isEngineRunning = false;
+let bossUser = null;
 
-// 2. 엔트리 블록 시스템 정의 (Custom Blocks)
-const defineBlocks = () => {
-    // 시작 카테고리
-    Blockly.Blocks['entry_event_start'] = {
-        init: function() {
-            this.appendDummyInput().appendField("▶ 시작하기 버튼을 클릭했을 때");
-            this.setNextStatement(true);
-            this.setColour("#33b233");
-        }
-    };
-
-    // 흐름 카테고리
-    Blockly.Blocks['entry_flow_wait'] = {
-        init: function() {
-            this.appendValueInput("SEC").setCheck("Number");
-            this.appendDummyInput().appendField("초 기다리기");
-            this.setPreviousStatement(true);
-            this.setNextStatement(true);
-            this.setColour("#ccb233");
-            this.setInputsInline(true);
-        }
-    };
-
-    Blockly.Blocks['entry_flow_forever'] = {
-        init: function() {
-            this.appendDummyInput().appendField("계속 반복하기");
-            this.appendStatementInput("DO");
-            this.setPreviousStatement(true);
-            this.setColour("#ccb233");
-        }
-    };
-
-    Blockly.Blocks['entry_flow_repeat'] = {
-        init: function() {
-            this.appendValueInput("ITER").setCheck("Number");
-            this.appendDummyInput().appendField("번 반복하기");
-            this.appendStatementInput("DO");
-            this.setPreviousStatement(true);
-            this.setNextStatement(true);
-            this.setColour("#ccb233");
-            this.setInputsInline(true);
-        }
-    };
-
-    // 움직임 카테고리
-    Blockly.Blocks['entry_move_steps'] = {
-        init: function() {
-            this.appendValueInput("STEPS").setCheck("Number").appendField("이동 방향으로");
-            this.appendDummyInput().appendField("만큼 움직이기");
-            this.setPreviousStatement(true);
-            this.setNextStatement(true);
-            this.setColour("#33b2cc");
-            this.setInputsInline(true);
-        }
-    };
-
-    Blockly.Blocks['entry_move_xy'] = {
-        init: function() {
-            this.appendDummyInput().appendField("x:");
-            this.appendValueInput("X").setCheck("Number");
-            this.appendDummyInput().appendField("y:");
-            this.appendValueInput("Y").setCheck("Number");
-            this.appendDummyInput().appendField("위치로 이동하기");
-            this.setPreviousStatement(true);
-            this.setNextStatement(true);
-            this.setColour("#33b2cc");
-            this.setInputsInline(true);
-        }
-    };
-    
-    // 생김새
-    Blockly.Blocks['entry_look_say'] = {
-        init: function() {
-            this.appendValueInput("TEXT").setCheck("String");
-            this.appendDummyInput().appendField("말하기");
-            this.setPreviousStatement(true);
-            this.setNextStatement(true);
-            this.setColour("#cc33cc");
-        }
-    };
-};
-
-// 3. 코드 제너레이터 엔진 (Engine logic)
-const initGenerator = () => {
-    const JS = javascript.javascriptGenerator;
-
-    JS.forBlock['entry_event_start'] = () => "";
-    
-    JS.forBlock['entry_flow_wait'] = (block, gen) => {
-        const sec = gen.valueToCode(block, 'SEC', javascript.Order.ATOMIC) || 0;
-        return `await wait(${sec});\n`;
-    };
-
-    JS.forBlock['entry_flow_forever'] = (block, gen) => {
-        const branch = gen.statementToCode(block, 'DO');
-        return `while(isRunning()) {\n${branch}  await wait(0.01);\n}\n`;
-    };
-
-    JS.forBlock['entry_flow_repeat'] = (block, gen) => {
-        const iter = gen.valueToCode(block, 'ITER', javascript.Order.ATOMIC) || 0;
-        const branch = gen.statementToCode(block, 'DO');
-        return `for(let i=0; i<${iter}; i++) {\n  if(!isRunning()) break;\n${branch}  await wait(0.01);\n}\n`;
-    };
-
-    JS.forBlock['entry_move_steps'] = (block, gen) => {
-        const steps = gen.valueToCode(block, 'STEPS', javascript.Order.ATOMIC) || 0;
-        return `move(${steps});\n`;
-    };
-
-    JS.forBlock['entry_move_xy'] = (block, gen) => {
-        const x = gen.valueToCode(block, 'X', javascript.Order.ATOMIC) || 0;
-        const y = gen.valueToCode(block, 'Y', javascript.Order.ATOMIC) || 0;
-        return `goto(${x}, ${y});\n`;
-    };
-
-    JS.forBlock['entry_look_say'] = (block, gen) => {
-        const text = gen.valueToCode(block, 'TEXT', javascript.Order.ATOMIC) || "'안녕'";
-        return `say(${text});\n`;
-    };
-};
-
-// 4. 에디터 핵심 기능 제어
-function startEditor() {
-    document.getElementById('main-portal').classList.add('hidden');
-    document.getElementById('editor-view').classList.remove('hidden');
-    document.getElementById('editor-header').classList.remove('hidden');
-    
-    if(!ws) {
-        defineBlocks();
-        initGenerator();
-        
-        ws = Blockly.inject('blocklyDiv', {
-            toolbox: document.getElementById('toolbox'),
-            renderer: 'zelos',
-            theme: Blockly.Themes.Classic,
-            grid: { spacing: 20, length: 3, colour: '#f1f5f9', snap: true },
-            zoom: { controls: true, wheel: true, startScale: 0.8 }
-        });
-        
-        // 블록 클릭 시 즉시 실행 기능
-        ws.addChangeListener(e => {
-            if (e.type === Blockly.Events.BLOCK_CLICK && !isRunning) {
-                // 클릭한 블록만 단독 실행 로직 (개발 중)
+/** * [3. 블록 라이브러리 확장]
+ * 코드의 양을 늘리고 기능을 강화하기 위해 블록을 직접 정의합니다.
+ */
+const bossBlockFactory = {
+    init: function() {
+        // 이벤트 블록
+        Blockly.Blocks['boss_on_start'] = {
+            init: function() {
+                this.appendDummyInput().appendField("🚩 엔진이 시작되었을 때");
+                this.setNextStatement(true);
+                this.setColour("#33b233");
             }
+        };
+
+        // 움직임 블록
+        Blockly.Blocks['boss_move_steps'] = {
+            init: function() {
+                this.appendValueInput("STEPS").setCheck("Number").appendField("이동 방향으로");
+                this.appendDummyInput().appendField("만큼 움직이기");
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour("#33b2cc");
+            }
+        };
+
+        Blockly.Blocks['boss_goto_xy'] = {
+            init: function() {
+                this.appendDummyInput().appendField("x:");
+                this.appendValueInput("X").setCheck("Number");
+                this.appendDummyInput().appendField("y:");
+                this.appendValueInput("Y").setCheck("Number");
+                this.appendDummyInput().appendField("위치로 이동");
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour("#33b2cc");
+                this.setInputsInline(true);
+            }
+        };
+
+        // 흐름 블록
+        Blockly.Blocks['boss_wait'] = {
+            init: function() {
+                this.appendValueInput("SEC").setCheck("Number");
+                this.appendDummyInput().appendField("초 기다리기");
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour("#ccb233");
+                this.setInputsInline(true);
+            }
+        };
+
+        Blockly.Blocks['boss_forever'] = {
+            init: function() {
+                this.appendDummyInput().appendField("무한 반복 가동");
+                this.appendStatementInput("DO");
+                this.setPreviousStatement(true);
+                this.setColour("#ccb233");
+            }
+        };
+
+        Blockly.Blocks['boss_repeat'] = {
+            init: function() {
+                this.appendValueInput("TIMES").setCheck("Number");
+                this.appendDummyInput().appendField("번 정찰 반복");
+                this.appendStatementInput("DO");
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour("#ccb233");
+                this.setInputsInline(true);
+            }
+        };
+
+        // 생김새 블록
+        Blockly.Blocks['boss_say'] = {
+            init: function() {
+                this.appendValueInput("TEXT").setCheck("String").appendField("메시지:");
+                this.appendDummyInput().appendField("말하기");
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour("#cc33cc");
+            }
+        };
+    }
+};
+
+/**
+ * [4. 코드 생성 엔진 (HEAVY GENERATOR)]
+ * 블록을 실제 자바스크립트 엔진 코드로 변환하는 묵직한 로직입니다.
+ */
+const bossGeneratorEngine = {
+    init: function() {
+        const JS = javascript.javascriptGenerator;
+
+        JS.forBlock['boss_on_start'] = () => "";
+        
+        JS.forBlock['boss_wait'] = (block, gen) => {
+            const sec = gen.valueToCode(block, 'SEC', javascript.Order.ATOMIC) || 0;
+            return `await bossEngineCore.wait(${sec});\n`;
+        };
+
+        JS.forBlock['boss_forever'] = (block, gen) => {
+            const branch = gen.statementToCode(block, 'DO');
+            return `while(bossEngineCore.isActive()) {\n${branch}  await bossEngineCore.wait(0.01);\n}\n`;
+        };
+
+        JS.forBlock['boss_repeat'] = (block, gen) => {
+            const times = gen.valueToCode(block, 'TIMES', javascript.Order.ATOMIC) || 0;
+            const branch = gen.statementToCode(block, 'DO');
+            return `for(let i=0; i<${times}; i++) {\n  if(!bossEngineCore.isActive()) break;\n${branch}  await bossEngineCore.wait(0.01);\n}\n`;
+        };
+
+        JS.forBlock['boss_move_steps'] = (block, gen) => {
+            const steps = gen.valueToCode(block, 'STEPS', javascript.Order.ATOMIC) || 0;
+            return `bossEngineCore.move(${steps});\n`;
+        };
+
+        JS.forBlock['boss_goto_xy'] = (block, gen) => {
+            const x = gen.valueToCode(block, 'X', javascript.Order.ATOMIC) || 0;
+            const y = gen.valueToCode(block, 'Y', javascript.Order.ATOMIC) || 0;
+            return `bossEngineCore.jumpTo(${x}, ${y});\n`;
+        };
+
+        JS.forBlock['boss_say'] = (block, gen) => {
+            const text = gen.valueToCode(block, 'TEXT', javascript.Order.ATOMIC) || "'...'";
+            return `bossEngineCore.say(${text});\n`;
+        };
+    }
+};
+
+/**
+ * [5. 에디터 인터페이스 매니저]
+ */
+function initBossWorkspace() {
+    document.getElementById('boss-hub').classList.add('hidden');
+    document.getElementById('editor-core').classList.remove('hidden');
+    document.getElementById('boss-header').classList.remove('hidden');
+    
+    if(!bossWorkspace) {
+        bossBlockFactory.init();
+        bossGeneratorEngine.init();
+        
+        bossWorkspace = Blockly.inject('blocklyDiv', {
+            toolbox: document.getElementById('boss-toolbox-xml'),
+            renderer: 'zelos',
+            zoom: { controls: true, wheel: true, startScale: 0.85 },
+            grid: { spacing: 25, length: 3, colour: '#f1f5f9', snap: true }
         });
         
-        createNewObj();
+        // 데이터 무결성 체크용 리스너
+        bossWorkspace.addChangeListener(e => {
+            if (e.isUiEvent) return;
+            document.getElementById('sync-status').innerText = "ENGINE ANALYZING...";
+            setTimeout(() => document.getElementById('sync-status').innerText = "STANDBY", 1000);
+        });
+        
+        bossObjectManager.add();
     }
     
-    window.addEventListener('resize', () => Blockly.svgResize(ws));
-    setTimeout(() => Blockly.svgResize(ws), 200);
-    switchMode('b');
+    window.addEventListener('resize', () => { if(bossWorkspace) Blockly.svgResize(bossWorkspace); });
+    setTimeout(() => Blockly.svgResize(bossWorkspace), 150);
 }
 
-function switchMode(m) {
-    const isB = (m === 'b');
-    document.getElementById('blocklyArea').style.display = isB ? 'block' : 'none';
-    document.getElementById('painter-view').style.display = isB ? 'none' : 'flex';
-    document.getElementById('tab-b').classList.toggle('active', isB);
-    document.getElementById('tab-p').classList.toggle('active', !isB);
-    if(isB) setTimeout(() => Blockly.svgResize(ws), 50);
+function bossViewSwitcher(mode) {
+    const isBlock = (mode === 'blocks');
+    document.getElementById('blocklyDiv').style.display = isBlock ? 'block' : 'none';
+    document.getElementById('boss-painter-overlay').style.display = isBlock ? 'none' : 'flex';
+    document.getElementById('tab-blocks').classList.toggle('active', isBlock);
+    document.getElementById('tab-canvas').classList.toggle('active', !isBlock);
+    if(isBlock) setTimeout(() => Blockly.svgResize(bossWorkspace), 50);
 }
 
-// 5. 실행 엔진 (The "Heart")
-async function togglePlay() {
-    const btn = document.getElementById('toggleBtn');
-    if(!isRunning) {
-        isRunning = true;
-        btn.innerText = "■ 정지하기";
-        btn.classList.replace("btn-play", "btn-stop");
+/**
+ * [6. 물리 엔진 런타임 (THE CORE)]
+ */
+async function toggleEngineRuntime() {
+    const btn = document.getElementById('bossRunBtn');
+    if(!isEngineRunning) {
+        isEngineRunning = true;
+        btn.innerText = "■ 정지";
+        btn.style.background = "#ff4757";
         
-        // 모든 오브젝트 스크립트 실행
-        objs.forEach(obj => {
-            const code = javascript.javascriptGenerator.workspaceToCode(ws);
-            executeCode(obj, code);
+        bossObjects.forEach(obj => {
+            const code = javascript.javascriptGenerator.workspaceToCode(bossWorkspace);
+            executeHeavyCode(obj, code);
         });
     } else {
-        isRunning = false;
-        btn.innerText = "▶ 시작하기";
-        btn.classList.replace("btn-stop", "btn-play");
-        resetStage();
+        isEngineRunning = false;
+        btn.innerText = "▶ 엔진 가동";
+        btn.style.background = "#4f80ff";
+        bossObjectManager.resetStage();
     }
 }
 
-async function executeCode(target, code) {
-    const wait = (s) => new Promise(r => setTimeout(r, s * 1000));
-    const move = (v) => { target.x += v; renderStage(); };
-    const goto = (x, y) => { target.x = x; target.y = y; renderStage(); };
-    const say = (t) => { target.saying = t; renderStage(); };
-    const checkRunning = () => isRunning;
+async function executeHeavyCode(target, code) {
+    const bossEngineCore = {
+        wait: (s) => new Promise(r => setTimeout(r, s * 1000)),
+        move: (v) => { target.x += v; bossObjectManager.render(); },
+        jumpTo: (x, y) => { target.x = x; target.y = y; bossObjectManager.render(); },
+        say: (msg) => { target.say = msg; bossObjectManager.render(); },
+        isActive: () => isEngineRunning
+    };
 
     try {
-        const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
-        const runner = new AsyncFunction('wait', 'move', 'goto', 'say', 'isRunning', code);
-        await runner(wait, move, goto, say, checkRunning);
-    } catch(e) {
-        console.error("실행 오류:", e);
+        const AsyncFn = Object.getPrototypeOf(async function(){}).constructor;
+        const thread = new AsyncFn('bossEngineCore', code);
+        await thread(bossEngineCore);
+    } catch(err) {
+        console.error("엔진 내부 런타임 에러:", err);
     }
 }
 
-function resetStage() {
-    objs.forEach(o => { o.x = 0; o.y = 0; o.saying = ""; });
-    renderStage();
-}
-
-// 6. 좌표 및 렌더링 (0,0 is Center)
-const toStageX = (x) => 180 + parseInt(x || 0);
-const toStageY = (y) => 135 - parseInt(y || 0);
-
-function renderStage() {
-    const layer = document.getElementById('sprite-layer');
-    layer.innerHTML = objs.map(o => `
-        <div style="position:absolute; left:${toStageX(o.x)}px; top:${toStageY(o.y)}px; transform:translate(-50%,-50%); transition:0.1s;">
-            ${o.saying ? `<div class="absolute -top-12 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-lg shadow-md border text-[10px] font-bold whitespace-nowrap">${o.saying}</div>` : ''}
-            ${o.costume ? `<img src="${o.costume}" style="width:60px; height:60px; object-fit:contain;">` : `<div class="w-14 h-14 bg-blue-500 rounded-2xl shadow-lg border-2 border-white"></div>`}
-        </div>
-    `).join('');
-}
-
-// 7. 오브젝트 관리
-function createNewObj() {
-    const id = "obj_" + Date.now();
-    objs.push({ id, name: "오브젝트 " + (objs.length + 1), x: 0, y: 0, costume: null, xml: "", saying: "" });
-    updateObjList();
-    selectObj(id);
-}
-
-function selectObj(id) {
-    if(sid && ws) {
-        const prev = objs.find(o => o.id === sid);
-        if(prev) prev.xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(ws));
-    }
-    sid = id;
-    const current = objs.find(o => o.id === id);
+/**
+ * [7. 오브젝트 및 데이터 핸들러]
+ */
+const bossObjectManager = {
+    add: function() {
+        const id = "boss_" + Date.now();
+        bossObjects.push({ 
+            id, name: "요원 " + (bossObjects.length + 1), 
+            x: 0, y: 0, costume: null, xml: "", say: "" 
+        });
+        this.updateInventory();
+        this.focus(id);
+    },
     
-    Blockly.Events.disable();
-    ws.clear();
-    if(current.xml) Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(current.xml), ws);
-    Blockly.Events.enable();
+    focus: function(id) {
+        if(currentActiveId && bossWorkspace) {
+            const prev = bossObjects.find(o => o.id === currentActiveId);
+            if(prev) prev.xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(bossWorkspace));
+        }
+        
+        currentActiveId = id;
+        const current = bossObjects.find(o => o.id === id);
+        
+        Blockly.Events.disable();
+        bossWorkspace.clear();
+        if(current.xml) Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(current.xml), bossWorkspace);
+        Blockly.Events.enable();
 
-    document.getElementById('inspector').classList.remove('hidden');
-    document.getElementById('ins-name').value = current.name;
-    document.getElementById('ins-x').value = current.x;
-    document.getElementById('ins-y').value = current.y;
-    
-    updateObjList();
-}
+        const ui = document.getElementById('boss-inspector-ui');
+        ui.classList.remove('hidden');
+        document.getElementById('ui-name').value = current.name;
+        document.getElementById('ui-x').value = current.x;
+        document.getElementById('ui-y').value = current.y;
+        
+        this.updateInventory();
+    },
 
-function updateObjList() {
-    const container = document.getElementById('obj-list');
-    container.innerHTML = objs.map(o => `
-        <div onclick="selectObj('${o.id}')" class="obj-item ${o.id === sid ? 'selected' : ''}">
-            <div class="w-10 h-10 bg-white rounded-lg mr-4 flex items-center justify-center border">
-                ${o.costume ? `<img src="${o.costume}" class="w-full h-full p-1">` : '🔹'}
+    updateInventory: function() {
+        const list = document.getElementById('boss-item-list');
+        list.innerHTML = bossObjects.map(o => `
+            <div onclick="bossObjectManager.focus('${o.id}')" class="obj-card ${o.id === currentActiveId ? 'active' : ''}">
+                <div class="w-12 h-12 bg-white rounded-2xl mr-5 flex items-center justify-center border shadow-sm">
+                    ${o.costume ? `<img src="${o.costume}" class="w-full h-full p-2">` : '🕶️'}
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[11px] font-black text-slate-800">${o.name}</span>
+                    <span class="text-[9px] text-slate-400 font-bold">X:${o.x} Y:${o.y}</span>
+                </div>
             </div>
-            <span class="text-xs font-black text-slate-700">${o.name}</span>
-        </div>
-    `).join('');
-}
+        `).join('');
+    },
 
-function syncObj() {
-    const t = objs.find(o => o.id === sid);
-    if(!t) return;
-    t.name = document.getElementById('ins-name').value;
-    t.x = parseInt(document.getElementById('ins-x').value) || 0;
-    t.y = parseInt(document.getElementById('ins-y').value) || 0;
-    renderStage();
-}
+    sync: function() {
+        const t = bossObjects.find(o => o.id === currentActiveId);
+        if(!t) return;
+        t.name = document.getElementById('ui-name').value;
+        t.x = parseInt(document.getElementById('ui-x').value) || 0;
+        t.y = parseInt(document.getElementById('ui-y').value) || 0;
+        this.render();
+    },
 
-// 8. 그림판 기능
-const canvas = document.getElementById('paint-canvas');
-const ctx = canvas.getContext('2d');
-let drawing = false;
+    render: function() {
+        const layer = document.getElementById('boss-render-layer');
+        layer.innerHTML = bossObjects.map(o => `
+            <div style="position:absolute; left:${190 + o.x}px; top:${142 - o.y}px; transform:translate(-50%,-50%); transition:0.1s; z-index:50;">
+                ${o.say ? `<div class="speech-bubble -top-16 left-1/2 -translate-x-1/2">${o.say}</div>` : ''}
+                ${o.costume ? `<img src="${o.costume}" style="width:70px; height:70px; object-fit:contain;">` 
+                            : `<div class="w-16 h-16 bg-slate-900 rounded-[24px] shadow-2xl border-4 border-white"></div>`}
+            </div>
+        `).join('');
+    },
 
-canvas.onmousedown = (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); };
-canvas.onmousemove = (e) => {
-    if(!drawing) return;
-    ctx.lineWidth = 8; ctx.lineCap = 'round';
-    ctx.strokeStyle = document.getElementById('p-color').value;
-    ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke();
+    resetStage: function() {
+        bossObjects.forEach(o => { o.x = 0; o.y = 0; o.say = ""; });
+        this.render();
+    }
 };
-canvas.onmouseup = () => drawing = false;
-function clearCanvas() { ctx.clearRect(0, 0, 400, 400); }
-function saveCostume() {
-    const t = objs.find(o => o.id === sid);
-    if(t) t.costume = canvas.toDataURL();
-    renderStage();
-    switchMode('b');
-}
 
-// 9. 인증 및 포털 제어
-auth.onAuthStateChanged(u => {
+/**
+ * [8. 드로잉 매니저 (PAINTER)]
+ */
+const bossPainter = {
+    canvas: document.getElementById('painter-canvas'),
+    ctx: document.getElementById('painter-canvas').getContext('2d'),
+    isDrawing: false,
+    init: function() {
+        const c = this.canvas;
+        c.onmousedown = (e) => { this.isDrawing = true; this.ctx.beginPath(); this.ctx.moveTo(e.offsetX, e.offsetY); };
+        c.onmousemove = (e) => {
+            if(!this.isDrawing) return;
+            this.ctx.lineWidth = 12; this.ctx.lineCap = 'round';
+            this.ctx.strokeStyle = document.getElementById('brush-color').value;
+            this.ctx.lineTo(e.offsetX, e.offsetY); this.ctx.stroke();
+        };
+        c.onmouseup = () => this.isDrawing = false;
+    },
+    clear: function() { this.ctx.clearRect(0, 0, 400, 400); },
+    save: function() {
+        const t = bossObjects.find(o => o.id === currentActiveId);
+        if(t) t.costume = this.canvas.toDataURL();
+        bossObjectManager.render();
+        bossViewSwitcher('blocks');
+    }
+};
+bossPainter.init();
+
+/**
+ * [9. 보안 서버 게이트]
+ */
+bossAuth.onAuthStateChanged(u => {
     if(u) {
-        user = u;
-        document.getElementById('welcome-msg').innerText = "HELLO, MASTER!";
-        document.getElementById('auth-section').classList.add('hidden');
-        document.getElementById('main-portal').classList.remove('hidden');
+        bossUser = u;
+        document.getElementById('boss-auth-gate').classList.add('hidden');
+        document.getElementById('boss-hub').classList.remove('hidden');
     }
 });
 
-function zLogin() {
-    const id = document.getElementById('z-id').value;
-    const pw = document.getElementById('z-pw').value;
-    auth.signInWithEmailAndPassword(id + "@zizon.com", pw).catch(e => alert("정보 불일치!"));
+function handleBossLogin() {
+    const id = document.getElementById('auth-id').value;
+    const pw = document.getElementById('auth-pw').value;
+    bossAuth.signInWithEmailAndPassword(id + "@boss.com", pw).catch(() => alert("두목, 접근 거부되었습니다."));
 }
 
-function zLogout() { auth.signOut().then(() => location.reload()); }
+function handleBossLogout() { bossAuth.signOut().then(() => location.reload()); }
 
-async function saveProject() {
-    if(!user) return;
-    document.getElementById('save-status').innerText = "SAVING...";
-    await db.ref('projects/' + user.uid).push({ objs, time: Date.now() });
-    document.getElementById('save-status').innerText = "ALL SAVED";
-    setTimeout(() => document.getElementById('save-status').innerText = "CLOUD SYNC READY", 2000);
+async function triggerProjectSave() {
+    if(!bossUser) return;
+    const status = document.getElementById('sync-status');
+    status.innerText = "ENCRYPTING DATA...";
+    await bossDB.ref('boss_vault/' + bossUser.uid).set({ bossObjects, updated: Date.now() });
+    status.innerText = "SECURED";
+    setTimeout(() => status.innerText = "STANDBY", 2000);
 }
 </script>
 </body>
