@@ -1,200 +1,360 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>ZIZON v21 FIREBASE</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지존짱짱 SUPREME v19.5 - REAL-TIME MODE</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/msg/ko.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        :root { 
+            --z-blue: #4f80ff; --z-purple: #7c3aed; --z-bg: #f8fafc; 
+            --z-dark: #0f172a;
+        }
+        
+        body { font-family: 'Pretendard', sans-serif; background: var(--z-bg); margin: 0; overflow: hidden; height: 100vh; color: var(--z-dark); }
+        
+        /* [NAVBAR] */
+        .zizon-nav { 
+            height: 64px; background: white; border-bottom: 1px solid #f1f5f9; 
+            display: flex; align-items: center; padding: 0 40px; position: fixed; 
+            top: 0; width: 100%; z-index: 2000;
+        }
+        .logo-box { width: 34px; height: 34px; border-radius: 10px; color: white; display: flex; align-items: center; justify-content: center; font-weight: 900; }
+        .nav-item { font-weight: 800; color: #94a3b8; cursor: pointer; padding: 10px 24px; border-radius: 14px; transition: 0.3s; }
+        .nav-item:hover { color: var(--z-blue); background: #f1f5f9; }
+        .nav-item.active { color: var(--z-blue); background: #eff6ff; }
 
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
-<script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
-<script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
+        /* [SECTIONS] */
+        .content-section { margin-top: 64px; height: calc(100vh - 64px); display: none; }
+        .content-section.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.99); } to { opacity: 1; transform: scale(1); } }
 
-<!-- 🔥 Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+        /* [EDITOR] */
+        #editor-container { display: none; height: calc(100vh - 64px); margin-top: 64px; background: white; }
+        #editor-container.active { display: flex; }
+        .sidebar { width: 420px; border-right: 1px solid #f1f5f9; display: flex; flex-direction: column; }
+        .stage-box { width: 380px; height: 285px; background: #fff; margin: 20px auto; border-radius: 24px; border: 1px solid #f1f5f9; position: relative; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.02); }
+        #blocklyDiv { flex: 1; border-top: 1px solid #f1f5f9; }
 
-<style>
-body { margin:0; font-family:sans-serif; }
-#blocklyDiv { height:60vh; }
-#render { height:200px; background:#eee; position:relative; }
-.obj { position:absolute; width:50px; height:50px; background:black; color:white; display:flex; align-items:center; justify-content:center; }
-</style>
+        /* [REAL-TIME CHAT] */
+        .chat-layout { max-width: 1100px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; padding: 30px; }
+        .chat-main { flex: 1; background: white; border-radius: 30px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.05); }
+        #chat-window { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #fcfdfe; }
+        
+        .msg-row { display: flex; flex-direction: column; max-width: 80%; animation: slideIn 0.2s ease-out; }
+        .msg-row.me { align-self: flex-end; align-items: flex-end; }
+        .msg-row.other { align-self: flex-start; align-items: flex-start; }
+        
+        .msg-bubble { padding: 14px 20px; border-radius: 20px; font-size: 15px; font-weight: 600; line-height: 1.5; }
+        .me .msg-bubble { background: var(--z-blue); color: white; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px rgba(79,128,255,0.2); }
+        .other .msg-bubble { background: #f1f5f9; color: #334155; border-bottom-left-radius: 4px; }
+        .msg-time { font-size: 10px; color: #cbd5e1; margin-top: 4px; font-weight: bold; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* [MYPAGE] */
+        #mypage-drawer { position: fixed; right: -500px; top: 0; width: 450px; height: 100vh; background: white; z-index: 3000; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 60px 40px; box-shadow: -20px 0 60px rgba(0,0,0,0.1); }
+        #mypage-drawer.open { right: 0; }
+        .work-card { background: #f8fafc; padding: 22px; border-radius: 24px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .work-card:hover { border-color: var(--z-blue); background: white; transform: translateX(-10px); }
+
+        .z-btn { padding: 16px 28px; border-radius: 20px; font-weight: 900; border: none; cursor: pointer; transition: 0.2s; }
+        .z-primary { background: var(--z-blue); color: white; box-shadow: 0 10px 25px rgba(79,128,255,0.2); }
+        .z-primary:hover { transform: translateY(-2px); filter: brightness(1.1); }
+    </style>
 </head>
-
 <body>
 
-<!-- 🔥 컨트롤 -->
-<div style="padding:10px; display:flex; gap:10px;">
-<button onclick="engine.run()">▶ 실행</button>
-<button onclick="engine.stop()">■ 정지</button>
+    <nav class="zizon-nav">
+        <div class="flex items-center gap-2 cursor-pointer" onclick="core.go('main')">
+            <div class="logo-box" style="background:var(--z-blue)">Z</div>
+            <div class="logo-box" style="background:var(--z-purple)">S</div>
+            <span class="font-black text-xl tracking-tighter ml-1">SUPREME</span>
+        </div>
+        <div class="flex ml-12">
+            <div id="m-make" class="nav-item" onclick="core.go('make')">만들기</div>
+            <div id="m-comm" class="nav-item" onclick="core.go('comm')">커뮤니티</div>
+        </div>
+        <div class="ml-auto flex items-center gap-4 cursor-pointer" onclick="core.toggleMypage()">
+            <div class="text-right">
+                <p class="text-[10px] font-bold text-slate-400 leading-none">MASTER</p>
+                <p class="font-black text-slate-700 text-sm">어쩌다코딩</p>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-purple-600 p-[2px]">
+                <div class="w-full h-full bg-white rounded-[14px] overflow-hidden">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=EojjeodaMaster" alt="Avatar">
+                </div>
+            </div>
+        </div>
+    </nav>
 
-<button onclick="project.save()">💾 저장</button>
-<button onclick="project.loadList()">📂 불러오기</button>
-<button onclick="project.publish()">🌍 공개</button>
-<button onclick="project.loadPublic()">🌐 공개작품</button>
-</div>
+    <section id="sec-main" class="content-section active">
+        <div class="h-full flex flex-col items-center justify-center text-center px-10">
+            <div class="bg-white p-20 rounded-[60px] shadow-2xl shadow-blue-100 animate__animated animate__fadeInUp">
+                <h1 class="text-7xl font-black text-slate-900 mb-8 leading-tight">진짜 실시간<br>지존 엔진 v19.5</h1>
+                <p class="text-slate-400 text-2xl mb-12 font-medium">봇은 꺼졌습니다. 이제 두목님의 메시지만 남습니다.</p>
+                <div class="flex gap-4 justify-center">
+                    <button onclick="core.go('make')" class="z-btn z-primary text-xl px-16 py-6 rounded-[25px]">코딩 시작하기</button>
+                    <button onclick="core.go('comm')" class="z-btn bg-slate-100 text-slate-600 text-xl px-16 py-6 rounded-[25px]">커뮤니티 입장</button>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<div id="blocklyDiv"></div>
-<div id="render"></div>
+    <section id="editor-container">
+        <aside class="sidebar">
+            <div class="stage-box">
+                <div id="render-layer" class="w-full h-full relative"></div>
+            </div>
+            <div class="px-8 mb-6">
+                <button id="run-btn" onclick="engine.toggle()" class="z-btn z-primary w-full text-xl flex items-center justify-center gap-3 py-5">
+                    <span id="run-icon">▶</span> <span id="run-text">지존 엔진 가동</span>
+                </button>
+            </div>
+            <div class="px-8 flex-1 flex flex-col overflow-hidden">
+                <div class="flex justify-between items-center mb-4 text-[10px] font-black text-slate-400 tracking-widest uppercase">Inventory</div>
+                <div id="obj-list" class="flex-1 overflow-y-auto space-y-3 pb-6"></div>
+                <button onclick="obj.add()" class="mb-8 p-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-black hover:border-blue-400 hover:text-blue-500 transition-all">+ ADD NEW OBJECT</button>
+            </div>
+        </aside>
+        <main class="flex-1 flex flex-col">
+            <div id="blocklyDiv"></div>
+        </main>
+    </section>
+
+    <section id="sec-comm" class="content-section bg-slate-50">
+        <div class="chat-layout">
+            <div class="chat-main">
+                <div class="p-8 border-b bg-white flex justify-between items-center">
+                    <div>
+                        <h3 class="text-2xl font-black text-slate-900">지존 실시간 채팅</h3>
+                        <p class="text-xs text-blue-500 font-bold mt-1 tracking-widest">● REAL-TIME USER ONLY</p>
+                    </div>
+                </div>
+                <div id="chat-window">
+                    </div>
+                <div class="p-8 bg-white border-t flex gap-4 items-center">
+                    <input id="chat-input" type="text" placeholder="메시지를 입력하고 엔터를 누르세요..." class="flex-1 bg-slate-50 border-2 border-transparent rounded-[20px] px-8 py-5 outline-none focus:border-blue-500 focus:bg-white transition-all text-lg font-bold">
+                    <button onclick="chat.send()" class="z-btn z-primary px-12 py-5 text-lg">전송</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="mypage-drawer">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-4xl font-black">My Page</h2>
+            <button onclick="core.toggleMypage()" class="text-slate-300 hover:text-slate-900 transition text-3xl">×</button>
+        </div>
+        <div class="bg-blue-600 rounded-[35px] p-8 text-white mb-10 shadow-xl">
+            <p class="font-black text-blue-200 text-xs uppercase tracking-widest mb-1">Professional Creator</p>
+            <p class="text-3xl font-black">어쩌다코딩</p>
+            <div class="mt-8 flex gap-4">
+                <div class="flex-1 bg-blue-500 bg-opacity-30 p-4 rounded-2xl"><p class="text-[10px] font-bold">PROJECTS</p><p class="text-xl font-black">42</p></div>
+                <div class="flex-1 bg-blue-500 bg-opacity-30 p-4 rounded-2xl"><p class="text-[10px] font-bold">LEVEL</p><p class="text-xl font-black">MASTER</p></div>
+            </div>
+        </div>
+        <h4 class="font-black text-slate-400 text-xs mb-6 uppercase tracking-widest">Recent Works</h4>
+        <div id="project-list" class="space-y-4"></div>
+    </div>
 
 <xml id="toolbox" style="display:none">
-<block type="move"></block>
-<block type="wait"></block>
+    <category name="시작" colour="#33b233">
+        <block type="e_start"></block>
+    </category>
+    <category name="움직임" colour="#33b2cc">
+        <block type="m_x_by"><value name="V"><block type="math_number"><field name="NUM">10</field></block></value></block>
+        <block type="m_y_by"><value name="V"><block type="math_number"><field name="NUM">10</field></block></value></block>
+        <block type="m_rotate_by"><value name="V"><block type="math_number"><field name="NUM">90</field></block></value></block>
+        <block type="m_bounce"></block>
+    </category>
+    <category name="흐름" colour="#ccb233">
+        <block type="f_wait"><value name="S"><block type="math_number"><field name="NUM">1</field></block></value></block>
+        <block type="f_forever"></block>
+        <block type="f_repeat"><value name="T"><block type="math_number"><field name="NUM">10</field></block></value></block>
+    </category>
+    <category name="생김새" colour="#cc33cc">
+        <block type="l_say"><value name="T"><block type="text"><field name="TEXT">안녕!</field></block></value></block>
+        <block type="l_show"></block>
+        <block type="l_hide"></block>
+    </category>
 </xml>
 
 <script>
-/* =========================
-   🔥 Firebase 설정 (여기 수정)
-========================= */
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH",
-  projectId: "YOUR_PROJECT_ID"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+/** [ZIZON CORE v19.5 - MASTER VERSION] **/
 
-/* =========================
-   🔧 Blockly 블록
-========================= */
-Blockly.Blocks['move'] = {
-init(){ this.appendDummyInput().appendField("오른쪽 이동"); this.setPreviousStatement(true); this.setNextStatement(true); }
+const core = {
+    go: function(dest) {
+        document.querySelectorAll('.content-section, #editor-container').forEach(e => e.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+        
+        if(dest === 'make') {
+            document.getElementById('editor-container').classList.add('active');
+            document.getElementById('m-make').classList.add('active');
+            if(!engine.workspace) {
+                engine.init();
+            } else {
+                setTimeout(() => { Blockly.svgResize(engine.workspace); }, 50);
+            }
+        } else if(dest === 'comm') {
+            document.getElementById('sec-comm').classList.add('active');
+            document.getElementById('m-comm').classList.add('active');
+        } else {
+            document.getElementById('sec-main').classList.add('active');
+        }
+        document.getElementById('mypage-drawer').classList.remove('open');
+    },
+    toggleMypage: function() {
+        const d = document.getElementById('mypage-drawer');
+        d.classList.toggle('open');
+        if(d.classList.contains('open')) {
+            const projects = ["지존 슈팅 게임", "좌표 물리 실험실", "어쩌다코딩의 전설", "블록 코딩 마스터피스"];
+            document.getElementById('project-list').innerHTML = projects.map(p => `
+                <div class="work-card">
+                    <div class="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-xl">🔥</div>
+                    <div class="flex-1 font-black text-slate-800">${p}</div>
+                    <span class="text-slate-300">❯</span>
+                </div>
+            `).join('');
+        }
+    }
 };
-Blockly.JavaScript['move'] = ()=>"move();\n";
 
-Blockly.Blocks['wait'] = {
-init(){ this.appendDummyInput().appendField("0.5초 대기"); this.setPreviousStatement(true); this.setNextStatement(true); }
-};
-Blockly.JavaScript['wait'] = ()=>"await wait(0.5);\n";
-
-/* =========================
-   ⚙️ 엔진
-========================= */
 const engine = {
-running:false,
-x:0,
+    workspace: null, isRunning: false, objects: [],
+    init: function() {
+        this.define();
+        this.workspace = Blockly.inject('blocklyDiv', { 
+            toolbox: document.getElementById('toolbox'), renderer: 'zelos' 
+        });
+        obj.add();
+        window.addEventListener('resize', () => Blockly.svgResize(this.workspace));
+    },
+    define: function() {
+        const B = Blockly.Blocks;
+        const JS = javascript.javascriptGenerator;
 
-run(){
-this.running = true;
-this.x = 0;
+        B['e_start'] = { init: function() { this.appendDummyInput().appendField("🚩 시작했을 때"); this.setNextStatement(true); this.setColour("#33b233"); } };
+        B['m_x_by'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("X를"); this.appendDummyInput().appendField("만큼 바꾸기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
+        B['m_y_by'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("Y를"); this.appendDummyInput().appendField("만큼 바꾸기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
+        B['m_rotate_by'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("방향을"); this.appendDummyInput().appendField("만큼 회전"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
+        B['m_bounce'] = { init: function() { this.appendDummyInput().appendField("벽에 닿으면 튕기기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
+        B['f_wait'] = { init: function() { this.appendValueInput("S").appendField("기다리기:"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); } };
+        B['f_forever'] = { init: function() { this.appendDummyInput().appendField("계속 반복"); this.appendStatementInput("DO"); this.setPreviousStatement(true); this.setColour("#ccb233"); } };
+        B['f_repeat'] = { init: function() { this.appendValueInput("T").setCheck("Number").appendField("반복:"); this.appendStatementInput("DO").appendField("번"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); this.setInputsInline(true); } };
+        B['l_say'] = { init: function() { this.appendValueInput("T").appendField("말하기:"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc"); } };
+        B['l_show'] = { init: function() { this.appendDummyInput().appendField("보이기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc"); } };
+        B['l_hide'] = { init: function() { this.appendDummyInput().appendField("숨기기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc"); } };
 
-const code = Blockly.JavaScript.workspaceToCode(ws);
-
-const move = ()=>{ this.x+=10; render(); }
-const wait = s => new Promise(r=>setTimeout(r,s*1000));
-
-const Async = Object.getPrototypeOf(async function(){}).constructor;
-new Async("move","wait","active",`
-while(active()){
-${code}
-}
-`)(move,wait,()=>this.running);
-},
-
-stop(){ this.running=false; }
+        JS.forBlock['e_start'] = () => "";
+        JS.forBlock['m_x_by'] = (b, g) => `moveX(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
+        JS.forBlock['m_y_by'] = (b, g) => `moveY(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
+        JS.forBlock['m_rotate_by'] = (b, g) => `rotBy(${g.valueToCode(b, 'V', javascript.Order.ATOMIC) || 0});\n`;
+        JS.forBlock['m_bounce'] = () => `bounce();\n`;
+        JS.forBlock['f_wait'] = (b, g) => `await wait(${g.valueToCode(b, 'S', javascript.Order.ATOMIC) || 0});\n`;
+        JS.forBlock['f_forever'] = (b, g) => `while(active()){ ${g.statementToCode(b, 'DO')} await wait(0.01); }\n`;
+        JS.forBlock['f_repeat'] = (b, g) => `for(let i=0;i<${g.valueToCode(b,'T',javascript.Order.ATOMIC)||0};i++){${g.statementToCode(b,'DO')} await wait(0.01);}\n`;
+        JS.forBlock['l_say'] = (b, g) => `say(${g.valueToCode(b, 'T', javascript.Order.ATOMIC) || "''"});\n`;
+        JS.forBlock['l_show'] = () => `target.vis = true; obj.render();\n`;
+        JS.forBlock['l_hide'] = () => `target.vis = false; obj.render();\n`;
+    },
+    toggle: function() {
+        if(!this.isRunning) {
+            this.isRunning = true; 
+            document.getElementById('run-text').innerText = "엔진 정지";
+            const code = javascript.javascriptGenerator.workspaceToCode(this.workspace);
+            this.objects.forEach(o => this.run(o, code));
+        } else {
+            this.isRunning = false; 
+            document.getElementById('run-text').innerText = "지존 엔진 가동";
+            obj.reset();
+        }
+    },
+    run: async function(target, code) {
+        const moveX = v => { target.x += v; obj.render(); };
+        const moveY = v => { target.y += v; obj.render(); };
+        const rotBy = v => { target.rot += v; obj.render(); };
+        const bounce = () => {
+            if(Math.abs(target.x) > 175) { target.x = target.x > 0 ? 175 : -175; target.rot = 180 - target.rot; }
+            if(Math.abs(target.y) > 125) { target.y = target.y > 0 ? 125 : -125; target.rot = -target.rot; }
+            obj.render();
+        };
+        const say = t => { target.say = t; obj.render(); };
+        const wait = s => new Promise(r => setTimeout(r, s * 1000));
+        const active = () => this.isRunning;
+        const AsyncFn = Object.getPrototypeOf(async function(){}).constructor;
+        try { await new AsyncFn('moveX','moveY','rotBy','bounce','say','wait','active','target','obj', code)(moveX,moveY,rotBy,bounce,say,wait,active,target,obj); } catch(e){}
+    }
 };
 
-/* =========================
-   🎨 렌더
-========================= */
-function render(){
-document.getElementById('render').innerHTML =
-`<div class="obj" style="left:${engine.x}px">Z</div>`;
-}
-
-/* =========================
-   🚀 프로젝트 시스템 (Firebase)
-========================= */
-const project = {
-
-async save(){
-const name = prompt("작품 이름?");
-if(!name) return;
-
-const xml = Blockly.Xml.domToText(
-Blockly.Xml.workspaceToDom(ws)
-);
-
-await db.collection("projects").add({
-name,
-xml,
-owner:"user1",
-isPublic:false,
-createdAt:Date.now()
-});
-
-alert("🔥 저장 완료");
-},
-
-async loadList(){
-const snap = await db.collection("projects")
-.where("owner","==","user1")
-.get();
-
-const list = [];
-snap.forEach(doc=>list.push({id:doc.id,...doc.data()}));
-
-if(!list.length) return alert("작품 없음");
-
-const pick = prompt(list.map((p,i)=>i+":"+p.name).join("\n"));
-const data = list[pick];
-if(!data) return;
-
-ws.clear();
-Blockly.Xml.domToWorkspace(
-Blockly.Xml.textToDom(data.xml), ws
-);
-},
-
-async publish(){
-const snap = await db.collection("projects")
-.where("owner","==","user1")
-.get();
-
-const list = [];
-snap.forEach(doc=>list.push({id:doc.id,...doc.data()}));
-
-const pick = prompt(list.map((p,i)=>i+":"+p.name).join("\n"));
-const data = list[pick];
-if(!data) return;
-
-await db.collection("projects").doc(data.id).update({
-isPublic:true
-});
-
-alert("🌍 공개됨");
-},
-
-async loadPublic(){
-const snap = await db.collection("projects")
-.where("isPublic","==",true)
-.get();
-
-const list = [];
-snap.forEach(doc=>list.push({id:doc.id,...doc.data()}));
-
-if(!list.length) return alert("공개 작품 없음");
-
-const pick = prompt(list.map((p,i)=>i+":"+p.name).join("\n"));
-const data = list[pick];
-if(!data) return;
-
-ws.clear();
-Blockly.Xml.domToWorkspace(
-Blockly.Xml.textToDom(data.xml), ws
-);
-}
-
+const obj = {
+    add: function() {
+        const id = "o_" + Date.now();
+        engine.objects.push({ id, name: "오브젝트 " + (engine.objects.length+1), x: 0, y: 0, rot: 0, say: "", vis: true });
+        this.update(); this.render();
+    },
+    update: () => {
+        document.getElementById('obj-list').innerHTML = engine.objects.map(o => `
+            <div class="work-card !p-4 !mb-2">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl"></div>
+                <div class="text-xs font-black text-slate-700">${o.name}</div>
+            </div>
+        `).join('');
+    },
+    render: () => {
+        document.getElementById('render-layer').innerHTML = engine.objects.map(o => `
+            <div style="position:absolute; left:${190+o.x}px; top:${142-o.y}px; transform:translate(-50%,-50%) rotate(${o.rot}deg); transition:0.05s; display:${o.vis?'block':'none'}">
+                ${o.say ? `<div class="absolute -top-12 left-1/2 -translate-x-1/2 bg-white px-3 py-1 border-2 border-blue-500 rounded-full shadow-lg text-[10px] font-black whitespace-nowrap">${o.say}</div>` : ''}
+                <div class="w-14 h-14 bg-slate-900 rounded-2xl border-4 border-white shadow-xl flex items-center justify-center text-white font-black">Z</div>
+            </div>
+        `).join('');
+    },
+    reset: () => { engine.objects.forEach(o => { o.x = 0; o.y = 0; o.rot = 0; o.say = ""; o.vis = true; }); obj.render(); }
 };
 
-/* =========================
-   🧩 Blockly INIT
-========================= */
-const ws = Blockly.inject('blocklyDiv',{
-toolbox:document.getElementById('toolbox')
-});
+const chat = {
+    messages: [],
+    send: function() {
+        const inp = document.getElementById('chat-input');
+        const text = inp.value.trim();
+        if(!text) return;
 
+        const msg = {
+            id: Date.now(),
+            user: "어쩌다코딩",
+            content: text,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            type: 'me'
+        };
+
+        this.messages.push(msg);
+        this.render();
+        inp.value = "";
+    },
+    render: function() {
+        const win = document.getElementById('chat-window');
+        win.innerHTML = this.messages.map(m => `
+            <div class="msg-row ${m.type}">
+                <div class="msg-bubble">${m.content}</div>
+                <div class="msg-time">${m.time}</div>
+            </div>
+        `).join('');
+        win.scrollTop = win.scrollHeight;
+    }
+};
+
+document.getElementById('chat-input')?.addEventListener('keypress', e => { if(e.key === 'Enter') chat.send(); });
+
+// [INIT]
+obj.render();
 </script>
-
 </body>
 </html>
