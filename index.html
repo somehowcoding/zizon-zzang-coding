@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지존짱짱 SUPREME v21.5 - HOTFIX</title>
+    <title>지존짱짱 SUPREME v22.0 - PAINTER</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
@@ -14,134 +14,79 @@
     
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        :root { --z-blue: #4f80ff; --z-purple: #7c3aed; --z-bg: #f8fafc; --z-yellow: #ffcc00; }
+        :root { --z-blue: #4f80ff; --z-bg: #f8fafc; --z-yellow: #ffcc00; }
         body { font-family: 'Pretendard', sans-serif; background: var(--z-bg); margin: 0; overflow: hidden; height: 100vh; }
         
-        /* [FIXED NAV] */
         .zizon-nav { height: 64px; background: white; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; padding: 0 40px; position: fixed; top: 0; width: 100%; z-index: 2000; }
         .nav-item { font-weight: 800; color: #94a3b8; cursor: pointer; padding: 10px 20px; border-radius: 12px; transition: 0.3s; }
         .nav-item.active { color: var(--z-blue); background: #eff6ff; }
 
-        /* [SECTION VISIBILITY] */
-        .content-section { margin-top: 64px; height: calc(100vh - 64px); display: none; width: 100%; }
-        .content-section.active { display: block; animation: fadeIn 0.3s ease-out; }
-        #editor-container { display: none; height: calc(100vh - 64px); margin-top: 64px; width: 100%; }
-        #editor-container.active { display: flex; }
-
-        .sidebar { width: 420px; border-right: 1px solid #f1f5f9; background: white; display: flex; flex-direction: column; overflow-y: auto; }
-        .stage-box { width: 380px; height: 285px; background: #fff; margin: 20px auto; border-radius: 20px; border: 1px solid #f1f5f9; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+        #editor-container { display: flex; height: calc(100vh - 64px); margin-top: 64px; }
+        .sidebar { width: 400px; border-right: 1px solid #f1f5f9; background: white; display: flex; flex-direction: column; }
+        .stage-box { width: 360px; height: 270px; background: #fff; margin: 20px auto; border-radius: 20px; border: 1px solid #f1f5f9; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
         
-        #blocklyDiv { flex: 1; height: 100%; }
-
-        /* [OBJ STYLES] */
-        .obj-item { cursor: pointer; transition: 0.2s; border: 2px solid transparent; }
+        /* [오브젝트 선택 스타일] */
+        .obj-item { cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
         .obj-item.selected { border-color: var(--z-blue); background: #f0f7ff; }
         .canvas-obj { cursor: pointer; border: 2px solid transparent; border-radius: 8px; }
         .canvas-obj.selected { border-color: var(--z-yellow); box-shadow: 0 0 15px rgba(255,204,0,0.5); }
 
-        /* [PAINTER] */
-        #painter-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; align-items: center; justify-content: center; }
-        .painter-box { background: white; padding: 30px; border-radius: 40px; display: flex; flex-direction: column; gap: 20px; }
-        #draw-canvas { background: #f1f5f9; cursor: crosshair; border-radius: 20px; border: 2px solid #e2e8f0; }
+        /* [그림판 모달] */
+        #painter-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 5000; align-items: center; justify-content: center; }
+        .painter-box { background: white; padding: 25px; border-radius: 30px; display: flex; flex-direction: column; gap: 15px; }
+        #draw-canvas { background: #f8fafc; cursor: crosshair; border-radius: 15px; border: 2px solid #e2e8f0; }
 
-        /* [CHAT] */
-        .chat-wrap { max-width: 900px; margin: 20px auto; height: 85%; background: white; border-radius: 30px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.05); }
-        #chat-window { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #fcfdfe; }
-        .msg-me { align-self: flex-end; background: var(--z-blue); color: white; padding: 12px 18px; border-radius: 20px; border-bottom-right-radius: 4px; font-weight: 600; }
-
-        .z-btn { padding: 14px 22px; border-radius: 16px; font-weight: 900; border: none; cursor: pointer; transition: 0.2s; text-align: center; }
+        #blocklyDiv { flex: 1; }
+        .z-btn { padding: 12px 20px; border-radius: 14px; font-weight: 900; border: none; cursor: pointer; transition: 0.2s; text-align: center; }
         .z-primary { background: var(--z-blue); color: white; }
-        .z-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <nav class="zizon-nav">
-        <div class="flex items-center gap-2 cursor-pointer" onclick="core.go('main')">
-            <div class="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg">Z</div>
-            <span class="font-black text-2xl tracking-tighter text-slate-800">SUPREME</span>
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-black">Z</div>
+            <span class="font-black text-xl tracking-tighter">SUPREME v22.0</span>
         </div>
-        <div class="flex ml-12 gap-2">
-            <div id="btn-make" class="nav-item" onclick="core.go('make')">만들기</div>
-            <div id="btn-comm" class="nav-item" onclick="core.go('comm')">커뮤니티</div>
+        <div class="flex ml-10">
+            <div class="nav-item active">만들기</div>
         </div>
-        <div class="ml-auto flex items-center gap-4">
-            <span class="text-xs font-black text-slate-400">어쩌다코딩 MASTER</span>
-            <div class="w-11 h-11 rounded-2xl bg-slate-900 border-2 border-white shadow-md overflow-hidden">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=EojjeodaMaster" alt="Avatar">
-            </div>
-        </div>
+        <div class="ml-auto font-black text-slate-700 text-sm">어쩌다코딩 MASTER</div>
     </nav>
-
-    <section id="sec-main" class="content-section active flex items-center justify-center bg-white">
-        <div class="text-center">
-            <div class="inline-block bg-blue-50 text-blue-600 px-4 py-1 rounded-full text-xs font-black mb-4">v21.5 STABLE RELEASE</div>
-            <h1 class="text-7xl font-black text-slate-900 mb-8 leading-tight">지능형 지존 엔진<br><span class="text-blue-600">완벽 복구 완료.</span></h1>
-            <div class="flex gap-4 justify-center">
-                <button onclick="core.go('make')" class="z-btn z-primary px-20 py-6 text-2xl rounded-3xl">만들기 시작</button>
-            </div>
-        </div>
-    </section>
 
     <section id="editor-container">
         <aside class="sidebar">
             <div class="stage-box" id="stage">
                 <div id="render-layer" class="w-full h-full relative"></div>
             </div>
-            <div class="px-8 mb-6 grid grid-cols-2 gap-3">
-                <button id="run-btn" onclick="engine.toggle()" class="z-btn z-primary text-lg py-5 shadow-lg shadow-blue-200">엔진 가동</button>
-                <button onclick="painter.open()" class="z-btn bg-slate-900 text-white text-lg py-5 shadow-lg shadow-slate-200">직접 그리기</button>
+            <div class="px-6 mb-4 grid grid-cols-2 gap-2">
+                <button onclick="engine.toggle()" id="run-btn" class="z-btn z-primary">엔진 가동</button>
+                <button onclick="painter.open()" class="z-btn bg-slate-900 text-white">모양 그리기</button>
             </div>
-            <div class="px-8 flex-1 flex flex-col overflow-hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-[10px] font-black text-slate-400 tracking-widest uppercase">Object List</span>
-                    <span id="obj-count" class="text-xs font-bold text-blue-500">0 Items</span>
-                </div>
-                <div id="obj-list" class="flex-1 overflow-y-auto space-y-2 pb-6"></div>
-                <button onclick="obj.add()" class="mb-10 p-5 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-black hover:border-blue-500 hover:text-blue-500 transition-all">+ NEW OBJECT</button>
+            <div class="px-6 flex-1 flex flex-col overflow-hidden">
+                <div class="text-[10px] font-black text-slate-400 mb-2 tracking-widest uppercase">Object List</div>
+                <div id="obj-list" class="flex-1 overflow-y-auto space-y-2"></div>
+                <button onclick="obj.add()" class="mt-2 mb-6 p-4 border-2 border-dashed rounded-2xl text-slate-400 font-black hover:text-blue-500 hover:border-blue-500 transition-all">+ NEW</button>
             </div>
         </aside>
-        <main class="flex-1 border-l">
+        <main class="flex-1">
             <div id="blocklyDiv"></div>
         </main>
     </section>
 
-    <section id="sec-comm" class="content-section bg-slate-50">
-        <div class="chat-wrap">
-            <div class="p-8 border-b bg-white flex items-center justify-between">
-                <h3 class="text-2xl font-black">실시간 피드 <span class="ml-2 text-blue-500 text-sm">● LIVE</span></h3>
-            </div>
-            <div id="chat-window"></div>
-            <div class="p-8 bg-white border-t flex gap-4">
-                <input id="chat-input" type="text" placeholder="메시지를 입력하세요..." class="flex-1 bg-slate-50 border-2 border-transparent rounded-2xl px-6 py-5 outline-none focus:border-blue-500 font-bold text-lg">
-                <button onclick="chat.send()" class="z-btn z-primary px-12">전송</button>
-            </div>
-        </div>
-    </section>
-
     <div id="painter-modal">
-        <div class="painter-box animate__animated animate__zoomIn">
+        <div class="painter-box">
             <div class="flex justify-between items-center">
-                <h2 class="text-3xl font-black">지존 그림판</h2>
-                <div class="flex gap-2">
-                    <button onclick="painter.clear()" class="px-4 py-2 bg-red-50 text-red-500 rounded-lg font-bold">전체 삭제</button>
-                </div>
+                <h2 class="text-2xl font-black">지존 그림판</h2>
+                <button onclick="painter.clear()" class="text-xs font-bold text-red-500">전체 지우기</button>
             </div>
-            <canvas id="draw-canvas" width="500" height="400"></canvas>
-            <div class="flex gap-6 items-center">
-                <div class="flex flex-col gap-1">
-                    <span class="text-[10px] font-black text-slate-400 uppercase">Color</span>
-                    <input type="color" id="p-color" class="w-16 h-12 rounded-lg cursor-pointer bg-transparent">
-                </div>
-                <div class="flex-1 flex flex-col gap-1">
-                    <span class="text-[10px] font-black text-slate-400 uppercase">Width</span>
-                    <input type="range" id="p-width" min="1" max="30" value="8" class="w-full">
-                </div>
+            <canvas id="draw-canvas" width="400" height="400"></canvas>
+            <div class="flex gap-4 items-center">
+                <input type="color" id="p-color" class="w-10 h-10 rounded-md cursor-pointer">
+                <input type="range" id="p-width" min="1" max="20" value="5" class="flex-1">
                 <div class="flex gap-2">
-                    <button onclick="painter.close()" class="z-btn bg-slate-100 px-8 text-slate-600">취소</button>
-                    <button onclick="painter.save()" class="z-btn z-primary px-12 text-xl">저장</button>
+                    <button onclick="painter.close()" class="z-btn bg-slate-100 px-6">취소</button>
+                    <button onclick="painter.save()" class="z-btn z-primary px-8">저장</button>
                 </div>
             </div>
         </div>
@@ -167,51 +112,21 @@
 </xml>
 
 <script>
-/** [ZIZON CORE v21.5 - THE MASTER FIXED] **/
-
-const core = {
-    go: function(dest) {
-        // 모든 섹션 숨기기
-        document.getElementById('sec-main').classList.remove('active');
-        document.getElementById('editor-container').classList.remove('active');
-        document.getElementById('sec-comm').classList.remove('active');
-        
-        // 네비게이션 버튼 스타일 초기화
-        document.getElementById('btn-make').classList.remove('active');
-        document.getElementById('btn-comm').classList.remove('active');
-
-        if(dest === 'make') {
-            document.getElementById('editor-container').classList.add('active');
-            document.getElementById('btn-make').classList.add('active');
-            if(!engine.workspace) engine.init();
-            else setTimeout(() => Blockly.svgResize(engine.workspace), 50);
-        } else if(dest === 'comm') {
-            document.getElementById('sec-comm').classList.add('active');
-            document.getElementById('btn-comm').classList.add('active');
-        } else {
-            document.getElementById('sec-main').classList.add('active');
-        }
-    }
-};
+/** [ZIZON CORE v22.0 - MASTER EDITION] **/
 
 const engine = {
     workspace: null, isRunning: false, objects: [], selectedId: null,
     init: function() {
         this.define();
-        this.workspace = Blockly.inject('blocklyDiv', { 
-            toolbox: document.getElementById('toolbox'), 
-            renderer: 'zelos',
-            theme: Blockly.Themes.Classic
-        });
-        obj.add(); // 기본 오브젝트 하나 추가
+        this.workspace = Blockly.inject('blocklyDiv', { toolbox: document.getElementById('toolbox'), renderer: 'zelos' });
+        obj.add();
     },
     define: function() {
         const B = Blockly.Blocks, JS = javascript.javascriptGenerator;
-        // 블록 정의 (v21.0과 동일 유지)
         B['e_start'] = { init: function() { this.appendDummyInput().appendField("🚩 시작했을 때"); this.setNextStatement(true); this.setColour("#33b233"); } };
         B['m_x_by'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("X를"); this.appendDummyInput().appendField("바꾸기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
         B['m_y_by'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("Y를"); this.appendDummyInput().appendField("바꾸기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
-        B['m_rotate_by'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("방향을"); this.appendDummyInput().appendField("회전"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
+        B['m_rotate_by'] = { init: function() { this.appendValueInput("V").setCheck("Number").appendField("회전:"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
         B['m_bounce'] = { init: function() { this.appendDummyInput().appendField("튕기기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
         B['f_wait'] = { init: function() { this.appendValueInput("S").appendField("기다리기:"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); } };
         B['f_forever'] = { init: function() { this.appendDummyInput().appendField("계속 반복"); this.appendStatementInput("DO"); this.setPreviousStatement(true); this.setColour("#ccb233"); } };
@@ -242,14 +157,14 @@ const engine = {
         const moveY = v => { target.y += v; obj.render(); };
         const rotBy = v => { target.rot += v; obj.render(); };
         const bounce = () => {
-            if(Math.abs(target.x) > 175) { target.x = target.x > 0 ? 175 : -175; target.rot = 180 - target.rot; }
-            if(Math.abs(target.y) > 125) { target.y = target.y > 0 ? 125 : -125; target.rot = -target.rot; }
+            if(Math.abs(target.x) > 170) { target.x = target.x > 0 ? 170 : -170; target.rot = 180 - target.rot; }
+            if(Math.abs(target.y) > 120) { target.y = target.y > 0 ? 120 : -120; target.rot = -target.rot; }
             obj.render();
         };
         const wait = s => new Promise(r => setTimeout(r, s * 1000));
         const active = () => this.isRunning;
         const AsyncFn = Object.getPrototypeOf(async function(){}).constructor;
-        try { await new AsyncFn('moveX','moveY','rotBy','bounce','wait','active','target','obj', code)(moveX,moveY,rotBy,bounce,wait,active,target,obj); } catch(e){}
+        try { await new AsyncFn('moveX','moveY','rotBy','bounce','wait','active','target', code)(moveX,moveY,rotBy,bounce,wait,active,target); } catch(e){}
     }
 };
 
@@ -257,31 +172,24 @@ const obj = {
     add: function() {
         const id = "o_" + Date.now();
         engine.objects.push({ id, name: "오브젝트 " + (engine.objects.length+1), x: 0, y: 0, rot: 0, img: null });
-        engine.selectedId = id; // 추가 시 자동 선택
+        engine.selectedId = id;
         this.update(); this.render();
     },
-    select: function(id) { 
-        engine.selectedId = id; 
-        this.update(); 
-        this.render(); 
-    },
+    select: function(id) { engine.selectedId = id; this.update(); this.render(); },
     update: () => {
-        const list = document.getElementById('obj-list');
-        list.innerHTML = engine.objects.map(o => `
-            <div onclick="obj.select('${o.id}')" class="obj-item p-4 rounded-2xl flex items-center gap-4 ${engine.selectedId === o.id ? 'selected' : 'bg-slate-50'}">
-                <div class="w-12 h-12 bg-white rounded-xl border-2 flex items-center justify-center overflow-hidden">
-                    ${o.img ? `<img src="${o.img}" class="w-full h-full object-contain">` : '<div class="w-6 h-6 bg-blue-500 rounded-md"></div>'}
+        document.getElementById('obj-list').innerHTML = engine.objects.map(o => `
+            <div onclick="obj.select('${o.id}')" class="obj-item p-3 rounded-xl flex items-center gap-3 ${engine.selectedId === o.id ? 'selected' : 'bg-slate-50'}">
+                <div class="w-10 h-10 bg-white rounded-lg border overflow-hidden flex items-center justify-center">
+                    ${o.img ? `<img src="${o.img}" class="w-full h-full object-contain">` : '<div class="w-6 h-6 bg-blue-600 rounded"></div>'}
                 </div>
-                <div class="flex-1 font-black text-slate-800">${o.name}</div>
+                <span class="text-xs font-black">${o.name}</span>
             </div>
         `).join('');
-        document.getElementById('obj-count').innerText = engine.objects.length + " Items";
     },
     render: () => {
-        const layer = document.getElementById('render-layer');
-        layer.innerHTML = engine.objects.map(o => `
-            <div onclick="event.stopPropagation(); obj.select('${o.id}')" class="canvas-obj ${engine.selectedId === o.id ? 'selected' : ''}" style="position:absolute; left:${190+o.x}px; top:${142-o.y}px; transform:translate(-50%,-50%) rotate(${o.rot}deg);">
-                ${o.img ? `<img src="${o.img}" style="width:64px; height:64px;">` : `<div class="w-14 h-14 bg-slate-900 rounded-2xl border-4 border-white shadow-xl flex items-center justify-center text-white font-black">Z</div>`}
+        document.getElementById('render-layer').innerHTML = engine.objects.map(o => `
+            <div onclick="event.stopPropagation(); obj.select('${o.id}')" class="canvas-obj ${engine.selectedId === o.id ? 'selected' : ''}" style="position:absolute; left:${180+o.x}px; top:${135-o.y}px; transform:translate(-50%,-50%) rotate(${o.rot}deg);">
+                ${o.img ? `<img src="${o.img}" style="width:60px; height:60px;">` : `<div class="w-12 h-12 bg-slate-900 rounded-xl border-4 border-white shadow-xl flex items-center justify-center text-white font-black text-xs">Z</div>`}
             </div>
         `).join('');
     },
@@ -305,42 +213,22 @@ const painter = {
             this.ctx.stroke();
         };
     },
-    open: function() { 
-        if(!engine.selectedId) return alert("오브젝트를 먼저 선택하세요!");
+    open: function() {
+        if(!engine.selectedId) return alert("오브젝트를 선택해주세요!");
         document.getElementById('painter-modal').style.display = 'flex';
         if(!this.ctx) this.init();
         this.clear();
     },
-    clear: function() { this.ctx.clearRect(0, 0, 500, 400); },
+    clear: function() { this.ctx.clearRect(0, 0, 400, 400); },
     save: function() {
-        const data = this.canvas.toDataURL();
-        const target = engine.objects.find(x => x.id === engine.selectedId);
-        if(target) target.img = data;
+        const target = engine.objects.find(o => o.id === engine.selectedId);
+        if(target) target.img = this.canvas.toDataURL();
         obj.update(); obj.render(); this.close();
     },
     close: function() { document.getElementById('painter-modal').style.display = 'none'; }
 };
 
-const chat = {
-    msgs: [],
-    send: function() {
-        const inp = document.getElementById('chat-input');
-        if(!inp.value.trim()) return;
-        this.msgs.push({ txt: inp.value, time: new Date().toLocaleTimeString() });
-        this.render();
-        inp.value = "";
-    },
-    render: function() {
-        const win = document.getElementById('chat-window');
-        win.innerHTML = this.msgs.map(m => `<div class="msg-me animate__animated animate__fadeInRight">${m.txt}</div>`).join('');
-        win.scrollTop = win.scrollHeight;
-    }
-};
-
-document.getElementById('chat-input')?.addEventListener('keypress', e => { if(e.key === 'Enter') chat.send(); });
-
-// [INIT]
-obj.render();
+engine.init();
 </script>
 </body>
 </html>
