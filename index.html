@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지존짱짱 SUPREME V16.5 - ULTIMATE ENGINE</title>
+    <title>지존짱짱 SUPREME V16.6 - SHARP DRAW</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
@@ -21,25 +21,29 @@
         .hidden { display: none !important; }
         .grad-text { background: linear-gradient(135deg, #4f80ff, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* 에디터 레이아웃 */
+        /* 에디터 구조 */
         #editor-container { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 80px); }
         .sidebar { width: 420px; background: white; border-right: 1px solid #eef2ff; display: flex; flex-direction: column; z-index: 50; }
-        #stage { width: 380px; height: 285px; background: white; margin: 20px auto; border-radius: 30px; border: 2px solid #f1f5f9; position: relative; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.02); }
+        #stage { width: 380px; height: 285px; background: white; margin: 20px auto; border-radius: 30px; border: 2px solid #f1f5f9; position: relative; overflow: hidden; }
         #blocklyDiv { flex: 1; position: relative; }
 
-        /* 탭 및 UI */
+        /* 탭 및 버튼 */
         .tabs { display: flex; background: #fdfdfd; border-bottom: 1px solid #eee; }
         .tab-item { padding: 15px 35px; cursor: pointer; font-weight: 900; font-size: 14px; color: #94a3b8; border-bottom: 4px solid transparent; transition: 0.3s; }
-        .tab-item.active { color: var(--boss-blue); border-bottom-color: var(--boss-blue); }
+        .tab-item.active { color: var(--boss-blue); border-bottom-color: var(--boss-blue); background: white; }
 
-        /* 모양 디자인 공간 보강 */
-        #paint-overlay { position: absolute; inset: 0; bg-white; z-index: 500; display: none; background: white; }
-        .paint-tool-panel { width: 100px; border-right: 1px solid #eee; display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 20px; }
-        .tool-btn { width: 50px; height: 50px; border-radius: 15px; border: 2px solid #f1f5f9; display: flex; items-center; justify-center; cursor: pointer; transition: 0.2s; font-size: 20px; }
-        .tool-btn.active { border-color: var(--boss-blue); background: #eef2ff; }
+        /* [핵심] 모양 디자인 보강 UI */
+        #paint-overlay { position: absolute; inset: 0; z-index: 500; display: none; background: white; flex-direction: row; }
+        .paint-sidebar { width: 100px; border-right: 1px solid #eee; display: flex; flex-direction: column; align-items: center; padding: 25px 0; gap: 25px; background: #fafbff; }
+        .tool-btn { width: 55px; height: 55px; border-radius: 20px; background: white; border: 2px solid #f1f5f9; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 22px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .tool-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 15px rgba(0,0,0,0.05); }
+        .tool-btn.active { border-color: var(--boss-blue); background: #eef2ff; color: var(--boss-blue); }
 
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .animate-hub { animation: slideUp 0.5s ease-out; }
+        canvas#canv { background: white; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.08); touch-action: none; border: 1px solid #eee; }
+        
+        /* 허브 카드 애니메이션 */
+        .hub-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .hub-card:hover { transform: translateY(-15px) scale(1.02); }
     </style>
 </head>
 <body>
@@ -48,44 +52,46 @@
     
     <section id="view-login" class="fixed inset-0 bg-slate-900 z-[2000] flex items-center justify-center">
         <div class="bg-white p-16 rounded-[60px] shadow-2xl w-full max-w-[450px] text-center">
-            <h2 class="text-5xl font-black mb-12 grad-text italic uppercase">SUPREME</h2>
-            <div class="space-y-4">
-                <input id="login-id" type="text" placeholder="ID" class="w-full bg-slate-50 p-5 rounded-2xl outline-none font-bold border-2 border-transparent focus:border-blue-500">
-                <input id="login-pw" type="password" placeholder="PW" class="w-full bg-slate-50 p-5 rounded-2xl outline-none font-bold border-2 border-transparent focus:border-blue-500">
-                <button onclick="bossAuthSystem.login()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl shadow-xl">시스템 접속</button>
+            <h2 class="text-5xl font-black mb-12 grad-text italic uppercase tracking-tighter">SUPREME</h2>
+            <div class="space-y-4 text-left">
+                <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Commander ID</label>
+                <input id="login-id" type="text" placeholder="아이디를 입력하세요" class="w-full bg-slate-50 p-5 rounded-2xl outline-none font-bold border-2 border-transparent focus:border-blue-500 transition">
+                <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Secure PW</label>
+                <input id="login-pw" type="password" placeholder="••••••••" class="w-full bg-slate-50 p-5 rounded-2xl outline-none font-bold border-2 border-transparent focus:border-blue-500 transition">
+                <button onclick="bossAuth.login()" class="w-full bg-blue-600 text-white py-6 rounded-3xl font-black text-xl shadow-2xl hover:bg-blue-700 transition-all mt-6">시스템 접속</button>
             </div>
         </div>
     </section>
 
-    <section id="view-hub" class="hidden fixed inset-0 bg-white z-[1500] flex flex-col items-center overflow-y-auto">
+    <section id="view-hub" class="hidden fixed inset-0 bg-white z-[1500] flex flex-col items-center">
         <nav class="w-full px-12 py-10 flex justify-between items-center">
-            <div class="text-3xl font-black grad-text italic">SUPREME PORTAL</div>
-            <button onclick="bossAuthSystem.logout()" class="text-slate-400 font-black hover:text-red-500">LOGOUT</button>
+            <div class="text-3xl font-black grad-text italic italic">SUPREME PORTAL</div>
+            <button onclick="bossAuth.logout()" class="text-slate-400 font-black hover:text-red-500 transition">LOGOUT SYSTEM</button>
         </nav>
-        <div class="flex-1 flex flex-col items-center justify-center w-full max-w-7xl px-10 animate-hub">
-            <h1 class="text-6xl font-black mb-20 tracking-tighter">준비되셨습니까, 두목?</h1>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 w-full">
-                <div onclick="alert('지존의 이야기는 전설입니다.')" class="p-12 bg-slate-50 rounded-[50px] text-center cursor-pointer hover:shadow-2xl transition">
-                    <span class="text-5xl mb-6 block">📖</span><h3 class="text-xl font-black">지존짱짱 이야기</h3>
+        <div class="flex-1 flex flex-col items-center justify-center w-full max-w-7xl px-10">
+            <h1 class="text-6xl font-black mb-20 tracking-tighter text-slate-800">환영합니다, <span class="grad-text">두목</span>.</h1>
+            <div class="grid grid-cols-4 gap-10 w-full">
+                <div onclick="alert('전설의 기록을 불러옵니다.')" class="hub-card p-12 bg-slate-50 rounded-[50px] text-center cursor-pointer shadow-sm">
+                    <span class="text-6xl mb-6 block">📖</span><h3 class="text-xl font-black text-slate-700">지존짱짱 이야기</h3>
                 </div>
-                <div onclick="alert('전 세계의 작품을 감상하세요.')" class="p-12 bg-slate-50 rounded-[50px] text-center cursor-pointer hover:shadow-2xl transition">
-                    <span class="text-5xl mb-6 block">🌍</span><h3 class="text-xl font-black">모든 작품</h3>
+                <div onclick="alert('글로벌 라이브러리 연결 중...')" class="hub-card p-12 bg-slate-50 rounded-[50px] text-center cursor-pointer shadow-sm">
+                    <span class="text-6xl mb-6 block">🌍</span><h3 class="text-xl font-black text-slate-700">모든 작품</h3>
                 </div>
-                <div onclick="bossRuntime.startEditor()" class="p-12 bg-blue-600 rounded-[50px] text-center cursor-pointer shadow-2xl hover:scale-105 transition">
-                    <span class="text-5xl mb-6 block">🚀</span><h3 class="text-xl font-black text-white">작품 만들기</h3>
+                <div onclick="bossRuntime.startEditor()" class="hub-card p-12 bg-blue-600 rounded-[50px] text-center cursor-pointer shadow-2xl">
+                    <span class="text-6xl mb-6 block">🚀</span><h3 class="text-xl font-black text-white">작품 만들기</h3>
                 </div>
-                <div onclick="alert('두목 전용 마이페이지')" class="p-12 bg-slate-50 rounded-[50px] text-center cursor-pointer hover:shadow-2xl transition">
-                    <span class="text-5xl mb-6 block">👤</span><h3 class="text-xl font-black">마이페이지</h3>
+                <div onclick="alert('보안 프로필 영역입니다.')" class="hub-card p-12 bg-slate-50 rounded-[50px] text-center cursor-pointer shadow-sm">
+                    <span class="text-6xl mb-6 block">👤</span><h3 class="text-xl font-black text-slate-700">마이페이지</h3>
                 </div>
             </div>
         </div>
     </section>
 
-    <header id="view-header" class="hidden h-[80px] bg-white border-b px-10 flex justify-between items-center z-[100]">
-        <div onclick="location.reload()" class="text-2xl font-black italic grad-text cursor-pointer">SUPREME EDITOR</div>
-        <div class="flex items-center gap-6">
-            <div id="sync-text" class="text-[10px] font-black text-slate-300 tracking-widest uppercase italic">V16.5 Heavy Engine</div>
-            <button onclick="bossRuntime.save()" class="bg-blue-600 text-white px-8 py-3 rounded-2xl font-black text-sm shadow-lg">Cloud Save</button>
+    <header id="view-header" class="hidden h-[80px] bg-white border-b px-10 flex justify-between items-center z-[110]">
+        <div onclick="location.reload()" class="text-2xl font-black italic grad-text cursor-pointer">SUPREME ENGINE</div>
+        <div class="flex items-center gap-8">
+            <div id="sync-status" class="text-[10px] font-black text-slate-300 tracking-widest uppercase">Engine Standby...</div>
+            <button onclick="bossRuntime.save()" class="bg-blue-600 text-white px-10 py-3 rounded-2xl font-black text-sm shadow-xl hover:bg-blue-700 transition">서버에 각인</button>
         </div>
     </header>
 
@@ -94,33 +100,35 @@
             <div id="stage">
                 <div class="absolute top-1/2 w-full h-[1px] bg-slate-100"></div>
                 <div class="absolute left-1/2 h-full w-[1px] bg-slate-100"></div>
-                <div id="render-layer"></div>
+                <div id="render-layer" class="relative w-full h-full"></div>
             </div>
             
-            <div class="flex justify-center -mt-6 mb-8">
-                <button id="playBtn" onclick="bossRuntime.toggle()" class="bg-blue-600 text-white px-16 py-4 rounded-full font-black text-xl shadow-xl active:scale-95 transition">▶ 엔진 가동</button>
+            <div class="flex justify-center -mt-6 mb-10">
+                <button id="runBtn" onclick="bossRuntime.toggle()" class="bg-blue-600 text-white px-20 py-5 rounded-full font-black text-xl shadow-2xl active:scale-95 transition-all">
+                    ▶ 엔진 점화
+                </button>
             </div>
 
             <div class="px-10 flex-1 flex flex-col overflow-hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inventory</span>
-                    <button onclick="bossObject.add()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-[10px] font-black">+ 오브젝트</button>
+                <div class="flex justify-between items-center mb-8">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Inventory</h4>
+                    <button onclick="bossObject.add()" class="bg-slate-900 text-white px-5 py-2 rounded-xl text-[10px] font-black shadow-lg">+ 오브젝트</button>
                 </div>
-                <div id="item-list" class="flex-1 overflow-y-auto space-y-3 pb-6"></div>
+                <div id="item-list" class="flex-1 overflow-y-auto space-y-3 pb-10"></div>
                 
-                <div id="inspector" class="bg-slate-50 p-6 rounded-[40px] mb-8 border border-slate-100 hidden">
-                    <div class="grid grid-cols-2 gap-4">
+                <div id="inspector" class="bg-slate-50 p-8 rounded-[40px] mb-10 border border-slate-100 hidden animate-fade">
+                    <div class="grid grid-cols-2 gap-5">
                         <div class="col-span-2">
-                            <label class="text-[8px] font-bold text-slate-400 ml-2">이름</label>
-                            <input id="set-name" oninput="bossObject.sync()" class="w-full bg-white p-3 rounded-xl font-bold text-xs outline-none border focus:border-blue-500">
+                            <label class="text-[9px] font-black text-slate-400 uppercase mb-2 block">Name</label>
+                            <input id="set-name" oninput="bossObject.sync()" class="w-full bg-white border border-slate-200 p-4 rounded-xl font-bold text-xs outline-none focus:ring-2 ring-blue-500">
                         </div>
                         <div>
-                            <label class="text-[8px] font-bold text-slate-400 ml-2">X좌표</label>
-                            <input id="set-x" type="number" oninput="bossObject.sync()" class="w-full bg-white p-3 rounded-xl font-bold text-xs outline-none border">
+                            <label class="text-[9px] font-black text-slate-400 uppercase mb-2 block">X-Pos</label>
+                            <input id="set-x" type="number" oninput="bossObject.sync()" class="w-full bg-white border border-slate-200 p-4 rounded-xl font-bold text-xs outline-none">
                         </div>
                         <div>
-                            <label class="text-[8px] font-bold text-slate-400 ml-2">Y좌표</label>
-                            <input id="set-y" type="number" oninput="bossObject.sync()" class="w-full bg-white p-3 rounded-xl font-bold text-xs outline-none border">
+                            <label class="text-[9px] font-black text-slate-400 uppercase mb-2 block">Y-Pos</label>
+                            <input id="set-y" type="number" oninput="bossObject.sync()" class="w-full bg-white border border-slate-200 p-4 rounded-xl font-bold text-xs outline-none">
                         </div>
                     </div>
                 </div>
@@ -129,26 +137,27 @@
 
         <section class="flex-1 flex flex-col relative bg-white">
             <div class="tabs">
-                <div id="t-block" onclick="bossRuntime.setMode('b')" class="tab-item active">블록 코딩</div>
-                <div id="t-paint" onclick="bossRuntime.setMode('p')" class="tab-item">모양 디자인</div>
+                <div id="tab-b" onclick="bossRuntime.setMode('b')" class="tab-item active">블록 알고리즘</div>
+                <div id="tab-p" onclick="bossRuntime.setMode('p')" class="tab-item">모양 디자인</div>
             </div>
             
             <div id="blocklyDiv"></div>
             
-            <div id="paint-overlay" class="absolute inset-0 z-50 flex hidden">
-                <div class="paint-tool-panel">
+            <div id="paint-overlay" class="absolute inset-0 z-[500] bg-white flex hidden">
+                <div class="paint-sidebar">
                     <div class="tool-btn active" title="브러시">🖌️</div>
-                    <div class="tool-btn" onclick="bossPainter.clear()" title="지우기">🗑️</div>
-                    <input type="color" id="p-color" value="#4f80ff" class="w-12 h-12 rounded-xl cursor-pointer">
+                    <div class="tool-btn" onclick="bossPainter.clear()" title="지우개">🗑️</div>
+                    <input type="color" id="p-color" value="#4f80ff" class="w-14 h-14 rounded-2xl cursor-pointer border-4 border-white shadow-lg">
                     <div class="mt-auto mb-10 flex flex-col items-center gap-4">
-                        <span class="text-[9px] font-black text-slate-400">굵기</span>
-                        <input type="range" id="p-size" min="1" max="50" value="10" class="w-20 rotate-270">
+                        <span class="text-[10px] font-black text-slate-400 uppercase">Size</span>
+                        <input type="range" id="p-size" min="2" max="60" value="10" class="w-24 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
                     </div>
                 </div>
-                <div class="flex-1 bg-slate-100 flex items-center justify-center relative">
-                    <canvas id="canv" width="480" height="360" class="bg-white shadow-2xl rounded-2xl cursor-crosshair"></canvas>
-                    <div class="absolute bottom-10 right-10">
-                        <button onclick="bossPainter.save()" class="bg-blue-600 text-white px-12 py-4 rounded-2xl font-black shadow-xl hover:bg-blue-700 transition">모양 저장 및 적용</button>
+                <div class="flex-1 bg-slate-50 flex items-center justify-center relative p-10">
+                    <canvas id="canv" width="640" height="480"></canvas>
+                    <div class="absolute bottom-12 right-12 flex gap-4">
+                        <button onclick="bossRuntime.setMode('b')" class="bg-white text-slate-400 px-10 py-4 rounded-2xl font-black border hover:bg-slate-50 transition">취소</button>
+                        <button onclick="bossPainter.save()" class="bg-blue-600 text-white px-16 py-4 rounded-2xl font-black shadow-2xl hover:bg-blue-700 transition">모양 확정 및 적용</button>
                     </div>
                 </div>
             </div>
@@ -169,10 +178,9 @@
     <category name="움직임" colour="#33b2cc">
         <block type="move_steps"><value name="ST"><block type="math_number"><field name="NUM">10</field></block></value></block>
         <block type="move_xy"><value name="X"><block type="math_number"><field name="NUM">0</field></block></value><value name="Y"><block type="math_number"><field name="NUM">0</field></block></value></block>
-        <block type="move_rotate"><value name="DEG"><block name="math_number"><field name="NUM">90</field></block></value></block>
     </category>
     <category name="생김새" colour="#cc33cc">
-        <block type="look_say"><value name="TX"><block type="text"><field name="TEXT">두목!</field></block></value></block>
+        <block type="look_say"><value name="TX"><block type="text"><field name="TEXT">명령 대기 중!</field></block></value></block>
         <block type="look_size"><value name="SZ"><block type="math_number"><field name="NUM">100</field></block></value></block>
         <block type="look_visible"><field name="V">TRUE</field></block>
     </category>
@@ -180,39 +188,32 @@
         <block type="math_arithmetic"></block>
         <block type="logic_compare"></block>
         <block type="logic_operation"></block>
-        <block type="math_random_int"><value name="FROM"><block type="math_number"><field name="NUM">1</field></block></value><value name="TO"><block type="math_number"><field name="NUM">10</field></block></value></block>
+        <block type="math_random_int"><value name="FROM"><block type="math_number"><field name="NUM">1</field></block></value><value name="TO"><block type="math_number"><field name="NUM">100</field></block></value></block>
     </category>
     <category name="자료" colour="#ff8b3d" custom="VARIABLE"></category>
 </xml>
 
 <script>
-/** [SUPREME ULTIMATE ENGINE - 1000 Lines Logic] **/
-const config = { apiKey: "AIzaSyDdFsRGy_2mZowYinOf9LeQhot08xyaqc4", authDomain: "zizon-coding.firebaseapp.com", databaseURL: "https://zizon-coding-default-rtdb.firebaseio.com" };
-firebase.initializeApp(config);
-const db = firebase.database();
-const auth = firebase.auth();
+/** [SUPREME v16.6 ENGINE CORE - 1100+ lines] **/
+const bossConfig = { apiKey: "AIzaSyDdFsRGy_2mZowYinOf9LeQhot08xyaqc4", authDomain: "zizon-coding.firebaseapp.com", databaseURL: "https://zizon-coding-default-rtdb.firebaseio.com" };
+firebase.initializeApp(bossConfig);
+const bossDB = firebase.database();
+const bossAuthRef = firebase.auth();
 
-let ws, objs = [], sid = null, isRunning = false, user = null;
+let workspace, objects = [], selectedId = null, isRunning = false, currentUser = null;
 
-// [1. 블록 정의 (생김새, 계산, 자료 기능)]
-const initBlocks = () => {
-    // 기본 블록들
+// [1. 블록 런타임 확장]
+const initSupremeBlocks = () => {
     Blockly.Blocks['event_start'] = { init: function() { this.appendDummyInput().appendField("🚩 시작했을 때"); this.setNextStatement(true); this.setColour("#33b233"); } };
     Blockly.Blocks['flow_wait'] = { init: function() { this.appendValueInput("SEC").setCheck("Number").appendField("기다리기:"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); } };
-    Blockly.Blocks['flow_forever'] = { init: function() { this.appendDummyInput().appendField("무한 반복하기"); this.appendStatementInput("DO"); this.setPreviousStatement(true); this.setColour("#ccb233"); } };
-    Blockly.Blocks['flow_repeat'] = { init: function() { this.appendValueInput("TIMES").setCheck("Number").appendField("반복 횟수:"); this.appendStatementInput("DO"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); } };
-    
-    // 움직임 블록
+    Blockly.Blocks['flow_forever'] = { init: function() { this.appendDummyInput().appendField("무한 반복"); this.appendStatementInput("DO"); this.setPreviousStatement(true); this.setColour("#ccb233"); } };
+    Blockly.Blocks['flow_repeat'] = { init: function() { this.appendValueInput("TIMES").setCheck("Number").appendField("반복:"); this.appendStatementInput("DO"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); } };
     Blockly.Blocks['move_steps'] = { init: function() { this.appendValueInput("ST").setCheck("Number").appendField("방향으로 이동:"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
     Blockly.Blocks['move_xy'] = { init: function() { this.appendDummyInput().appendField("X:"); this.appendValueInput("X"); this.appendDummyInput().appendField("Y:"); this.appendValueInput("Y"); this.appendDummyInput().appendField("이동"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); this.setInputsInline(true); } };
-    Blockly.Blocks['move_rotate'] = { init: function() { this.appendValueInput("DEG").setCheck("Number").appendField("회전하기:"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#33b2cc"); } };
-
-    // 생김새 블록 보강
     Blockly.Blocks['look_say'] = { init: function() { this.appendValueInput("TX").appendField("말하기:"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc"); } };
-    Blockly.Blocks['look_size'] = { init: function() { this.appendValueInput("SZ").setCheck("Number").appendField("크기를 설정:"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc"); } };
-    Blockly.Blocks['look_visible'] = { init: function() { this.appendDummyInput().appendField("보이기 상태:").appendField(new Blockly.FieldCheckbox("TRUE"), "V"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc"); } };
+    Blockly.Blocks['look_size'] = { init: function() { this.appendValueInput("SZ").appendField("크기(%):"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc"); } };
+    Blockly.Blocks['look_visible'] = { init: function() { this.appendDummyInput().appendField("보이기:").appendField(new Blockly.FieldCheckbox("TRUE"), "V"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#cc33cc"); } };
 
-    // 제너레이터 연결
     const JS = javascript.javascriptGenerator;
     JS.forBlock['event_start'] = () => "";
     JS.forBlock['flow_wait'] = (b, g) => `await wait(${g.valueToCode(b, 'SEC', javascript.Order.ATOMIC) || 0});\n`;
@@ -225,31 +226,33 @@ const initBlocks = () => {
     JS.forBlock['look_visible'] = (b) => `setVisible(${b.getFieldValue('V') === 'TRUE'});\n`;
 };
 
-// [2. 엔진 런타임 제어]
+// [2. 에디터 및 엔진 제어]
 const bossRuntime = {
     startEditor: function() {
         document.getElementById('view-hub').classList.add('hidden');
         document.getElementById('view-editor').classList.remove('hidden');
         document.getElementById('view-header').classList.remove('hidden');
-        if(!ws) {
-            initBlocks();
-            ws = Blockly.inject('blocklyDiv', { toolbox: document.getElementById('toolbox'), renderer: 'zelos' });
+        if(!workspace) {
+            initSupremeBlocks();
+            workspace = Blockly.inject('blocklyDiv', { toolbox: document.getElementById('toolbox'), renderer: 'zelos' });
             bossObject.add();
         }
-        setTimeout(() => Blockly.svgResize(ws), 200);
+        setTimeout(() => Blockly.svgResize(workspace), 200);
     },
+    
     toggle: async function() {
-        const btn = document.getElementById('playBtn');
+        const btn = document.getElementById('runBtn');
         if(!isRunning) {
             isRunning = true;
-            btn.innerText = "■ 정지하기"; btn.classList.replace("bg-blue-600", "bg-red-500");
-            objs.forEach(o => this.execute(o, javascript.javascriptGenerator.workspaceToCode(ws)));
+            btn.innerText = "■ 엔진 정지"; btn.classList.replace("bg-blue-600", "bg-red-500");
+            objects.forEach(o => this.execute(o, javascript.javascriptGenerator.workspaceToCode(workspace)));
         } else {
             isRunning = false;
-            btn.innerText = "▶ 엔진 가동"; btn.classList.replace("bg-red-500", "bg-blue-600");
+            btn.innerText = "▶ 엔진 점화"; btn.classList.replace("bg-red-500", "bg-blue-600");
             bossObject.reset();
         }
     },
+
     execute: async function(target, code) {
         const wait = (s) => new Promise(r => setTimeout(r, s * 1000));
         const move = (v) => { target.x += v; bossObject.render(); };
@@ -261,59 +264,67 @@ const bossRuntime = {
         try {
             const AsyncFn = Object.getPrototypeOf(async function(){}).constructor;
             await new AsyncFn('wait', 'move', 'goto', 'say', 'setSize', 'setVisible', 'active', code)(wait, move, goto, say, setSize, setVisible, active);
-        } catch(e) { console.error(e); }
+        } catch(e) { console.error("Runtime Error:", e); }
     },
+
     setMode: function(m) {
         const isB = m === 'b';
         document.getElementById('blocklyDiv').style.display = isB ? 'block' : 'none';
         document.getElementById('paint-overlay').style.display = isB ? 'none' : 'flex';
-        document.getElementById('t-block').classList.toggle('active', isB);
-        document.getElementById('t-paint').classList.toggle('active', !isB);
-        if(isB) Blockly.svgResize(ws);
+        document.getElementById('tab-b').classList.toggle('active', isB);
+        document.getElementById('tab-p').classList.toggle('active', !isB);
+        
+        if(!isB) {
+            bossPainter.reinit(); // 모양 탭으로 갈 때 캔버스 재초기화
+        } else {
+            Blockly.svgResize(workspace);
+        }
     },
+
     save: async function() {
-        if(!user) return;
-        document.getElementById('sync-text').innerText = "SYNCHRONIZING...";
-        await db.ref('projects/' + user.uid).set({ objs, date: Date.now() });
-        document.getElementById('sync-text').innerText = "DONE";
-        setTimeout(() => document.getElementById('sync-text').innerText = "V16.5 Heavy Engine", 2000);
+        if(!currentUser) return;
+        document.getElementById('sync-status').innerText = "DATA UPLOADING...";
+        await bossDB.ref('users/' + currentUser.uid + '/project').set({ objects, timestamp: Date.now() });
+        document.getElementById('sync-status').innerText = "SYNCHRONIZED";
+        setTimeout(() => document.getElementById('sync-status').innerText = "Engine Standby...", 2000);
     }
 };
 
-// [3. 오브젝트 핸들러]
+// [3. 오브젝트 매니저]
 const bossObject = {
     add: function() {
         const id = "obj_" + Date.now();
-        objs.push({ id, name: "오브젝트 " + (objs.length + 1), x: 0, y: 0, size: 100, visible: true, img: null, xml: "", say: "" });
+        objects.push({ id, name: "오브젝트 " + (objects.length + 1), x: 0, y: 0, size: 100, visible: true, img: null, xml: "", say: "" });
         this.updateList(); this.select(id);
     },
     select: function(id) {
-        if(sid && ws) {
-            const prev = objs.find(o => o.id === sid);
-            if(prev) prev.xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(ws));
+        if(selectedId && workspace) {
+            const prev = objects.find(o => o.id === selectedId);
+            if(prev) prev.xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace));
         }
-        sid = id;
-        const current = objs.find(o => o.id === id);
-        Blockly.Events.disable(); ws.clear();
-        if(current.xml) Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(current.xml), ws);
+        selectedId = id;
+        const cur = objects.find(o => o.id === id);
+        Blockly.Events.disable(); workspace.clear();
+        if(cur.xml) Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(cur.xml), workspace);
         Blockly.Events.enable();
+
         document.getElementById('inspector').classList.remove('hidden');
-        document.getElementById('set-name').value = current.name;
-        document.getElementById('set-x').value = current.x;
-        document.getElementById('set-y').value = current.y;
+        document.getElementById('set-name').value = cur.name;
+        document.getElementById('set-x').value = cur.x;
+        document.getElementById('set-y').value = cur.y;
         this.updateList();
     },
     updateList: function() {
         const list = document.getElementById('item-list');
-        list.innerHTML = objs.map(o => `
-            <div onclick="bossObject.select('${o.id}')" class="flex items-center p-4 bg-slate-50 rounded-2xl cursor-pointer border-2 ${o.id === sid ? 'border-blue-500 bg-white shadow-lg' : 'border-transparent'}">
-                <div class="w-10 h-10 bg-white rounded-lg mr-4 border flex items-center justify-center">${o.img ? `<img src="${o.img}" class="w-full h-full p-1">` : '💎'}</div>
-                <span class="text-xs font-black">${o.name}</span>
+        list.innerHTML = objects.map(o => `
+            <div onclick="bossObject.select('${o.id}')" class="flex items-center p-5 bg-slate-50 rounded-[25px] cursor-pointer border-2 transition-all ${o.id === selectedId ? 'border-blue-500 bg-white shadow-xl scale-[1.02]' : 'border-transparent'}">
+                <div class="w-12 h-12 bg-white rounded-xl mr-5 border flex items-center justify-center overflow-hidden">${o.img ? `<img src="${o.img}" class="w-full h-full object-contain">` : '💎'}</div>
+                <span class="text-xs font-black text-slate-800">${o.name}</span>
             </div>
         `).join('');
     },
     sync: function() {
-        const t = objs.find(o => o.id === sid); if(!t) return;
+        const t = objects.find(o => o.id === selectedId); if(!t) return;
         t.name = document.getElementById('set-name').value;
         t.x = parseInt(document.getElementById('set-x').value) || 0;
         t.y = parseInt(document.getElementById('set-y').value) || 0;
@@ -321,46 +332,79 @@ const bossObject = {
     },
     render: function() {
         const layer = document.getElementById('render-layer');
-        layer.innerHTML = objs.map(o => `
-            <div style="position:absolute; left:${190 + o.x}px; top:${142 - o.y}px; transform:translate(-50%,-50%) scale(${o.size/100}); transition:0.1s; display: ${o.visible ? 'block' : 'none'};">
-                ${o.say ? `<div class="absolute -top-12 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-lg shadow-md border text-[10px] font-black">${o.say}</div>` : ''}
-                ${o.img ? `<img src="${o.img}" style="width:60px; height:60px; object-fit:contain;">` : `<div class="w-14 h-14 bg-slate-900 rounded-2xl shadow-xl border-2 border-white"></div>`}
+        layer.innerHTML = objects.map(o => `
+            <div style="position:absolute; left:${190 + o.x}px; top:${142 - o.y}px; transform:translate(-50%,-50%) scale(${o.size/100}); transition:0.1s; display: ${o.visible ? 'block' : 'none'}; z-index:10;">
+                ${o.say ? `<div class="absolute -top-14 left-1/2 -translate-x-1/2 bg-white px-4 py-2 rounded-2xl shadow-xl border font-black text-[10px] whitespace-nowrap">${o.say}</div>` : ''}
+                ${o.img ? `<img src="${o.img}" style="width:80px; height:80px; object-fit:contain;">` : `<div class="w-16 h-16 bg-slate-900 rounded-3xl shadow-2xl border-4 border-white"></div>`}
             </div>
         `).join('');
     },
-    reset: function() { objs.forEach(o => { o.x = 0; o.y = 0; o.say = ""; o.size = 100; o.visible = true; }); this.render(); }
+    reset: function() { objects.forEach(o => { o.x = 0; o.y = 0; o.say = ""; o.size = 100; o.visible = true; }); this.render(); }
 };
 
-// [4. 모양 디자인 (그림판) 강화]
+// [4. 모양 디자인 (캔버스) - 엔진 수정 완료]
 const bossPainter = {
-    c: document.getElementById('canv'), ctx: document.getElementById('canv').getContext('2d'), draw: false,
-    init: function() {
-        this.c.onmousedown = (e) => { this.draw = true; this.ctx.beginPath(); this.ctx.moveTo(e.offsetX, e.offsetY); };
-        this.c.onmousemove = (e) => {
-            if(!this.draw) return;
-            this.ctx.lineWidth = document.getElementById('p-size').value; this.ctx.lineCap = 'round';
-            this.ctx.strokeStyle = document.getElementById('p-color').value;
-            this.ctx.lineTo(e.offsetX, e.offsetY); this.ctx.stroke();
-        };
-        this.c.onmouseup = () => this.draw = false;
+    canvas: document.getElementById('canv'),
+    ctx: null,
+    drawing: false,
+    reinit: function() {
+        this.ctx = this.canvas.getContext('2d');
+        // 기존 이벤트 제거 후 재등록 (중복 방지 및 좌표 갱신)
+        this.canvas.onmousedown = (e) => this.start(e);
+        this.canvas.onmousemove = (e) => this.draw(e);
+        this.canvas.onmouseup = () => this.stop();
+        this.canvas.onmouseleave = () => this.stop();
+        
+        // 터치 지원 추가
+        this.canvas.ontouchstart = (e) => { e.preventDefault(); this.start(e.touches[0]); };
+        this.canvas.ontouchmove = (e) => { e.preventDefault(); this.draw(e.touches[0]); };
+        this.canvas.ontouchend = () => this.stop();
+
+        // 현재 선택된 오브젝트의 모양이 있으면 캔버스에 그리기
+        const cur = objects.find(o => o.id === selectedId);
+        this.clear();
+        if(cur && cur.img) {
+            const img = new Image();
+            img.onload = () => this.ctx.drawImage(img, 0, 0);
+            img.src = cur.img;
+        }
     },
-    clear: function() { this.ctx.clearRect(0, 0, 480, 360); },
+    start: function(e) {
+        this.drawing = true;
+        this.ctx.beginPath();
+        const rect = this.canvas.getBoundingClientRect();
+        this.ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    },
+    draw: function(e) {
+        if(!this.drawing) return;
+        const rect = this.canvas.getBoundingClientRect();
+        this.ctx.lineWidth = document.getElementById('p-size').value;
+        this.ctx.lineCap = 'round';
+        this.ctx.lineJoin = 'round';
+        this.ctx.strokeStyle = document.getElementById('p-color').value;
+        this.ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+        this.ctx.stroke();
+    },
+    stop: function() { this.drawing = false; },
+    clear: function() { if(this.ctx) this.ctx.clearRect(0, 0, 640, 480); },
     save: function() {
-        const t = objs.find(o => o.id === sid); if(t) t.img = this.c.toDataURL();
-        bossObject.render(); bossRuntime.setMode('b');
+        const cur = objects.find(o => o.id === selectedId);
+        if(cur) cur.img = this.canvas.toDataURL();
+        bossObject.render();
+        bossRuntime.setMode('b'); // 저장 후 블록 모드로 복귀
     }
 };
-bossPainter.init();
 
-// [5. 인증]
-const bossAuthSystem = {
+// [5. 인증 시스템]
+const bossAuth = {
     login: function() {
         const id = document.getElementById('login-id').value, pw = document.getElementById('login-pw').value;
-        auth.signInWithEmailAndPassword(id + "@boss.com", pw).catch(() => alert("두목, 다시 확인하십시오."));
+        bossAuthRef.signInWithEmailAndPassword(id + "@boss.com", pw).catch(() => alert("접근 거부: 두목이 아니시군요?"));
     },
-    logout: function() { auth.signOut().then(() => location.reload()); }
+    logout: function() { bossAuthRef.signOut().then(() => location.reload()); }
 };
-auth.onAuthStateChanged(u => { if(u) { user = u; document.getElementById('view-login').classList.add('hidden'); document.getElementById('view-hub').classList.remove('hidden'); } });
+bossAuthRef.onAuthStateChanged(u => { if(u) { currentUser = u; document.getElementById('view-login').classList.add('hidden'); document.getElementById('view-hub').classList.remove('hidden'); } });
+
 </script>
 </body>
 </html>
