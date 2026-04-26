@@ -25,7 +25,7 @@
         .obj-item.active { border-color: #4f80ff; background: #f0f7ff; }
         .tab-btn { flex: 1; padding: 12px; font-weight: 800; color: #94a3b8; border-bottom: 3px solid transparent; }
         .tab-btn.active { color: #4f80ff; border-bottom-color: #4f80ff; background: #f8fbff; }
-        .game-obj { position: absolute; transform: translate(-50%, -50%); transition: all 0.1s; }
+        .game-obj { position: absolute; transform: translate(-50%, -50%); transition: all 0.1s; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -33,65 +33,72 @@
 <div class="flex flex-col h-screen">
     <nav id="topNav" class="entry-blue h-[50px] px-6 flex justify-between items-center hidden text-white z-[100] shadow-md">
         <div class="flex items-center gap-6">
-            <div class="font-black italic text-xl">지존짱짱</div>
-            <button onclick="showSection('main')" class="font-bold">작품목록</button>
-            <button onclick="showSection('create')" class="font-bold">만들기</button>
+            <div class="font-black italic text-xl cursor-pointer" onclick="location.reload()">지존짱짱 코딩사이트</div>
+            <button onclick="showSection('main')" class="font-bold hover:text-blue-200">작품목록</button>
+            <button onclick="showSection('create')" class="font-bold hover:text-blue-200">만들기</button>
         </div>
         <div class="flex items-center gap-4">
             <span id="userNick" class="bg-white/20 px-3 py-1 rounded-full text-xs font-bold"></span>
-            <button onclick="auth.signOut().then(()=>location.reload())" class="text-xs opacity-70">로그아웃</button>
+            <button onclick="auth.signOut().then(()=>location.reload())" class="text-xs font-bold opacity-80 hover:opacity-100">로그아웃</button>
         </div>
     </nav>
 
     <div id="authBox" class="flex-grow flex items-center justify-center bg-slate-50">
-        <div class="bg-white p-10 rounded-[30px] shadow-2xl w-full max-w-[360px] text-center border-t-8 border-blue-600">
-            <h2 class="text-3xl font-black text-slate-800 mb-6 italic">어쩌다코딩</h2>
+        <div class="bg-white p-10 rounded-[30px] shadow-2xl w-full max-w-[380px] text-center border-t-8 border-blue-600">
+            <h2 class="text-3xl font-black text-slate-800 mb-2 italic">지존짱짱 코딩사이트</h2>
+            <p class="text-sm font-bold text-slate-400 mb-8">by 어쩌다코딩</p>
             <div class="space-y-3">
-                <input id="loginId" type="text" placeholder="아이디" class="w-full bg-slate-50 p-4 rounded-xl outline-none border focus:border-blue-400 font-bold">
-                <input id="loginPw" type="password" placeholder="비밀번호" class="w-full bg-slate-50 p-4 rounded-xl outline-none border focus:border-blue-400 font-bold">
-                <button id="doLoginBtn" class="w-full entry-blue text-white py-4 rounded-xl font-black text-lg shadow-lg">코딩 시작</button>
-                <button id="doSignupBtn" class="mt-4 text-slate-400 text-xs font-bold underline cursor-pointer">회원가입</button>
+                <input id="loginId" type="text" placeholder="아이디를 입력하세요" class="w-full bg-slate-50 p-4 rounded-xl outline-none border focus:border-blue-400 font-bold">
+                <input id="loginPw" type="password" placeholder="비밀번호를 입력하세요" class="w-full bg-slate-50 p-4 rounded-xl outline-none border focus:border-blue-400 font-bold">
+                <button id="doLoginBtn" class="w-full entry-blue text-white py-4 rounded-xl font-black text-lg shadow-lg hover:bg-blue-600">코딩 시작하기</button>
+                <button id="doSignupBtn" class="mt-4 text-slate-400 text-sm font-bold underline cursor-pointer hover:text-blue-500">아직 회원이 아니신가요?</button>
             </div>
         </div>
     </div>
+
+    <section id="mainView" class="hidden flex-grow p-8 bg-slate-50 overflow-y-auto">
+        <h1 class="text-3xl font-black text-center mb-10 text-slate-800">모든 작품들 🌏</h1>
+        <div id="workList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-[1200px] mx-auto">
+            </div>
+    </section>
 
     <section id="createView" class="hidden flex flex-grow overflow-hidden">
         <div class="side-bar">
             <div id="stage">
                 <div id="screen"></div>
                 <div class="absolute bottom-3 w-full px-3 flex gap-2">
-                    <button onclick="addObj()" class="flex-1 bg-white border border-blue-500 text-blue-500 py-2 rounded-lg font-bold text-xs">+ 오브젝트</button>
-                    <button id="runBtn" onclick="runCode()" class="flex-1 entry-blue text-white py-2 rounded-lg font-bold text-xs shadow-lg">▶ 시작하기</button>
+                    <button onclick="addObj()" class="flex-1 bg-white border border-blue-500 text-blue-500 py-2 rounded-lg font-bold text-xs hover:bg-blue-50">+ 오브젝트 추가</button>
+                    <button id="runBtn" onclick="runCode()" class="flex-1 entry-blue text-white py-2 rounded-lg font-bold text-xs shadow-lg hover:bg-blue-600">▶ 시작하기</button>
                 </div>
             </div>
-            <div id="objList" class="flex-grow overflow-y-auto bg-slate-50 pt-3"></div>
+            <div class="p-3 text-[11px] font-black text-slate-400 border-b bg-slate-50">오브젝트 목록</div>
+            <div id="objList" class="flex-grow overflow-y-auto bg-slate-50 pt-2"></div>
         </div>
 
         <div class="work-area">
-            <div class="flex bg-white border-b">
-                <button onclick="switchTab('block')" id="tabBlock" class="tab-btn active">블록</button>
+            <div class="flex bg-white border-b shadow-sm z-10">
+                <button onclick="switchTab('block')" id="tabBlock" class="tab-btn active">블록 조립</button>
                 <button onclick="switchTab('costume')" id="tabCostume" class="tab-btn">모양 그리기</button>
             </div>
             <div id="blocklyArea" class="flex-grow relative">
                 <div id="blocklyDiv"></div>
             </div>
             <div id="costumeDiv" class="hidden flex-grow flex flex-col p-6 items-center justify-center bg-slate-100">
-                <div class="bg-white p-8 rounded-[40px] shadow-sm flex flex-col items-center">
-                    <div id="costumeThumbnails" class="flex gap-2 mb-4 overflow-x-auto w-full min-h-[60px]"></div>
-                    <canvas id="drawCanvas" width="300" height="300" class="border-4 border-slate-50 rounded-3xl bg-white shadow-inner"></canvas>
-                    <div class="flex gap-3 mt-6">
-                        <button onclick="addCostumeSlot()" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl font-bold text-xs">+ 추가</button>
-                        <button onclick="clearCanvas()" class="bg-slate-100 text-slate-500 px-4 py-2 rounded-xl font-bold text-xs">지우기</button>
-                        <button onclick="saveCostume()" class="entry-blue text-white px-8 py-2 rounded-xl font-black text-xs shadow-md">저장</button>
+                <div class="bg-white p-8 rounded-[30px] shadow-sm flex flex-col items-center">
+                    <div id="costumeThumbnails" class="flex gap-2 mb-4 overflow-x-auto w-full min-h-[60px] p-1"></div>
+                    <canvas id="drawCanvas" width="300" height="300" class="border-4 border-slate-100 rounded-3xl bg-white shadow-inner cursor-crosshair"></canvas>
+                    <div class="flex gap-3 mt-6 items-center">
+                        <div class="flex flex-col items-center">
+                            <span class="text-[10px] font-bold text-slate-400 mb-1">펜 색상</span>
+                            <input type="color" id="penColor" value="#4f80ff" class="w-10 h-10 p-0 border-0 rounded-lg cursor-pointer bg-transparent">
+                        </div>
+                        <button onclick="addCostumeSlot()" class="bg-blue-50 text-blue-600 px-5 py-3 rounded-xl font-bold text-sm hover:bg-blue-100">+ 새 모양</button>
+                        <button onclick="clearCanvas()" class="bg-slate-100 text-slate-500 px-5 py-3 rounded-xl font-bold text-sm hover:bg-slate-200">지우기</button>
+                        <button onclick="saveCostume()" class="entry-blue text-white px-8 py-3 rounded-xl font-black text-sm shadow-md hover:bg-blue-600">모양 저장</button>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-
-    <section id="mainView" class="hidden flex-grow p-8 bg-slate-50">
-        <h1 class="text-2xl font-black text-center mb-10">모든작품들 🌏</h1>
-        <div id="workList" class="grid grid-cols-4 gap-6 max-w-[1200px] mx-auto"></div>
     </section>
 </div>
 
@@ -114,22 +121,14 @@
         <block type="set_size"><value name="SIZE"><block type="math_number"><field name="NUM">100</field></block></value></block>
     </category>
     <category name="계산" colour="#3366cc">
-        <block type="math_arithmetic">
-            <field name="OP">ADD</field>
-            <value name="A"><block type="math_number"><field name="NUM">1</field></block></value>
-            <value name="B"><block type="math_number"><field name="NUM">1</field></block></value>
-        </block>
-        <block type="math_random_int">
-            <value name="FROM"><block type="math_number"><field name="NUM">1</field></block></value>
-            <value name="TO"><block type="math_number"><field name="NUM">10</field></block></value>
-        </block>
-        <block type="logic_compare"></block>
+        <block type="math_arithmetic"><field name="OP">ADD</field><value name="A"><block type="math_number"><field name="NUM">1</field></block></value><value name="B"><block type="math_number"><field name="NUM">1</field></block></value></block>
+        <block type="math_random_int"><value name="FROM"><block type="math_number"><field name="NUM">1</field></block></value><value name="TO"><block type="math_number"><field name="NUM">10</field></block></value></block>
     </category>
     <category name="자료" colour="#cc3333" custom="VARIABLE"></category>
 </xml>
 
 <script>
-// 1. Blockly 한글 설정
+// 1. 완벽한 한글화 번역 (변수 알림창 포함)
 const MSG = {
     "EVENT_WHENFLAGCLICKED": "▶ 시작하기를 클릭했을 때",
     "CONTROLS_REPEAT_TITLE": "%1 번 반복하기",
@@ -139,7 +138,12 @@ const MSG = {
     "CHANGE_Y_TITLE": "y 좌표를 %1 만큼 바꾸기",
     "NEXT_COSTUME_TITLE": "다음 모양으로 바꾸기",
     "SET_SIZE_TITLE": "크기를 %1 % 로 정하기",
-    "NEW_VARIABLE": "변수 만들기"
+    "NEW_VARIABLE": "변수 만들기...",
+    "NEW_VARIABLE_TITLE": "새 변수 이름을 입력하세요:",
+    "RENAME_VARIABLE": "변수 이름 바꾸기...",
+    "RENAME_VARIABLE_TITLE": "모든 '%1' 변수를 다음 이름으로 바꾸기:",
+    "DELETE_VARIABLE": "'%1' 변수 삭제",
+    "DELETE_VARIABLE_CONFIRMATION": "정말 %1개의 '%2' 변수 블록을 삭제할까요?"
 };
 for (let key in MSG) { Blockly.Msg[key] = MSG[key]; }
 
@@ -153,34 +157,34 @@ Blockly.Blocks['next_costume'] = { init: function() { this.appendDummyInput().ap
 Blockly.Blocks['set_size'] = { init: function() { this.appendValueInput("SIZE").setCheck("Number").appendField("크기를"); this.appendDummyInput().appendField("(으)로 정하기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ff66cc"); }};
 Blockly.Blocks['wait_seconds'] = { init: function() { this.appendValueInput("SEC").setCheck("Number").appendField(""); this.appendDummyInput().appendField("초 기다리기"); this.setPreviousStatement(true); this.setNextStatement(true); this.setColour("#ccb233"); }};
 
-// 3. Firebase 및 변수
+// 3. Firebase 및 기본 설정
 const firebaseConfig = { apiKey: "AIzaSyDdFsRGy_2mZowYinOf9LeQhot08xyaqc4", authDomain: "zizon-coding.firebaseapp.com", projectId: "zizon-coding", databaseURL: "https://zizon-coding-default-rtdb.firebaseio.com" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database(), auth = firebase.auth();
 
 let workspace, objects = [], selectedId = null, currentCosIdx = 0, objCounter = 1;
 
-// 4. 에디터 초기화
+// 4. 에디터 초기화 (변수 생성 버그 완전 해결)
 function initBlockly() {
     workspace = Blockly.inject('blocklyDiv', { 
         toolbox: document.getElementById('toolbox'),
         zoom: {controls: true, wheel: true}
     });
 
-    // 🚨 [강력 패치] 변수 생성 시 툴박스 자동 리셋 🚨
     workspace.addChangeListener((e) => {
-        if (e.type === Blockly.Events.VAR_CREATE || e.type === Blockly.Events.VAR_DELETE) {
-            workspace.updateToolbox(document.getElementById('toolbox'));
+        // 변수가 생성/삭제/변경될 때, 툴박스를 강제 재설정하지 않고 크기만 맞춤 (버그 해결 핵심)
+        if (e.type === Blockly.Events.VAR_CREATE || e.type === Blockly.Events.VAR_RENAME || e.type === Blockly.Events.VAR_DELETE) {
+            setTimeout(() => { Blockly.svgResize(workspace); workspace.render(); }, 50);
         }
-        if (e.type === Blockly.Events.UI) { Blockly.hideChaff(); } // 메뉴 탈출 방어
+        if (e.type === Blockly.Events.UI) { Blockly.hideChaff(); } // 툴박스에서 부드럽게 빠져나오기
     });
     addObj();
 }
 
-// 5. 오브젝트 관리
+// 5. 오브젝트 관리 로직
 function addObj() {
     const id = "obj_" + Date.now();
-    objects.push({ id, name: "오브젝트 " + (objCounter++), x: 190, y: 140, size: 80, costumes: [null], currentIdx: 0, xml: "" });
+    objects.push({ id, name: "새 오브젝트 " + (objCounter++), x: 190, y: 140, size: 80, costumes: [null], currentIdx: 0, xml: "" });
     renderObjList();
     selectObj(id);
 }
@@ -194,9 +198,10 @@ function selectObj(id) {
     const o = objects.find(o => o.id === id);
     workspace.clear();
     if(o.xml) try { Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(o.xml), workspace); } catch(e) {}
+    currentCosIdx = o.currentIdx;
     renderObjList();
     renderStage();
-    setTimeout(() => Blockly.svgResize(workspace), 50);
+    setTimeout(() => { Blockly.svgResize(workspace); workspace.render(); }, 50);
 }
 
 function renderObjList() {
@@ -205,13 +210,13 @@ function renderObjList() {
         const div = document.createElement('div');
         div.className = `obj-item ${o.id === selectedId ? 'active' : ''}`;
         div.onclick = () => selectObj(o.id);
-        div.innerHTML = `<span class="font-bold text-sm text-slate-600">${o.name}</span><button onclick="event.stopPropagation(); deleteObj('${o.id}')" class="text-slate-300 hover:text-red-500 font-black px-2">×</button>`;
+        div.innerHTML = `<span class="font-bold text-sm text-slate-700">${o.name}</span><button onclick="event.stopPropagation(); deleteObj('${o.id}')" class="text-slate-300 hover:text-red-500 font-black px-2">×</button>`;
         list.appendChild(div);
     });
 }
 
 function deleteObj(id) {
-    if(objects.length <= 1) return;
+    if(objects.length <= 1) { alert("최소 1개의 오브젝트는 있어야 해!"); return; }
     objects = objects.filter(o => o.id !== id);
     selectObj(objects[0].id);
 }
@@ -223,17 +228,28 @@ function renderStage() {
         div.className = 'game-obj';
         div.style.cssText = `left:${o.x}px; top:${o.y}px; width:${o.size}px; height:${o.size}px;`;
         const img = o.costumes[o.currentIdx];
-        div.innerHTML = img ? `<img src="${img}" class="w-full h-full object-contain">` : `<div class="w-full h-full bg-blue-100 border-2 border-blue-400 rounded-2xl"></div>`;
+        div.innerHTML = img ? `<img src="${img}" class="w-full h-full object-contain">` : `<div class="w-full h-full bg-blue-100 border-2 border-blue-400 rounded-2xl shadow-sm"></div>`;
         screen.appendChild(div);
     });
 }
 
-// 6. 그림판 (모양 그리기) 로직 부활
+// 6. 🎨 그림판 로직 (색상 선택 기능 포함)
 const canvas = document.getElementById('drawCanvas'), ctx = canvas.getContext('2d');
 let drawing = false;
+
 canvas.onmousedown = (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); };
-canvas.onmousemove = (e) => { if(drawing) { ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.strokeStyle = '#4f80ff'; ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } };
+canvas.onmousemove = (e) => { 
+    if(drawing) { 
+        ctx.lineWidth = 6; 
+        ctx.lineCap = 'round'; 
+        // 선택한 색상을 펜 색깔로 적용!
+        ctx.strokeStyle = document.getElementById('penColor').value; 
+        ctx.lineTo(e.offsetX, e.offsetY); 
+        ctx.stroke(); 
+    } 
+};
 canvas.onmouseup = () => drawing = false;
+canvas.onmouseleave = () => drawing = false; // 마우스가 캔버스 밖으로 나가면 그리기 중지
 
 function addCostumeSlot() {
     const o = objects.find(o => o.id === selectedId);
@@ -248,9 +264,10 @@ function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 function saveCostume() {
     const o = objects.find(o => o.id === selectedId);
     o.costumes[currentCosIdx] = canvas.toDataURL();
+    o.currentIdx = currentCosIdx;
     renderStage();
     renderCosThumbs();
-    alert("모양이 저장되었어!");
+    alert("멋진 모양이 저장되었어! 🎨");
 }
 
 function renderCosThumbs() {
@@ -258,20 +275,20 @@ function renderCosThumbs() {
     const o = objects.find(o => o.id === selectedId);
     o.costumes.forEach((c, i) => {
         const div = document.createElement('div');
-        div.className = `w-12 h-12 border-2 rounded-xl overflow-hidden cursor-pointer ${currentCosIdx === i ? 'border-blue-500' : 'border-slate-200'}`;
+        div.className = `w-14 h-14 border-2 rounded-xl overflow-hidden cursor-pointer flex-shrink-0 ${currentCosIdx === i ? 'border-blue-500 ring-2 ring-blue-200' : 'border-slate-200'}`;
         div.onclick = () => { currentCosIdx = i; clearCanvas(); if(c){ const img = new Image(); img.src = c; img.onload = () => ctx.drawImage(img,0,0); } renderCosThumbs(); };
-        div.innerHTML = c ? `<img src="${c}" class="w-full h-full object-contain">` : `<div class="w-full h-full flex items-center justify-center text-[10px] text-slate-300">${i+1}</div>`;
+        div.innerHTML = c ? `<img src="${c}" class="w-full h-full object-contain bg-white">` : `<div class="w-full h-full flex items-center justify-center text-[11px] font-bold text-slate-300 bg-white">${i+1}번</div>`;
         box.appendChild(div);
     });
 }
 
-// 7. 탭 전환 및 UI 제어
+// 7. UI 제어 및 탭 전환
 function switchTab(tab) {
     document.getElementById('blocklyArea').classList.toggle('hidden', tab !== 'block');
     document.getElementById('costumeDiv').classList.toggle('hidden', tab !== 'costume');
     document.getElementById('tabBlock').classList.toggle('active', tab === 'block');
     document.getElementById('tabCostume').classList.toggle('active', tab === 'costume');
-    if(tab === 'block') setTimeout(() => Blockly.svgResize(workspace), 50);
+    if(tab === 'block') { Blockly.hideChaff(); setTimeout(() => { Blockly.svgResize(workspace); workspace.render(); }, 50); }
     else renderCosThumbs();
 }
 
@@ -281,28 +298,40 @@ function showSection(name) {
     if(name === 'create' && !workspace) initBlockly();
 }
 
-// 8. 실행 및 로그인
+// 8. 실행 및 로그인 시스템
 function runCode() {
-    alert("코드가 실행되었어! (실제 동작 엔진은 다음 패치 예정)");
+    alert("시작하기 버튼 클릭! (다음 단계에서 블록 코드를 진짜로 연결할 예정이야)");
 }
 
 document.getElementById("doLoginBtn").onclick = () => {
     const id = document.getElementById('loginId').value.trim();
     const pw = document.getElementById('loginPw').value.trim();
-    auth.signInWithEmailAndPassword(id + "@zizon.com", pw).catch(() => alert("아이디/비번 확인해봐!"));
+    if(!id || !pw) { alert("아이디랑 비밀번호를 입력해주세요!"); return; }
+    auth.signInWithEmailAndPassword(id + "@zizon.com", pw).catch(() => alert("아이디나 비밀번호가 틀렸습니다."));
 };
 
 document.getElementById("doSignupBtn").onclick = () => {
-    const id = prompt("아이디"), pw = prompt("비번(6자 이상)"), nick = prompt("닉네임");
-    auth.createUserWithEmailAndPassword(id+"@zizon.com", pw).then(res => db.ref('users/'+res.user.uid).set({ nickname: nick }));
+    const id = prompt("사용할 아이디를 입력해주세요 (영어/숫자):");
+    if(!id) return;
+    const pw = prompt("비밀번호를 입력해주세요 (6자 이상):");
+    const nick = prompt("사용할 닉네임을 입력해주세요:");
+    if(id && pw && nick) {
+        auth.createUserWithEmailAndPassword(id+"@zizon.com", pw)
+            .then(res => db.ref('users/'+res.user.uid).set({ nickname: nick }).then(() => alert("가입 완료! 이제 로그인해주세요.")))
+            .catch(e => alert("회원가입 실패: " + e.message));
+    }
 };
 
+// 🚨 로그인 성공 시 '만들기'가 아니라 '메뉴(main)'로 가도록 수정 🚨
 auth.onAuthStateChanged(async user => {
     if(user) {
         const snap = await db.ref('users/'+user.uid).once('value');
-        document.getElementById('userNick').innerText = snap.val().nickname + " 님";
+        document.getElementById('userNick').innerText = snap.val().nickname + " 님 환영합니다!";
         document.getElementById('topNav').classList.remove('hidden');
-        showSection('create');
+        showSection('main'); // 여기를 main으로 바꿈!
+    } else {
+        document.getElementById('topNav').classList.add('hidden');
+        showSection('auth');
     }
 });
 </script>
